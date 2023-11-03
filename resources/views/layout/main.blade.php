@@ -24,6 +24,8 @@
     <link rel="stylesheet" type="text/css" href="../../../app-assets/vendors/css/extensions/nouislider.min.css">
     <link rel="stylesheet" type="text/css" href="../../../app-assets/vendors/css/extensions/toastr.min.css">
 
+    <link rel="stylesheet" type="text/css" href="../../../app-assets/vendors/css/forms/select/select2.min.css">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
     <link rel="stylesheet" type="text/css" href="../../../app-assets/vendors/css/forms/spinner/jquery.bootstrap-touchspin.css">
@@ -31,6 +33,9 @@
 
     <link rel="stylesheet" type="text/css" href="../../../app-assets/css/core/colors/palette-gradient.css">
     <link rel="stylesheet" type="text/css" href="../../../app-assets/css/pages/app-ecommerce-shop.css">
+
+    {{-- flaction link --}}
+
     <!-- END: Vendor CSS-->
 
     <!-- BEGIN: Theme CSS-->
@@ -111,7 +116,7 @@
             </ul>
         </div>
         <div class="navbar-container d-flex content">
-            
+
             <ul class="nav navbar-nav align-items-center ms-auto">
                 <li class="nav-item nav-search"><a class="nav-link nav-link-search"><i class="ficon"
                             data-feather="search"></i></a>
@@ -575,6 +580,12 @@
                     <li data-menu=""><a class="dropdown-item d-flex align-items-center" href="/"
                             data-bs-toggle="" data-i18n="Analytics"><i class="fa fa-id-card-o"></i><span
                                 data-i18n="Analytics">Memberships</span></a></li>
+                    <li data-menu="">
+                        <a class="dropdown-item d-flex align-items-center" href="/vehicle/addnew" data-bs-toggle="" data-i18n="Analytics">
+                            <i class="fa fa-money"></i>
+                            <span data-i18n="Analytics">Sell My Vehicle</span>
+                        </a>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -582,7 +593,9 @@
     <!-- END: Main Menu-->
 
     <!-- BEGIN: Content-->
-    @yield('content')
+    <div class="app-content content ">
+        @yield('content')
+    </div>
     <!-- END: Content-->
 
     <div class="sidenav-overlay"></div>
@@ -636,6 +649,8 @@
         <!-- BEGIN: Page JS-->
         <script src="../../../app-assets/js/scripts/pages/app-ecommerce-details.js"></script>
         <script src="../../../app-assets/js/scripts/forms/number-input.js"></script>
+
+        <script src="../../../app-assets/vendors/js/forms/select/select2.full.min.js"></script>
         <!-- END: Page JS-->
     {{-- End Swipper --}}
 
@@ -646,6 +661,7 @@
 
         <!-- BEGIN: Page Vendor JS-->
         <script src="../../../app-assets/vendors/js/ui/jquery.sticky.js"></script>
+        <script src="../../../app-assets/js/scripts/forms/form-select2.js"></script>
         <!-- END: Page Vendor JS-->
 
         <!-- BEGIN: Theme JS-->

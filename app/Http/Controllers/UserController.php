@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Sparepart;
+use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
-class SparepartController extends Controller
+class UserController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -15,8 +14,7 @@ class SparepartController extends Controller
      */
     public function index()
     {
-        $sparepart = Sparepart::all();
-        dd($sparepart);
+        //
     }
 
     /**
@@ -43,10 +41,10 @@ class SparepartController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Sparepart  $sparepart
+     * @param  \App\Models\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function show(Sparepart $sparepart)
+    public function show(User $user)
     {
         //
     }
@@ -54,10 +52,10 @@ class SparepartController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\Sparepart  $sparepart
+     * @param  \App\Models\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function edit(Sparepart $sparepart)
+    public function edit(User $user)
     {
         //
     }
@@ -66,10 +64,10 @@ class SparepartController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Sparepart  $sparepart
+     * @param  \App\Models\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Sparepart $sparepart)
+    public function update(Request $request, User $user)
     {
         //
     }
@@ -77,10 +75,10 @@ class SparepartController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Sparepart  $sparepart
+     * @param  \App\Models\User  $user
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Sparepart $sparepart)
+    public function destroy(User $user)
     {
         //
     }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\RoleController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -21,5 +22,11 @@ Route::get('/', function () {
 });
 
 Route::get('/vehicle/cars', function () {
-    return view('vehicle.index');
+    return view('vehicle.carindex');
 });
+
+Route::get('/vehicle/addnew', function(){
+    return view('vehicle.newvehicle');
+});
+
+Route::get('/user/role', [RoleController::class, 'index']);

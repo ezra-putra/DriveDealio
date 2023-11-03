@@ -1,7 +1,6 @@
 @extends('layout.main')
 @section('content')
     {{-- Start Carousel --}}
-    <div class="app-content content ">
         <section id="carousel-options">
             <div class="row match-height" style="padding: 2.5vh">
                 <!-- Interval Option starts -->
@@ -202,7 +201,6 @@
             <div class="swiper-button-next"></div>
             <div class="swiper-button-prev"></div>
         </div>
-    </div>
     {{-- End Recommendation --}}
 
     {{-- Start Vehicle Recommendation --}}
