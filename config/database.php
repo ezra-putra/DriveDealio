@@ -75,7 +75,7 @@ return [
             'prefix' => '',
             'prefix_indexes' => true,
             'search_path' => 'drivedealio',
-            'sslmode' => 'prefer',
+            'sslmode' => 'allow',
             'timeout' => 120,
         ],
 

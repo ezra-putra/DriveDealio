@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
@@ -14,7 +15,12 @@ class UserController extends Controller
      */
     public function index()
     {
-        //
+        $user = DB::select(
+            DB::raw('select u.id, u.email, u.firstname, u.lastname, u.phonenumber, u.address, u.city, u.province, r.name
+            from drivedealio.users as u INNER JOIN drivedealio.roles as r on u.roles_id = r.id;')
+        );
+        // dd($user);
+        return view('profile.listuser', ['users' => $user]);
     }
 
     /**

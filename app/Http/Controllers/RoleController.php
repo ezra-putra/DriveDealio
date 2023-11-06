@@ -15,7 +15,7 @@ class RoleController extends Controller
     public function index()
     {
         $role = Role::all();
-        dd($role);
+        return view('profile.listrole', ['role' => $role]);
     }
 
     /**
