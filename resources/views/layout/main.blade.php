@@ -351,14 +351,11 @@
                                 height="40" width="40"><span class="avatar-status-online"></span></span>
                     </a>
                     <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdown-user">
-                        <a class="dropdown-item" href="page-profile.html"><i class="me-50" data-feather="user"></i>
-                            Profile</a>
-                        <a class="dropdown-item" href="app-email.html"><i class="me-50" data-feather="mail"></i>
-                            Inbox</a>
-                        <a class="dropdown-item" href="/dashboard"><i class="me-50 fa fa-bar-chart"></i>
-                            Analytics</a>
-                        <a class="dropdown-item" href="app-chat.html"><i class="me-50"
-                                data-feather="message-square"></i> Chats</a>
+                        <a class="dropdown-item" href="page-profile.html"><i class="me-50" data-feather="user"></i>Profile</a>
+                        <a class="dropdown-item" href="app-email.html"><i class="me-50" data-feather="mail"></i>Inbox</a>
+                        <a class="dropdown-item" href="/dashboard"><i class="me-50 fa fa-bar-chart"></i>Analytics</a>
+                        <a class="dropdown-item" href="app-chat.html"><i class="me-50"data-feather="message-square"></i> Chats</a>
+                        <a class="dropdown-item" href="/user"><i class="fa fa-users me-50"></i> User List</a>
                         <div class="dropdown-divider"></div>
                         {{-- <a class="dropdown-item"><a class="nav-link nav-link-style"><i class="ficon me-50" data-feather="moon"></i>Dark Mode</a></a> --}}
                         <a class="dropdown-item" href="page-account-settings-account.html"><i class="me-50" data-feather="settings"></i>Settings</a>
@@ -562,9 +559,9 @@
             <div class="navbar-container main-menu-content" data-menu="menu-container">
                 <!-- include ../../../includes/mixins-->
                 <ul class="nav navbar-nav" id="main-menu-navigation" data-menu="menu-navigation">
-                    <li data-menu=""><a class="dropdown-item d-flex align-items-center" href="/"
+                    {{-- <li data-menu=""><a class="dropdown-item d-flex align-items-center" href="/"
                             data-bs-toggle="" data-i18n="Analytics"><i class="fa fa-home"></i><span
-                                data-i18n="Analytics">Home</span></a></li>
+                                data-i18n="Analytics">Home</span></a></li> --}}
                     <li data-menu=""><a class="dropdown-item d-flex align-items-center" href="/vehicle/cars"
                             data-bs-toggle="" data-i18n="Analytics"><i class="fa fa-car"></i><span
                                 data-i18n="Analytics">Cars</span></a></li>
@@ -593,7 +590,7 @@
     <!-- END: Main Menu-->
 
     <!-- BEGIN: Content-->
-    <div class="app-content content ">
+    <div class="app-content content">
         @yield('content')
     </div>
     <!-- END: Content-->
