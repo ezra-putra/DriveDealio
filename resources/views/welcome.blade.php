@@ -2,7 +2,7 @@
 @section('content')
     {{-- Start Carousel --}}
         <section id="carousel-options">
-            <div class="row match-height" style="padding: 2.5vh">
+            <div class="row match-height" style="padding: 2.5vh;">
                 <!-- Interval Option starts -->
                 <div id="carousel-interval" class="carousel slide" data-bs-ride="carousel" data-bs-interval="2000">
                     <ol class="carousel-indicators">
@@ -42,12 +42,13 @@
 
     {{-- Start Recommendation --}}
     <div class="card-body" style="padding: 5vh">
-        <div class="mt-4 mb-2 text-center">
+        <div class="mt-1 mb-2 text-center">
             <h2>HOT ITEMS RIGHT NOW</h2>
             <p>People also bid this product</p>
         </div>
         <div class="swiper-responsive-breakpoints swiper-container px-4 py-2">
             <div class="swiper-wrapper">
+                {{-- @foreach ( as ) --}}
                 <div class="swiper-slide rounded swiper-shadow">
                     <div class="item-heading">
                         <p class="text-truncate mb-0">
@@ -72,6 +73,8 @@
                         <p class="text-primary mb-0">$19.98</p>
                     </div>
                 </div>
+                {{-- @endforeach --}}
+
                 <div class="swiper-slide rounded swiper-shadow">
                     <div class="item-heading">
                         <p class="text-truncate mb-0">
@@ -206,4 +209,121 @@
     {{-- Start Vehicle Recommendation --}}
 
     {{-- End Vehicle Recommendation --}}
+
+    {{-- Start Memberships Card --}}
+    <div class="content-wrapper container-xxl p-0">
+        <div class="content-header row">
+        </div>
+        <div class="content-body">
+            <section id="pricing-plan">
+                <!-- title text and switch button -->
+                <div class="text-center">
+                    <h1 class="mt-5 mb-1">Memberships Pricing Plans</h1>
+                    <p class="mb-3 pb-75">
+                        As a DriveDealio Member, you'll be able to search our massive inventory for wholesale, used and
+                        repairable Vehicles. Unlock additional features by upgrading to a Bronze to Platinum
+                        Membership—you'll be able to jump right into the auction and start bidding in our live auctions!
+                    </p>
+
+                    <p>{{ auth()->id() }}</p>
+                </div>
+                <!--/ title text and switch button -->
+
+                <!-- pricing plan cards -->
+                <div class="row pricing-card">
+                    <div class="col-12 col-sm-offset-2 col-sm-10 col-md-12 col-lg-offset-2 col-lg-10 mx-auto">
+                        <div class="row">
+                            <!-- basic plan -->
+                            @foreach ($membership as $m)
+                            <div class="col-12 col-md-6">
+                                <div class="card basic-pricing text-center">
+                                    <div class="card-body">
+                                        <img src="../../../app-assets/images/illustration/Pot1.svg" class="mb-2 mt-5" alt="svg img" />
+                                        <h3>{{ $m->membershiptype }}</h3>
+                                        <p class="card-text">{{ $m->description }}</p>
+                                        <div class="annual-plan">
+                                            <div class="plan-price mt-2">
+                                                <span class="pricing-basic-value fw-bolder text-primary">@currency($m->price)</span>
+                                                <sub class="pricing-duration text-body font-medium-1 fw-bold">/month</sub>
+                                            </div>
+                                            <small class="annual-pricing d-none text-muted"></small>
+                                        </div>
+                                        <ul class="list-group list-group-circle text-start mb-1">
+                                            <li class="list-group-item">{{ $m->benefit1 }}</li>
+                                            <li class="list-group-item">{{ $m->benefit2 }}</li>
+                                            <li class="list-group-item">{{ $m->benefit3 }}</li>
+                                        </ul>
+                                        <a class="btn w-100 btn-outline-success mt-2" href="/membership/register">More Details</a>
+                                    </div>
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+                <!--/ pricing plan cards -->
+
+                <!-- pricing faq -->
+                <div class="pricing-faq">
+                    <h3 class="text-center">FAQ's</h3>
+                    <p class="text-center">Let us help answer the most common questions.</p>
+                    <div class="row my-2">
+                        <div class="col-12 col-lg-10 col-lg-offset-2 mx-auto">
+                            <!-- faq collapse -->
+                            <div class="accordion accordion-margin" id="accordionExample">
+                                <div class="card accordion-item">
+                                    <h2 class="accordion-header" id="headingOne">
+                                        <button class="accordion-button collapsed" data-bs-toggle="collapse" role="button" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                                            Does my subscription automatically renew?
+                                        </button>
+                                    </h2>
+
+                                    <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                                        <div class="accordion-body">
+                                            Pastry pudding cookie toffee bonbon jujubes jujubes powder topping. Jelly beans gummi bears sweet roll
+                                            bonbon muffin liquorice. Wafer lollipop sesame snaps. Brownie macaroon cookie muffin cupcake candy
+                                            caramels tiramisu. Oat cake chocolate cake sweet jelly-o brownie biscuit marzipan. Jujubes donut
+                                            marzipan chocolate bar. Jujubes sugar plum jelly beans tiramisu icing cheesecake.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card accordion-item">
+                                    <h2 class="accordion-header" id="headingTwo">
+                                        <button class="accordion-button collapsed" data-bs-toggle="collapse" role="button" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                            Can I store the item on an intranet so everyone has access?
+                                        </button>
+                                    </h2>
+                                    <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#accordionExample">
+                                        <div class="accordion-body">
+                                            Tiramisu marshmallow dessert halvah bonbon cake gingerbread. Jelly beans chocolate pie powder. Dessert
+                                            pudding chocolate cake bonbon bear claw cotton candy cheesecake. Biscuit fruitcake macaroon carrot cake.
+                                            Chocolate cake bear claw muffin chupa chups pudding.
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card accordion-item">
+                                    <h2 class="accordion-header" id="headingThree">
+                                        <button class="accordion-button collapsed" data-bs-toggle="collapse" role="button" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                            Am I allowed to modify the item that I purchased?
+                                        </button>
+                                    </h2>
+                                    <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordionExample">
+                                        <div class="accordion-body">
+                                            Tart gummies dragée lollipop fruitcake pastry oat cake. Cookie jelly jelly macaroon icing jelly beans
+                                            soufflé cake sweet. Macaroon sesame snaps cheesecake tart cake sugar plum. Dessert jelly-o sweet muffin
+                                            chocolate candy pie tootsie roll marzipan. Carrot cake marshmallow pastry. Bonbon biscuit pastry topping
+                                            toffee dessert gummies. Topping apple pie pie croissant cotton candy dessert tiramisu.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--/ pricing faq -->
+            </section>
+
+        </div>
+    </div>
+    {{-- End Memberships Card --}}
 @endsection

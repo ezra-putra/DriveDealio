@@ -2,24 +2,26 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Sparepart;
+use App\Models\Seller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class SparepartController extends Controller
+class SellerController extends Controller
 {
-    public function listSparepart()
+
+
+    public function dashboard()
     {
         $id = auth()->id();
         $sparepart = DB::select(
             DB::raw("SELECT id, partnumber, partname, unitprice, stock, description, vehiclemodel, buildyear, colour, shops_id
             FROM drivedealio.spareparts WHERE shops_id = $id")
         );
-        return view('seller.sparepartlist', compact('sparepart'));
+        return view('/seller/dashboard', compact('sparepart'));
     }
 
-    public function addSparepart(Request $request, $id)
+    public function orderList()
     {
-
+        
     }
 }

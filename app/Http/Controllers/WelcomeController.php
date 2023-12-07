@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Brand;
+use App\Models\Membership;
+use Illuminate\Contracts\Session\Session;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class BrandController extends Controller
+class WelcomeController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -15,12 +16,15 @@ class BrandController extends Controller
      */
     public function index()
     {
-        $brand = DB::select(
-            DB::raw('select id, image, brandname from drivedealio.brands;')
+        $membership = DB::select(
+            DB::raw("select m.*, b.* FROM drivedealio.memberships as m
+            INNER JOIN drivedealio.benefits as b on m.benefits_id = b.id;")
         );
-        // dd($brand);
-        return view('vehicle.newvehicle')->with('brands', $brand);
+        $memberships = Session('membership');
+        return view('welcome', compact('membership'));
     }
+
+
 
     /**
      * Show the form for creating a new resource.
@@ -46,10 +50,10 @@ class BrandController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\Brand  $brand
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(Brand $brand)
+    public function show($id)
     {
         //
     }
@@ -57,10 +61,10 @@ class BrandController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\Brand  $brand
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit(Brand $brand)
+    public function edit($id)
     {
         //
     }
@@ -69,10 +73,10 @@ class BrandController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Brand  $brand
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Brand $brand)
+    public function update(Request $request, $id)
     {
         //
     }
@@ -80,10 +84,10 @@ class BrandController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\Brand  $brand
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Brand $brand)
+    public function destroy($id)
     {
         //
     }

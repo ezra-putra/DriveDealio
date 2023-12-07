@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\VehicleType;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
-class VehicleTypeController extends Controller
+class AppointmentController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -15,13 +13,7 @@ class VehicleTypeController extends Controller
      */
     public function index()
     {
-        $type = DB::select(
-            DB::raw('select * from drivedealio.vehicletypes;')
-        );
-        return view('vehicle.newvehicle')->with('types', $type);
-        // return view('vehicle.newvehicle', ['type' => $type]);
-        // return view('vehicle.newvehicle', compact('types'));
-        // dd($type);
+        //
     }
 
     /**
@@ -48,10 +40,10 @@ class VehicleTypeController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  \App\Models\VehicleType  $vehicleType
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show(VehicleType $vehicleType)
+    public function show($id)
     {
         //
     }
@@ -59,10 +51,10 @@ class VehicleTypeController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  \App\Models\VehicleType  $vehicleType
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit(VehicleType $vehicleType)
+    public function edit($id)
     {
         //
     }
@@ -71,10 +63,10 @@ class VehicleTypeController extends Controller
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\VehicleType  $vehicleType
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, VehicleType $vehicleType)
+    public function update(Request $request, $id)
     {
         //
     }
@@ -82,10 +74,10 @@ class VehicleTypeController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  \App\Models\VehicleType  $vehicleType
+     * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(VehicleType $vehicleType)
+    public function destroy($id)
     {
         //
     }
