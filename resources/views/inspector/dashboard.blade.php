@@ -91,9 +91,12 @@
                                         </tr>
                                     </thead>
                                     <tbody>
+                                        @php
+                                            $counter = 1
+                                        @endphp
                                         @foreach ($vehicle as $v)
                                         <tr>
-                                            <td>{{ $v->idvehicle }}</td>
+                                            <td>{{ $counter++ }}</td>
                                             <td>{{ $v->name }}</td>
                                             <td>{{ $v->firstname }}</td>
                                             <td>{{ $v->adstatus }}</td>
@@ -129,9 +132,12 @@
                                         </tr>
                                     </thead>
                                     <tbody>
+                                        @php
+                                            $counter = 1
+                                        @endphp
                                         @foreach ($appointment as $a)
                                         <tr>
-                                            <td>{{ $a->idappointment }}</td>
+                                            <td>{{ $counter++ }}</td>
                                             <td>{{ $a->appointmentdate }}</td>
                                             <td>{{ $a->appointmenttime }}</td>
                                             <td>{{ $a->status }}</td>

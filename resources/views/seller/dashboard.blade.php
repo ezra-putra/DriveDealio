@@ -95,8 +95,8 @@
                                         <tr>
                                             <td>{{ $s->id }}</td>
                                             <td>{{ $s->partnumber }} - {{ $s->partname }} {{ $s->vehiclemodel }} {{ $s->buildyear }}, {{ $s->colour }}</td>
-                                            <td>{{ $s->stoock }}</td>
-                                            <td>{{ $s->unitprice }}</td>
+                                            <td>{{ $s->stock }}</td>
+                                            <td>@currency($s->unitprice)</td>
                                         </tr>
                                         @endforeach
 
@@ -123,8 +123,9 @@
                                     <thead>
                                         <tr>
                                             <th scope="col">#</th>
-                                            <th scope="col">Date</th>
-                                            <th scope="col">Time</th>
+                                            <th scope="col">Buyer Name</th>
+                                            <th scope="col">Order Date</th>
+                                            <th scope="col">Total Price</th>
                                             <th scope="col">Status</th>
                                         </tr>
                                     </thead>

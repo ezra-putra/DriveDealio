@@ -1,5 +1,8 @@
 @extends('layout.main')
 @section('content')
+    <link rel="stylesheet" type="text/css" href="../../../app-assets/vendors/css/file-uploaders/dropzone.min.css">
+    <link rel="stylesheet" type="text/css" href="../../../app-assets/css/plugins/forms/form-file-uploader.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.0/dropzone.js"></script>
     <div class="col-md-12" style="padding: 3vh;">
         <div class="card">
             <div class="card-body col-md-12">
@@ -110,12 +113,17 @@
                         <div class="col-md-6">
                             <div class="col-md-12 mb-1">
                                 <div class="col-md-12 mb-1">
-                                    <label for="dpz-multiple-files" class="form-label">
+                                    <label for="myDropzone" class="form-label">
                                         <h4>Upload Vehicle Image</h4>
                                     </label>
-                                    <form action="#" class="dropzone dropzone-area" id="dpz-multiple-files">
+                                    <form class="dropzone" id="dpz-multiple-files">
+
+                                    </form>
+
+                                    <form action="/target" class="dropzone" id="myDropzone">
                                         <div class="dz-message">Drop images here or click to upload.</div>
                                     </form>
+
                                 </div>
                             </div>
 
@@ -171,4 +179,15 @@
             </div>
         </div>
     </div>
+
+
+    <script>
+        // Note that the name "myDropzone" is the camelized
+        // id of the form.
+        Dropzone.options.myDropzone = {
+            paramName: "file", // The name that will be used to transfer the file
+            maxFilesize: 10, // MB
+            maxFiles:10,
+        };
+    </script>
 @endsection

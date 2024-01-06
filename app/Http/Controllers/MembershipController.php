@@ -68,9 +68,25 @@ class MembershipController extends Controller
     public function approve_post($id)
     {
         $member = UserMemberships::findOrFail($id);
-        $member->status = 'Approved';
+        $member->status = 'Actived';
 
         $member->save();
+        return back()->with('status', 'Your request has been process!');
+    }
+
+    public function expired_post()
+    {
+        $member = DB::select(
+            DB::raw("SELECT * from drivedealio.user_memberships WHERE status IS 'Active'")
+        );
+
+        foreach ($member as $m) {
+            $expiryDate = Carbon::parse($m->end);
+
+            if (now()->gt($expiryDate)) {
+                $m->update(['status' => 'Expired']);
+            }
+        }
         return back()->with('status', 'Your request has been process!');
     }
 

@@ -33,14 +33,7 @@
                             @endif
                             <td>{{ $v->adstatus }}</td>
                             <td>
-                                @if ($v->status === 'Available')
-                                    <a class="btn btn-icon btn-flat-success" href="{{ route('acceptAppointment', $v->idappointment) }}">
-                                        <i data-feather="check" class="me-50"></i>
-                                        <span>Accept</span>
-                                    </a>
-                                @endif
-                                @if ($v->status === 'Booked' && $v->adstatus === 'Inspections')
-
+                                @if ($v->status === 'Booked' && $v->adstatus === 'Inspection')
                                     <a class="btn btn-icon btn-flat-info" href="{{ route('inspector.inspections', $v->idvehicle) }}">
                                         <i data-feather="eye" class="me-50"></i>
                                         <span>Inspections</span>

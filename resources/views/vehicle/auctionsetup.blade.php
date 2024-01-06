@@ -24,13 +24,6 @@
                                             name="price" />
                                     </div>
                                 </div>
-                                <div class="col-md-12">
-                                    <label class="form-label" for="lot-number">Lot Number</label>
-                                    <div class="col-md-12 mb-2">
-                                        <input type="text" class="form-control" id="lot-number" placeholder="Lot Number"
-                                            name="lotnumber" />
-                                    </div>
-                                </div>
                                 <div class="col-md-6">
                                     <label class="form-label" for="dateInput">Auction Start Date</label>
                                     <div class="col-md-12 mb-2">

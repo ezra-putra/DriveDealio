@@ -34,16 +34,10 @@
                             @endif
                             <td>{{ $v->adstatus }}</td>
                             <td>
-                                @if ($v->adstatus === 'Pending')
+                                @if ($v->adstatus === 'Waiting for Approval')
                                     <a class="btn btn-icon btn-flat-info" href="{{ route('vehicle.adminEdit', $v->idvehicle) }}">
                                         <i data-feather="eye" class="me-50"></i>
                                         <span>Details</span>
-                                    </a>
-                                @endif
-                                @if ($v->adstatus === 'Approved')
-                                    <a class="btn btn-icon btn-flat-info" href="{{ route('vehicle.appointment', $v->idvehicle) }}">
-                                        <i data-feather="eye" class="me-50"></i>
-                                        <span>Schedule</span>
                                     </a>
                                 @endif
                                 @if ($v->adstatus === 'Auction Request')

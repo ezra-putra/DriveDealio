@@ -166,4 +166,28 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // Make an AJAX request when the page loads
+        window.addEventListener('DOMContentLoaded', function () {
+            updateMembershipStatuses();
+        });
+
+        function updateMembershipStatuses() {
+            // Make an AJAX request to the controller method
+            fetch('{{ route('expired_post') }}', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Handle the response, e.g., display a message
+                document.getElementById('ajax-response').innerText = data.message;
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
 @endsection

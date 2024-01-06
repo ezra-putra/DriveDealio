@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\AuctionController;
 use App\Http\Controllers\BrandController;
 use App\Http\Controllers\InspectorController;
 use App\Http\Controllers\LoginController;
@@ -9,6 +10,7 @@ use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SellerController;
 use App\Http\Controllers\SparepartController;
+use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VehicleController;
 use App\Http\Controllers\VehicleTypeController;
@@ -19,6 +21,7 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Brand;
 use App\Models\Membership;
 use App\Models\Vehicle;
+use PhpParser\Builder\Trait_;
 
 /*
 |--------------------------------------------------------------------------
@@ -62,10 +65,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/cancel_post/{id}', [MembershipController::class, 'cancel_post'])->name('cancel_post');
     Route::get('/approve_post/{id}', [MembershipController::class, 'approve_post'])->name('approve_post');
     Route::get('/membership/bilings', [MembershipController::class, 'myBilings'])->name('membership.myBilings');
+    Route::get('/update-membership-statuses', [MembershipController::class, 'expired_post'])->name('expired_post');
 
     Route::get('/admin/reviewvehicle/{id}', [VehicleController::class, 'adminEdit'])->name('vehicle.adminEdit');
     Route::get('/approve/{id}', [VehicleController::class, 'approve'])->name('approve_post');
-    Route::get('/admin/inspectionappointment/{id}', [VehicleController::class, 'appointment'])->name('vehicle.appointment');
+    Route::get('/vehicle/inspectionappointment/{id}', [VehicleController::class, 'appointment'])->name('vehicle.appointment');
     Route::put('/appointmentDate/{id}', [VehicleController::class, 'appointmentDate'])->name('appointmentDate');
     Route::get('/approveauctions/{id}', [VehicleController::class, 'approveAuction'])->name('vehicle.approveautions');
 
@@ -90,11 +94,28 @@ Route::middleware(['auth'])->group(function () {
     });
     Route::post('/appointments', [InspectorController::class, 'appointmentCreate'])->name('inspector.appointmentCreate');
 
+    Route::get('/auction', function(){
+        return view('auction.listauction');
+    });
 
     Route::get('/seller/dashboard', [SellerController::class, 'dashboard'], function(){
         return view('seller.dashboard');
     })->name('sellerdashboard');
     Route::get('/seller/listsparepart', [SparepartController::class, 'listSparepart'])->name('seller.sparepartlist');
+    Route::get('/seller/add-sparepart', [SparepartController::class, 'sparepartCategories'], function() {
+        return view('seller.addsparepart');
+    });
+    Route::post('add-sparepart', [SparepartController::class, 'addSparepart'])->name('seller.add-sparepart');
+    Route::delete('spareparts/{id}', [SparePartController::class, 'destroy'])->name('sparepart.destroy');
+
+    Route::get('/wishlist', function() {return view('sparepart.wishlist');});
+
+    Route::get('/cart', [TransactionController::class, 'cartIndex']);
+    Route::get('checkout', [TransactionController::class, 'checkout']);
+
+    Route::post('sparepart/add-cart/{id}', [TransactionController::class, 'addToCart'])->name('sparepart.addcart');
+    Route::post('sparepart/add-wishlist/{id}', [TransactionController::class, 'addToWishlist'])->name('sparepart.addwishlist');
+    Route::post('/totalprice', [TransactionController::class, 'calculateTotalPrice'])->name('totalprice');
 
     Route::get('/seller/register', function(){
         return view('seller.sellerregister');
@@ -104,10 +125,15 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/approveseller/{id}', [AdminController::class, 'approveSeller'])->name('admin.approve');
     Route::get('/suspendseller/{id}', [AdminController::class, 'suspendSeller'])->name('admin.suspend');
 
+    Route::post('/auction/add-bid/{id}', [AuctionController::class, 'placeBid'])->name('place_bid');
+
 });
 
 Route::get('/vehicle/car', [VehicleController::class, 'car']);
 Route::get('/vehicle/motorcycle', [VehicleController::class, 'motorcycle']);
 Route::get('/vehicle/details/{id}', [VehicleController::class, 'show'])->name('vehicle.show');
 Route::get('/vehicle/myvehicle', [VehicleController::class, 'myvehicle'])->name('vehicle.myvehicle');
-Route::post('/update-ad-status', [VehicleController::class, 'updateAdStatus']);
+Route::post('/end-bid-status/{id}', [VehicleController::class, 'auctionEndStatus'])->name('vehicle.end-bid');
+
+Route::get('/sparepart', [SparepartController::class, 'index']);
+Route::get('/sparepart/details/{id}', [SparepartController::class, 'show'])->name('sparepart.show');

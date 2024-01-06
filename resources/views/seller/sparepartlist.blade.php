@@ -17,6 +17,8 @@
                                 <th scope="col">Part Name</th>
                                 <th scope="col">Stock</th>
                                 <th scope="col">Price</th>
+                                <th scope="col">Condition</th>
+                                <th scope="col">Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -25,8 +27,23 @@
                                     <td>{{ $s->id }}</td>
                                     <td>{{ $s->partnumber }} - {{ $s->partname }} {{ $s->vehiclemodel }}
                                         {{ $s->buildyear }}, {{ $s->colour }}</td>
-                                    <td>{{ $s->stoock }}</td>
-                                    <td>{{ $s->unitprice }}</td>
+                                    <td>{{ $s->stock }}</td>
+                                    <td>@currency($s->unitprice)</td>
+                                    <td>{{ $s->condition }}</td>
+                                    <td>
+                                        <a href="#" class="btn btn-icon btn-flat-info">
+                                            <i data-feather="edit"></i>
+                                        </a>
+                                        <form method="POST" action="{{ route('sparepart.destroy', $s->id) }}"
+                                            style="display: inline-block">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-icon btn-flat-danger"
+                                                onclick="return confirm('Do you want to delete this product (ID: {{ $s->id }} - Name: {{ $s->partnumber }} - {{ $s->partname }} {{ $s->vehiclemodel }} {{ $s->buildyear }}, {{ $s->colour }})?');">
+                                                <i class="fa fa-trash-o"></i>
+                                            </button>
+                                        </form>
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>

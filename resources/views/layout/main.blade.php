@@ -49,8 +49,6 @@
     <link rel="stylesheet" type="text/css" href="../../../app-assets/css/pages/app-ecommerce.css">
     <link rel="stylesheet" type="text/css" href="../../../app-assets/css/plugins/extensions/ext-component-toastr.css">
 
-    <link rel="stylesheet" type="text/css" href="../../../app-assets/vendors/css/file-uploaders/dropzone.min.css">
-
 
     <link rel="stylesheet" type="text/css" href="../../../app-assets/vendors/css/forms/wizard/bs-stepper.min.css">
     <link rel="stylesheet" type="text/css" href="../../../app-assets/css/plugins/forms/form-wizard.css">
@@ -101,11 +99,11 @@
 
 <!-- BEGIN: Body-->
 
-<body class="horizontal-layout horizontal-menu content-detached-left-sidebar navbar-floating footer-static  "
-    data-open="hover" data-menu="horizontal-menu" data-col="content-detached-left-sidebar">
+<body class="horizontal-layout horizontal-menu 1-column navbar-floating footer-static "
+data-open="hover" data-menu="horizontal-menu" data-col="1-column">
 
     <!-- BEGIN: Header-->
-    <nav class="header-navbar navbar-expand-lg navbar navbar-fixed align-items-right navbar-shadow  mb-4"
+    <nav class="header-navbar navbar-expand-lg navbar navbar-fixed align-items-right navbar-shadow  "
         style="background-color: white;">
         <div class="navbar-header ml-auto">
             @if (auth()->user())
@@ -142,10 +140,10 @@
                         <a href="/vehicle/motorcycle" class="nav-link d-flex align-items-center">Motorcycles</a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link d-flex align-items-center">Spare Parts</a>
+                        <a href="/sparepart" class="nav-link d-flex align-items-center">Spareparts</a>
                     </li>
                     <li class="nav-item">
-                        <a href="#" class="nav-link d-flex align-items-center">Auctions</a>
+                        <a href="/auction" class="nav-link d-flex align-items-center">Auctions</a>
                     </li>
                     <li class="nav-item">
                         <a href="/membership/bilings" class="nav-link d-flex align-items-center">Memberships</a>
@@ -158,12 +156,12 @@
                 <!-- User Links -->
                 <ul class="nav navbar-nav ms-auto">
                     <li class="nav-item mx-1">
-                        <a href="#" class="btn btn-icon">
-                            <i class="fa fa-eye"></i> <!-- Ikon mata -->
+                        <a href="/wishlist" class="btn btn-icon">
+                            <i class="fa fa-heart"></i> <!-- Ikon mata -->
                         </a>
                     </li>
                     <li class="nav-item mx-1">
-                        <a href="#" class="btn btn-icon">
+                        <a href="/cart" class="btn btn-icon">
                             <i class="fa fa-shopping-cart"></i> <!-- Ikon keranjang belanjaan -->
                         </a>
                     </li>

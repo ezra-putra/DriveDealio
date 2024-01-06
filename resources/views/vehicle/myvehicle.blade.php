@@ -30,7 +30,13 @@
                                         <td>{{ $v->firstname }}</th>
                                     @endif
                                     <td>{{ $v->adstatus }}</td>
-                                    <td id="countdown">{{ $v->duration }}</td>
+
+                                    @if (empty($v->duration))
+                                        <td>AUCTION NOT SET</td>
+                                    @else
+                                        <td id="countdown">{{ $v->duration }}</td>
+                                    @endif
+
 
                                     <td>
                                         @if ($v->adstatus === 'Setup Auction')
@@ -38,6 +44,13 @@
                                                 href="{{ route('auctionSetupBtn', $v->idvehicle) }}">
                                                 <i data-feather="edit" class="me-50"></i>
                                                 <span>Setup Auction</span>
+                                            </a>
+                                        @endif
+                                        @if ($v->adstatus === 'Pending')
+                                            <a class="btn btn-icon btn-flat-info"
+                                                href="{{ route('vehicle.appointment', $v->idvehicle) }}">
+                                                <i data-feather="calendar" class="me-50"></i>
+                                                <span>Inspection Date</span>
                                             </a>
                                         @endif
                                     </td>
@@ -137,6 +150,8 @@
         </div>
     </div>
 
+
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         // Ambil data start_date dan end_date dari PHP dan konversi ke UTC
@@ -147,7 +162,7 @@
 
 
         function startTimer(status) {
-            if ($v->adstatus === "Open to Bid") {
+            if ($v - > adstatus === "Open to Bid") {
                 // Tanggal akhir lelang (gantilah dengan tanggal yang sesuai)
                 var endDate = new Date().getTime();
 

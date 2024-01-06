@@ -13,18 +13,10 @@ use Carbon\Carbon;
 
 class VehicleController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-
-
-
     public function car()
     {
         $vehicle = DB::select(
-            DB::raw("select a.start_price as price, i.url, v.id as idvehicle, v.model, v.variant, vt.name as type, c.name, b.name as brand, v.location
+            DB::raw("SELECT a.start_price as price, i.url, v.id as idvehicle, v.model, v.variant, vt.name as type, c.name, b.name as brand, v.location
             from drivedealio.auctions as a INNER JOIN drivedealio.vehicles as v on a.vehicles_id = v.id
             LEFT JOIN drivedealio.images as i on v.id = i.vehicles_id
             INNER JOIN drivedealio.vehicletypes as vt on vt.id = v.vehicletypes_id
@@ -40,7 +32,7 @@ class VehicleController extends Controller
     public function motorcycle()
     {
         $vehicle = DB::select(
-            DB::raw("select a.start_price as price, i.url, v.id as idvehicle, v.model, v.variant, vt.name as type, c.name, b.name as brand, v.location
+            DB::raw("SELECT a.start_price as price, i.url, v.id as idvehicle, v.model, v.variant, vt.name as type, c.name, b.name as brand, v.location
             from drivedealio.auctions as a INNER JOIN drivedealio.vehicles as v on a.vehicles_id = v.id
             LEFT JOIN drivedealio.images as i on v.id = i.vehicles_id
             INNER JOIN drivedealio.vehicletypes as vt on vt.id = v.vehicletypes_id
@@ -50,6 +42,85 @@ class VehicleController extends Controller
         );
         // dd($vehicle);
         return view('vehicle.vehicleindex', compact('vehicle'));
+    }
+
+    public function myvehicle()
+    {
+        $iduser = auth()->id();
+
+        if (auth()->user()->roles_id === 1) {
+            $vehicle = DB::select(
+                DB::raw("SELECT v.id as idvehicle, CONCAT(v.model,' ', v.variant) as name, v.transmission, v.platenumber, v.adstatus, v.inputdate, b.name as brand, u.id, u.firstname
+                FROM drivedealio.vehicles as v INNER JOIN drivedealio.brands as b on v.brands_id = b.id
+                INNER JOIN drivedealio.users as u on v.users_id = u.id order by v.inputdate asc ;")
+            );
+            return view('/admin/listvehicle', compact('vehicle'));
+        }
+        if(auth()->user()->roles_id === 3){
+            $vehicle = DB::select(
+                DB::raw("SELECT v.id as idvehicle, CONCAT(v.model,' ', v.variant) as name, v.transmission, v.platenumber,
+                v.adstatus, v.inputdate, b.name as brand, u.id, u.firstname, u.address, v.appointments_id, a.id as idappointment, a.status
+                FROM drivedealio.vehicles as v INNER JOIN drivedealio.brands as b on v.brands_id = b.id
+                INNER JOIN drivedealio.users as u on v.users_id = u.id
+                LEFT JOIN drivedealio.appointments as a on v.appointments_id = a.id
+                where v.adstatus IN ('Inspection', 'Grading', 'Graded') order by v.inputdate asc;")
+            );
+            return view('/inspector/listvehicle', compact('vehicle'));
+        }else{
+            $vehicle = DB::select(
+                DB::raw("SELECT v.id as idvehicle, CONCAT(v.model,' ', v.variant) as name, v.transmission, v.platenumber, v.adstatus, v.inputdate, b.name as brand, u.id as iduser, a.id as idauction, a.start_date, a.end_date
+                FROM drivedealio.vehicles as v INNER JOIN drivedealio.brands as b on v.brands_id = b.id
+                INNER JOIN drivedealio.users as u on v.users_id = u.id LEFT JOIN drivedealio.auctions as a on v.id = a.vehicles_id
+                where u.id = $iduser order by v.inputdate asc ;")
+            );
+
+
+
+            $startDateTime = Carbon::parse($vehicle[0]->start_date);
+            $endDateTime = Carbon::parse($vehicle[0]->end_date);
+            $interval = $startDateTime->diff($endDateTime);
+            $vehicle[0]->duration = $this->formatDuration($interval);
+            return view('/vehicle/myvehicle', compact('vehicle'));
+        }
+    }
+
+    public function show($id)
+    {
+        $vehicle = DB::select(
+            DB::raw("SELECT i.url as image, v.id as idvehicle, v.model, v.enginecapacity, v. enginecylinders, v.fueltype, v.transmission, vt.id as idtype, vt.name as type, v.platenumber,
+            b.id as idbrand, b.name as brand, a.id as idauction, a.start_price as price, a.current_price, a.lot_number as lotnumber, v.location, u.id as iduser, u.firstname as fname, u.lastname as lname, v.variant, a.start_date, a.end_date, v.users_id
+            FROM drivedealio.vehicles as v LEFT JOIN drivedealio.images as i on v.id = i.vehicles_id
+            LEFT JOIN drivedealio.auctions as a on v.id = a.vehicles_id
+            INNER JOIN drivedealio.users as u on v.users_id = u.id
+            INNER JOIN drivedealio.brands as b on v.brands_id = b.id
+            INNER JOIN drivedealio.vehicletypes as vt on v.vehicletypes_id = vt.id where v.id = $id;")
+        );
+
+        $bid = DB::select(
+            DB::raw("SELECT u.id as iduser, um.id as idusermember, b.id as idbid, a.id as idauction, v.id as idvehicle,
+            CONCAT(u.firstname, ' ', u.lastname) as name, b.bidamount, TO_TIMESTAMP(b.date || ' ' || b.time, 'YYYY-MM-DD HH24:MI:SS') as  datetime
+            FROM drivedealio.users as u INNER JOIN drivedealio.user_memberships as um on u.id = um.users_id
+            INNER JOIN drivedealio.bids as b on um.id = b.user_memberships_id
+            INNER JOIN drivedealio.auctions as a on b.auctions_id = a.id
+            INNER JOIN drivedealio.vehicles as v on a.vehicles_id = v.id
+            WHERE v.id = $id ORDER BY b.bidamount DESC LIMIT 5;")
+        );
+
+        $startDateTime = Carbon::parse($vehicle[0]->start_date);
+        $endDateTime = Carbon::parse($vehicle[0]->end_date);
+        $now = Carbon::now();
+
+        if ($now >= $endDateTime) {
+
+            DB::table('drivedealio.vehicles')
+                ->where('id', $id)
+                ->update(['adstatus' => 'Auction Ended']);
+        }
+
+        $interval = $startDateTime->diff($endDateTime);
+        $vehicle[0]->duration = $this->formatDuration($interval);
+
+        return view('vehicle.vehicledetails', compact('vehicle', 'bid'));
     }
 
     public function categorized()
@@ -74,27 +145,11 @@ class VehicleController extends Controller
         return view('vehicle.addvehicledata', compact('brand', 'type', 'year', 'color', 'date'));
     }
 
-    public function inspection()
-    {
-        return view('vehicle.vehicleinspection');
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create()
     {
         return view('vehicle.addvehicledata');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
         $vehicle = new Vehicle;
@@ -120,46 +175,14 @@ class VehicleController extends Controller
 
 
         $vehicle->save();
-        return redirect('/vehicle/myvehicle')->with('status', 'Vehicle Data Saved!');
+        return view('/vehicle/myvehicle')->with('status', 'Vehicle Data Saved!');
     }
 
-    public function myvehicle()
+    public function uploadImage(Request $request)
     {
-        $iduser = auth()->id();
 
-        if (auth()->user()->roles_id === 1) {
-            $vehicle = DB::select(
-                DB::raw("select v.id as idvehicle, CONCAT(v.model,' ', v.variant) as name, v.transmission, v.platenumber, v.adstatus, v.inputdate, b.name as brand, u.id, u.firstname
-                FROM drivedealio.vehicles as v INNER JOIN drivedealio.brands as b on v.brands_id = b.id
-                INNER JOIN drivedealio.users as u on v.users_id = u.id order by v.inputdate asc ;")
-            );
-            return view('/admin/listvehicle', compact('vehicle'));
-        }
-        if(auth()->user()->roles_id === 3){
-            $vehicle = DB::select(
-                DB::raw("select v.id as idvehicle, CONCAT(v.model,' ', v.variant) as name, v.transmission, v.platenumber,
-                v.adstatus, v.inputdate, b.name as brand, u.id, u.firstname, u.address, v.appointments_id, a.id as idappointment, a.status
-                FROM drivedealio.vehicles as v INNER JOIN drivedealio.brands as b on v.brands_id = b.id
-                INNER JOIN drivedealio.users as u on v.users_id = u.id
-                LEFT JOIN drivedealio.appointments as a on v.appointments_id = a.id
-                where v.adstatus IN ('Inspections', 'Grading', 'Graded') order by v.inputdate asc;")
-            );
-            return view('/inspector/listvehicle', compact('vehicle'));
-        }else{
-            $vehicle = DB::select(
-                DB::raw("select v.id as idvehicle, CONCAT(v.model,' ', v.variant) as name, v.transmission, v.platenumber, v.adstatus, v.inputdate, b.name as brand, u.id as iduser, a.id as idauction, a.start_date, a.end_date
-                FROM drivedealio.vehicles as v INNER JOIN drivedealio.brands as b on v.brands_id = b.id
-                INNER JOIN drivedealio.users as u on v.users_id = u.id LEFT JOIN drivedealio.auctions as a on v.id = a.vehicles_id
-                where u.id = $iduser order by v.inputdate asc ;")
-            );
-
-            $startDateTime = Carbon::parse($vehicle[0]->start_date);
-            $endDateTime = Carbon::parse($vehicle[0]->end_date);
-            $interval = $startDateTime->diff($endDateTime);
-            $vehicle[0]->duration = $this->formatDuration($interval);
-            return view('/vehicle/myvehicle', compact('vehicle'));
-        }
     }
+
 
     public function adminEdit($id)
     {
@@ -192,7 +215,7 @@ class VehicleController extends Controller
     public function approve($id)
     {
         $vehicle = Vehicle::findOrFail($id);
-        $vehicle->adstatus = 'Approved';
+        $vehicle->adstatus = 'Inspection';
         $vehicle->verificationdate = now();
 
         $vehicle->save();
@@ -212,22 +235,25 @@ class VehicleController extends Controller
             from drivedealio.appointments as a INNER JOIN drivedealio.users as u on a.inspectors_id = u.id where a.status = 'Available';")
         );
 
-        return view('admin.inspectappointment', compact('appointment', 'vehicle'));
+        return view('vehicle.inspectappointment', compact('appointment', 'vehicle'));
     }
 
     public function appointmentDate(Request $request, $id)
     {
         DB::update(
             'UPDATE drivedealio.vehicles SET adstatus = :adstatus, appointments_id = :appointments_id WHERE id = :id',
-            ['adstatus' => 'Inspections', 'appointments_id' => $request->input('date'), 'id' => $id]
+            ['adstatus' => 'Waiting for Approval', 'appointments_id' => $request->input('inspectiondate'), 'id' => $id]
         );
-        return redirect('/admin/listvehicle')->with('status', 'Your request has been processed!');
+        $appointment = Appointments::find($id);
+        DB::update("UPDATE drivedealio.appointments SET status = :status WHERE id = :id",
+        ['status' => 'Booked', 'id' => $appointment->id]);
+        return redirect('/vehicle/myvehicle')->with('status', 'Your request has been processed!');
     }
 
     public function acceptAppointment($id)
     {
         $appointment = Appointments::find($id);
-        $appointment->status = 'Booked';
+        $appointment->status = 'Accepted';
         $appointment->save();
 
         return redirect('/admin/listvehicle')->with('status', 'Your request has been processed!');
@@ -260,10 +286,10 @@ class VehicleController extends Controller
         );
 
         $appointment = DB::select(
-            DB::raw("select a.id as idappointment, a.appointmentdate, a.appointmenttime, a.status, a.inspectors_id, u.id as idinspector, CONCAT(u.firstname, '', u.lastname) as name, v.id as idvehicle, v.appointments_id
+            DB::raw("SELECT a.id as idappointment, a.appointmentdate, a.appointmenttime, a.status, a.inspectors_id, u.id as idinspector, CONCAT(u.firstname, '', u.lastname) as name, v.id as idvehicle, v.appointments_id
             from drivedealio.appointments as a INNER JOIN drivedealio.users as u on a.inspectors_id = u.id
             INNER JOIN drivedealio.vehicles as v on a.id = v.appointments_id
-            where a.id = v.appointments_id;")
+            where a.id = v.appointments_id and v.id = $id;")
         );
 
         return view('inspector.grading', compact('vehicle', 'appointment'));
@@ -331,25 +357,25 @@ class VehicleController extends Controller
         return redirect('/admin/listvehicle')->with('status', 'Your request has been processed!');
     }
 
-
-    public function show($id)
+    public function auctionEndStatus($id)
     {
-        $vehicle = DB::select(
-            DB::raw("select i.url as image, v.id as idvehicle, v.model, v.enginecapacity, v. enginecylinders, v.fueltype, v.transmission, vt.id as idtype, vt.name as type, v.platenumber,
-            b.id as idbrand, b.name as brand, a.id as idauction, a.start_price as price, a.lot_number as lotnumber, v.location, u.id as iduser, u.firstname as fname, u.lastname as lname, v.variant, a.start_date, a.end_date
-            FROM drivedealio.vehicles as v LEFT JOIN drivedealio.images as i on v.id = i.vehicles_id
-            INNER JOIN drivedealio.auctions as a on v.id = a.vehicles_id
-            INNER JOIN drivedealio.users as u on v.users_id = u.id
-            INNER JOIN drivedealio.brands as b on v.brands_id = b.id
-            INNER JOIN drivedealio.vehicletypes as vt on v.vehicletypes_id = vt.id where v.id = $id;")
-        );
+        $vehicle = Vehicle::find($id);
 
-        $startDateTime = Carbon::parse($vehicle[0]->start_date);
-        $endDateTime = Carbon::parse($vehicle[0]->end_date);
-        $interval = $startDateTime->diff($endDateTime);
-        $vehicle[0]->duration = $this->formatDuration($interval);
+        if ($vehicle) {
+            // Periksa apakah waktu lelang telah berakhir
+            $now = Carbon::now();
+            $endDate = Carbon::parse($vehicle->end_date);
 
-        return view('vehicle.vehicledetails', compact('vehicle'));
+            if ($now >= $endDate) {
+                // Waktu lelang telah berakhir, ubah status
+                $vehicle->adstatus = 'Auction Ended';
+                $vehicle->save();
+
+                return response()->json(['success' => true]);
+            }
+        }
+
+        return response()->json(['success' => false, 'message' => 'Auction is still active']);
     }
 
 
@@ -391,35 +417,6 @@ class VehicleController extends Controller
         return response()->json(['message' => 'Ad status updated successfully']);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Vehicle  $vehicle
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Vehicle $vehicle)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Vehicle  $vehicle
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Vehicle $vehicle)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Vehicle  $vehicle
-     * @return \Illuminate\Http\Response
-     */
     public function destroy(Vehicle $vehicle)
     {
         //

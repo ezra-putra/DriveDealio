@@ -14,7 +14,7 @@
                                     <div class="row">
                                         <div class="col-md-12 mb-1">
                                             <label class="form-label" for="select-date">Inspection Date</label>
-                                            <select class="select2 form-select" id="select-date" name="date">
+                                            <select class="select2 form-select" id="select-date" name="inspectiondate">
                                                 <option value="">--Choose Inspection Date--</option>
                                                 @foreach ($appointment as $a)
                                                     <option value={{ $a->idappointment }}>{{ $a->name }} -
@@ -27,7 +27,7 @@
                             </div>
                             <div class="row justify-content-end">
                                 <div class="col-auto">
-                                    <input type="submit" class="btn btn-success" value="Approve">
+                                    <input type="submit" class="btn btn-success" value="Select">
                                 </div>
                             </div>
                         </form>

@@ -1,7 +1,6 @@
 @extends('layout.main')
 @section('content')
     <div class="ecommerce-application">
-
         <div class="content-wrapper container-xxl p-0">
             <div class="content-header row">
                 <div class="content-header-left col-md-9 col-12 mb-2">
@@ -37,6 +36,36 @@
                     </div>
                 </div>
             </div>
+            @if(session('error'))
+                <div id="errorPopup" style="display: none; background-color: #ff8080; color: #fff; padding: 10px; position: fixed; top: 15%; left: 50%; transform: translateX(-50%); z-index: 1000;">
+                    {{ session('error') }}
+                </div>
+
+                <script>
+                    // Show the error popup
+                    document.getElementById('errorPopup').style.display = 'block';
+
+                    // Hide the error popup after 10 seconds
+                    setTimeout(function() {
+                        document.getElementById('errorPopup').style.display = 'none';
+                    }, 10000);
+                </script>
+            @endif
+            @if(session('success'))
+                <div id="successPopup" style="display: none; background-color: #80ff80; color: #000; padding: 10px; position: fixed; top: 15%; left: 50%; transform: translateX(-50%); z-index: 1000;">
+                    {{ session('success') }}
+                </div>
+
+                <script>
+                    // Show the success popup
+                    document.getElementById('successPopup').style.display = 'block';
+
+                    // Hide the success popup after 10 seconds
+                    setTimeout(function() {
+                        document.getElementById('successPopup').style.display = 'none';
+                    }, 10000);
+                </script>
+            @endif
             <div class="content-body">
                 <!-- app e-commerce details start -->
                 <section class="app-ecommerce-details">
@@ -71,10 +100,18 @@
                                                 <div class="col-md-6">
                                                     <div class="row">
                                                         <label for="colFormLabelLg" class="col-sm-6 col-form-label-lg">
-                                                            <h5>Current Price</h5>
+                                                            <h5>Start Price</h5>
                                                         </label>
                                                         <div class="col-sm-6">
                                                             <h5 class="mt-1">@currency($v->price)</h5>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <label for="colFormLabelLg" class="col-sm-6 col-form-label-lg">
+                                                            <h5>Current Price</h5>
+                                                        </label>
+                                                        <div class="col-sm-6">
+                                                            <h5 class="mt-1">@currency($v->current_price)</h5>
                                                         </div>
                                                     </div>
                                                     <div class="row">
@@ -117,32 +154,50 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody>
+                                                    @php
+                                                        $counter = 1
+                                                    @endphp
+                                                    @foreach ($bid as $b)
                                                     <tr>
-                                                        <td>1</td>
-                                                        <td>Ezra</td>
-                                                        <td>Rp.170.000.000</td>
-                                                        <td>17:52:01</td>
+                                                        <td>{{ $counter++ }}</td>
+                                                        <td>{{ $b->name }}</td>
+                                                        <td>@currency($b->bidamount)</td>
+                                                        <td>{{ $b->datetime }}</td>
                                                     </tr>
-                                                    <tr>
-                                                        <td>2</td>
-                                                        <td>Theresia</td>
-                                                        <td>Rp.167.500.000</td>
-                                                        <td>17:50:80</td>
-                                                    </tr>
+                                                    @endforeach
                                                 </tbody>
                                             </table>
                                         </div>
+                                        @if(empty($bid))
+                                            <p class="text-center">NO BID, PLACE BID NOW</p>
+                                        @endif
 
-                                        <div class="d-flex flex-column flex-sm-row pt-1 mt-auto">
-                                            <a href="#" class="btn btn-primary me-0 me-sm-1 mb-1 mb-sm-0">
+                                        <div class="d-flex flex-column flex-sm-row pt-1 mt-auto mb-1">
+                                            @if (auth()->user())
+                                                @if ($v->users_id != auth()->user()->id)
+                                                    <a href="#modalBid" data-bs-toggle="modal" onclick=""
+                                                        class="btn btn-primary me-0 me-sm-1 mb-1 mb-sm-0">
+                                                        <i class="fa fa-gavel me-50" id="btnPlacebid"></i>
+                                                        <span>Place Bid</span>
+                                                    </a>
+                                                    <a href="#"
+                                                        class="btn btn-outline-secondary btn-wishlist me-0 me-sm-1 mb-1 mb-sm-0">
+                                                        <i data-feather="eye" class="me-50" id="btnAddWatchlist"></i>
+                                                        <span>Watchlist</span>
+                                                    </a>
+                                                @endif
+                                            @else
+                                            <a href="#modalBid" data-bs-toggle="modal" onclick=""
+                                                class="btn btn-primary me-0 me-sm-1 mb-1 mb-sm-0">
                                                 <i class="fa fa-gavel me-50" id="btnPlacebid"></i>
-                                                <span>Place Bidding</span>
+                                                <span>Place Bid</span>
                                             </a>
                                             <a href="#"
                                                 class="btn btn-outline-secondary btn-wishlist me-0 me-sm-1 mb-1 mb-sm-0">
                                                 <i data-feather="eye" class="me-50" id="btnAddWatchlist"></i>
                                                 <span>Watchlist</span>
                                             </a>
+                                            @endif
                                         </div>
                                 @endforeach
                             </div>
@@ -364,6 +419,39 @@
         </div>
     </div>
 
+    {{-- Modal Form Edit Product --}}
+    <div class="modal fade" id="modalBid" tabindex="-1" role="basic" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-transparent">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body px-sm-5 mx-50 pb-5">
+                    <h1 class="text-center mb-1" id="addNewCardTitle">Place New Bid</h1>
+                    <!-- form -->
+                    <form action="{{ route('place_bid', $vehicle[0]->idauction) }}" method="POST"
+                        enctype="multipart/form-data" class="row gy-1 gx-2 mt-75" id="bidForm">
+                        @csrf
+                        <div class="col-12">
+                            <label class="form-label" for="modalAddCardNumber">Bid Amount</label>
+                            <div class="input-group input-group-merge">
+                                <input name="amount" class="form-control" type="number"
+                                    placeholder="Enter Bid Amount" />
+                            </div>
+                        </div>
+                        <div class="col-12 text-center">
+                            <input type="submit" id="submitBid" class="btn btn-primary me-1 mt-1" value="Submit Bid">
+                            <button type="reset" class="btn btn-outline-secondary mt-1" data-bs-dismiss="modal"
+                                aria-label="Close">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         // Ambil data start_date dan end_date dari PHP dan konversi ke UTC
@@ -385,33 +473,37 @@
             var seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
             // Tampilkan durasi di elemen dengan id "countdown"
-            $("#countdown").html(days + "D " + hours + "H " + minutes + "M " + seconds + "S ");
+            $("#countdown").html(days + "D, " + hours + "H " + minutes + "M " + seconds + "S ");
 
             // Jika waktu sudah habis, tampilkan pesan atau lakukan aksi tertentu
             if (distance < 0) {
-                clearInterval(x);
+                clearInterval(distance);
                 $("#countdown").html("Auction Ended");
 
                 $("#btnPlacebid").prop('disabled', true);
 
                 $("#btnAddWatchlist").prop('disabled', true);
+
+
+                $.ajax({
+                    url: '{{ route("vehicle.end-bid", $vehicle[0]->idvehicle) }}',
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    data: {
+                        vehicleId: {{ $vehicle[0]->idvehicle }}
+                    },
+                    success: function(response) {
+                        // Handle the API response if needed
+                        console.log(response);
+                    },
+                    error: function(error) {
+                        // Handle the error if the API call fails
+                        console.error(error);
+                    }
+                });
             }
         }, 1000);
-
-        function updateAdStatus() {
-            $.ajax({
-                type: 'POST',
-                url: '/update-ad-status', // Sesuaikan dengan URL rute yang sesuai di Laravel
-                data: {
-                    auctionId: "{{ $vehicle[0]->idauction }}"
-                },
-                success: function(response) {
-                    console.log(response); // Tampilkan respons dari server jika diperlukan
-                },
-                error: function(error) {
-                    console.error(error); // Tampilkan pesan kesalahan jika terjadi
-                }
-            });
-        }
     </script>
 @endsection
