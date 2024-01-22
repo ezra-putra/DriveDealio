@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Address;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -24,11 +25,8 @@ class RegisterController extends Controller
         $user->profilepicture = "https://png.pngtree.com/png-clipart/20210129/ourmid/pngtree-default-male-avatar-png-image_2811083.jpg";
         $user->phonenumber = $request->input('number');
         $user->birthdate = $request->input('birth');
-        $user->address = $request->input('address');
-        $user->province = $request->input('province');
-        $user->city = $request->input('city');
-        $user->district = $request->input('district');
-        $user->zipcode = $request->input('zip');
+
+
         $user->sellerstatus = 0;
         $user->roles_id = 2;
 
@@ -41,4 +39,20 @@ class RegisterController extends Controller
     }
 
   }
+
+  public function addAddress(Request $request)
+  {
+    $address = new Address;
+    $address->users_id = auth()->id();
+    $address->name = $request->input('name');
+    $address->address = $request->input('address');
+    $address->province = $request->input('province');
+    $address->city = $request->input('city');
+    $address->district = $request->input('district');
+    $address->zipcode = $request->input('zip');
+
+    $address->save();
+    return redirect()->back();
+  }
+
 }

@@ -36,36 +36,6 @@
                     </div>
                 </div>
             </div>
-            @if(session('error'))
-                <div id="errorPopup" style="display: none; background-color: #ff8080; color: #fff; padding: 10px; position: fixed; top: 15%; left: 50%; transform: translateX(-50%); z-index: 1000;">
-                    {{ session('error') }}
-                </div>
-
-                <script>
-                    // Show the error popup
-                    document.getElementById('errorPopup').style.display = 'block';
-
-                    // Hide the error popup after 10 seconds
-                    setTimeout(function() {
-                        document.getElementById('errorPopup').style.display = 'none';
-                    }, 10000);
-                </script>
-            @endif
-            @if(session('success'))
-                <div id="successPopup" style="display: none; background-color: #80ff80; color: #000; padding: 10px; position: fixed; top: 15%; left: 50%; transform: translateX(-50%); z-index: 1000;">
-                    {{ session('success') }}
-                </div>
-
-                <script>
-                    // Show the success popup
-                    document.getElementById('successPopup').style.display = 'block';
-
-                    // Hide the success popup after 10 seconds
-                    setTimeout(function() {
-                        document.getElementById('successPopup').style.display = 'none';
-                    }, 10000);
-                </script>
-            @endif
             <div class="content-body">
                 <!-- app e-commerce details start -->
                 <section class="app-ecommerce-details">
@@ -175,8 +145,7 @@
                                         <div class="d-flex flex-column flex-sm-row pt-1 mt-auto mb-1">
                                             @if (auth()->user())
                                                 @if ($v->users_id != auth()->user()->id)
-                                                    <a href="#modalBid" data-bs-toggle="modal" onclick=""
-                                                        class="btn btn-primary me-0 me-sm-1 mb-1 mb-sm-0">
+                                                    <a href="#modalBid" data-bs-toggle="modal"                                                        class="btn btn-primary me-0 me-sm-1 mb-1 mb-sm-0">
                                                         <i class="fa fa-gavel me-50" id="btnPlacebid"></i>
                                                         <span>Place Bid</span>
                                                     </a>
@@ -187,7 +156,7 @@
                                                     </a>
                                                 @endif
                                             @else
-                                            <a href="#modalBid" data-bs-toggle="modal" onclick=""
+                                            <a href="#modalBid" data-bs-toggle="modal"
                                                 class="btn btn-primary me-0 me-sm-1 mb-1 mb-sm-0">
                                                 <i class="fa fa-gavel me-50" id="btnPlacebid"></i>
                                                 <span>Place Bid</span>
@@ -419,7 +388,7 @@
         </div>
     </div>
 
-    {{-- Modal Form Edit Product --}}
+    {{-- Modal Form Add Bid --}}
     <div class="modal fade" id="modalBid" tabindex="-1" role="basic" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">

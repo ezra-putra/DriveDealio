@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Order;
+use App\Models\OrderDetail;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -10,71 +13,19 @@ class TransactionController extends Controller
     public function cartIndex()
     {
         $iduser = auth()->id();
-        $cart = DB::select(
-            DB::raw("SELECT sp.id as idsparepart, sp.partnumber, sp.partname, sp.vehiclemodel, sp.stock, sp.image, sp.unitprice, c.quantity, (sp.stock - c.quantity) as temp_stock, (sp.unitprice * c.quantity) as total_price, c.spareparts_id, c.users_id,
-            u.id as iduser, u.firstname, s.id as idseller, s.name as sellername
+        $cartItems = DB::select(
+            DB::raw("SELECT sp.id as idsparepart, sp.partnumber, sp.partname, sp.vehiclemodel, sp.stock, sp.unitprice, c.quantity, (sp.stock - c.quantity) as temp_stock, (sp.unitprice * c.quantity) as total_price, c.spareparts_id, c.users_id,
+            u.id as iduser, u.firstname, s.id as idseller, s.name as sellername, c.id as idcart,
+            (SELECT p.url FROM drivedealio.pics as p WHERE p.spareparts_id = sp.id LIMIT 1) as url
             FROM drivedealio.spareparts as sp INNER JOIN drivedealio.carts as c on sp.id = c.spareparts_id
             INNER JOIN drivedealio.users as u on c.users_id = u.id
             INNER JOIN drivedealio.shops as s on sp.shops_id = s.id WHERE u.id =  $iduser;")
         );
-        return view('transaction.cart', compact('cart'));
+
+        return view('transaction.cart', compact('cartItems'));
     }
 
     // Transaksi Sparepart START
-    public function addToWishlist($id)
-    {
-        $iduser = auth()->id();
-        DB::insert("INSERT INTO drivedealio.wishlist(users_id, spareparts_id) VALUES(:users_id, :spareparts_id)",
-        ['users_id' => $iduser, 'spareparts_id' => $id]);
-    }
-    public function removeWishlist($id)
-    {
-        DB::delete("DELETE FROM drivedealio.wishlist WHERE spareparts_id = :spareparts_id",
-        ['spareparts_id' => $id]);
-    }
-
-    public function calculateTotalPrice(Request $request)
-    {
-        $userId = auth()->id();
-
-        // Mengambil harga dan kuantitas dari keranjang
-        $cartData = DB::select(
-            DB::raw("SELECT sp.unitprice as price, c.quantity
-                FROM drivedealio.spareparts as sp
-                INNER JOIN drivedealio.carts as c on sp.id = c.spareparts_id
-                INNER JOIN drivedealio.users as u on c.users_id = u.id
-                INNER JOIN drivedealio.shops as s on sp.shops_id = s.id WHERE u.id = $userId;")
-        );
-
-        // Memastikan data keranjang ditemukan
-        if (empty($cartData)) {
-            return view('sparepart.total_price')->with('totalPrice', 0); // Tampilkan total harga 0 jika keranjang kosong
-        }
-
-        $price = $cartData[0]->price ?? 0;
-        $quantity = $cartData[0]->quantity ?? 0;
-
-        // Mendapatkan diskon dari inputan user
-        $userDiscount = $request->input('discount') ?? 0;
-
-        // Mendapatkan diskon dari voucher yang tersedia (gantilah dengan logika yang sesuai)
-        $voucherDiscount = 0.0;
-
-        // Menghitung total diskon
-        $discount = max($userDiscount, $voucherDiscount);
-
-        // Menghitung subtotal dan total harga setelah diskon
-        $subtotal = $price * $quantity;
-        $totalPrice = max(0, $subtotal - $discount);
-
-        // Menampilkan hasil di blade
-        return view('transaction.cart', [
-            'subtotal' => $subtotal,
-            'discount' => $discount,
-            'totalPrice' => $totalPrice,
-        ]);
-    }
-
     public function addToCart($id)
     {
         $iduser = auth()->id();
@@ -102,34 +53,209 @@ class TransactionController extends Controller
         return redirect()->back()->with('success', 'Product added to cart successfully.');
     }
 
-    public function removeFromCart($id)
+    public function incrementProductQuantity($id)
     {
-
         $iduser = auth()->id();
-        DB::update("UPDATE drivedealio.carts SET quantity = CASE WHEN quantity > 1 THEN quantity - 1 ELSE 0 END
+        DB::update("UPDATE drivedealio.carts SET quantity = quantity + 1
+        WHERE users_id = :users_id  AND spareparts_id = :spareparts_id", ['users_id' => $iduser, 'spareparts_id' =>$id]);
+        return redirect()->back()->with('success', 'Product quantity updated successfully.');
+    }
+    public function decrementProductQuantity($id)
+    {
+        $iduser = auth()->id();
+        DB::update("UPDATE drivedealio.carts SET quantity = quantity - 1
         WHERE users_id = :users_id  AND spareparts_id = :spareparts_id", ['users_id' => $iduser, 'spareparts_id' =>$id]);
 
+        $affectedRows = DB::table('carts')
+            ->where('users_id', $iduser)
+            ->where('spareparts_id', $id)
+            ->where('quantity', '=', 0)
+            ->delete();
 
-        return redirect()->back()->with('success', 'Product quantity updated successfully.');
+        if ($affectedRows > 0) {
+            return redirect()->back()->with('success', 'Product removed from the cart.');
+        } else {
+            return redirect()->back()->with('success', 'Product quantity updated successfully.');
+        }
+    }
+
+
+    public function deletefromCart($idcart)
+    {
+        DB::delete("DELETE FROM drivedealio.carts WHERE id = :id", ['id' => $idcart]);
+
+        return redirect()->back()->with('error', 'Item Deleted from Cart');
     }
 
     public function checkout()
     {
         $iduser = auth()->id();
         $checkout = DB::select(
-            DB::raw("SELECT sp.id as idsparepart, sp.partnumber, sp.partname, sp.vehiclemodel, sp.stock, sp.image, sp.unitprice, c.quantity, (sp.stock - c.quantity) as temp_stock, (sp.unitprice * c.quantity) as total_price, c.spareparts_id, c.users_id,
-            u.id as iduser, u.firstname, s.id as idseller, s.name as sellername, u.address, u.city, u.province, u.zipcode, u.district
+            DB::raw("SELECT sp.id as idsparepart, sp.partnumber, sp.partname, sp.vehiclemodel, sp.stock, sp.unitprice, c.quantity, (sp.stock - c.quantity) as temp_stock, (sp.unitprice * c.quantity) as total_price, c.spareparts_id, c.users_id,
+            u.id as iduser, u.firstname, s.id as idseller, s.name as sellername, s.city as sellercity,
+            (SELECT p.url FROM drivedealio.pics as p WHERE p.spareparts_id = sp.id LIMIT 1) as url
             FROM drivedealio.spareparts as sp INNER JOIN drivedealio.carts as c on sp.id = c.spareparts_id
             INNER JOIN drivedealio.users as u on c.users_id = u.id
-            INNER JOIN drivedealio.shops as s on sp.shops_id = s.id WHERE u.id =  $iduser;")
+            INNER JOIN drivedealio.shops as s on sp.shops_id = s.id WHERE u.id =  $iduser ")
+        );
+        $address = DB::select(
+            DB::raw("SELECT u.id as iduser, a.id as idaddress, a.name, a.address, a.district, a.city, a.zipcode, a.province
+            from drivedealio.users as u INNER JOIN drivedealio.addresses as a on u.id = a.users_id where u.id = $iduser;")
         );
 
         $userinfo = DB::select(
-            DB::raw("SELECT id, firstname, lastname, phonenumber, address, district, city, zipcode from drivedealio.users where id = $iduser")
+            DB::raw("SELECT id, firstname, lastname, phonenumber from drivedealio.users where id = $iduser")
         )[0];
-        return view('transaction.checkout', compact('checkout', 'userinfo'));
+
+
+        return view('transaction.checkout', compact('checkout', 'userinfo', 'address'));
     }
 
+    public function createOrderSparepart(Request $request)
+    {
+        $iduser = auth()->id();
+        $checkout = DB::select(
+            DB::raw("SELECT sp.id as idsparepart, sp.partnumber, sp.partname, sp.vehiclemodel, sp.stock, sp.unitprice, c.id as idcart, c.quantity, (sp.stock - c.quantity) as temp_stock, (sp.unitprice * c.quantity) as total_price, c.spareparts_id, c.users_id,
+            u.id as iduser, u.firstname, s.id as idseller, s.name as sellername, s.city as sellercity
+            FROM drivedealio.spareparts as sp INNER JOIN drivedealio.carts as c on sp.id = c.spareparts_id
+            INNER JOIN drivedealio.users as u on c.users_id = u.id
+            INNER JOIN drivedealio.shops as s on sp.shops_id = s.id WHERE u.id = $iduser; ")
+        );
+        $date = DB::select(
+            DB::raw("SELECT count(orderdate) from drivedealio.orders where DATE(orderdate) = CURRENT_DATE;")
+        );
+        $address = DB::select(
+            DB::raw("SELECT u.id as iduser, a.id as idaddress, a.name, a.address, a.district, a.city, a.zipcode, a.province
+            from drivedealio.users as u INNER JOIN drivedealio.addresses as a on u.id = a.users_id where u.id = $iduser;")
+        );
+
+        if(!empty($address))
+        {
+            $order = new Order;
+            $counter = $date[0]->count + 1;
+            $order->invoicenum = "INV/" .date("Y/m/d"). "/$counter";
+            $order->status = "Waiting for Payment";
+            $order->paymentmethod = $request->input('payment');
+            $order->paymentstatus = "Unpaid";
+            $order->users_id = $iduser;
+            $order->shops_id = $checkout[0]->idseller;
+            $order->paymentduedate = Carbon::now()->addDay();
+            // dd($order);
+            $order->save();
+
+            foreach($checkout as $c)
+            {
+                $subTotal = $c->unitprice * $c->quantity;
+
+                DB::insert("INSERT INTO drivedealio.orderdetails(orders_id, spareparts_id, quantityordered, unitprice, created_at, updated_at)
+                    VALUES(:orders_id, :spareparts_id, :quantityordered, :unitprice, :created_at, :updated_at)",
+                    ['orders_id' => $order->id, 'spareparts_id' => $c->idsparepart, 'quantityordered' => $c->quantity, 'unitprice' => $subTotal, 'created_at' => now(), 'updated_at' => now()]);
+
+                DB::delete("DELETE FROM drivedealio.carts WHERE id = :id", ['id' => $c->idcart]);
+            }
+            $orderid = $order->id;
+            return redirect('/payment/$orderid')->with('success', 'Transaction Success');
+        }
+        else{
+            return redirect()->back()->with('error', 'Add Your Address First');
+        }
+    }
+
+    public function paymentIndex($id)
+    {
+        $iduser = auth()->id();
+        $product = DB::select(
+            DB::raw("SELECT o.id as idorder, o.invoicenum, o.paymentduedate, o.orderdate, u.id as iduser, o.status, o.paymentstatus,
+            (SELECT sum(od.unitprice) from drivedealio.orderdetails as od where od.orders_id = o.id ) as total_price
+            from drivedealio.orders as o INNER JOIN drivedealio.users as u on o.users_id = u.id WHERE o.users_id = $iduser AND o.id = $id;")
+        );
+        $startDateTime = Carbon::parse($product[0]->orderdate);
+        $endDateTime = Carbon::parse($product[0]->paymentduedate);
+        $now = Carbon::now();
+
+        if ($now >= $endDateTime && $product[0]->paymentstatus == "Unpaid") {
+            DB::table('drivedealio.orders')
+                ->where('id', $id)
+                ->update(['status' => 'Cancelled', 'paymentstatus' => 'Unpaid']);
+        }
+
+        $interval = $startDateTime->diff($endDateTime);
+        $product[0]->duration = $this->formatDuration($interval);
+
+        return view('transaction.payment', compact('product'));
+    }
+
+    public function paymentPaid($id)
+    {
+        $order = Order::findOrFail($id);
+        $order->status = "Waiting for Confirmation";
+        $order->paymentstatus = "Paid";
+        $order->paymentdate = Carbon::now();
+        $order->save();
+
+        return redirect('/orderhistory')->with('success', 'Transaction Success');
+    }
+    public function paymentCancel($id)
+    {
+        DB::table('drivedealio.orders')
+        ->where('id', $id)
+        ->update(['status' => 'Cancelled', 'paymentstatus' => 'Unpaid']);
+
+        return redirect('/orderhistory')->with('error', 'Transaction Cancelled');
+    }
+
+    public function approveOrder($id)
+    {
+        $order = Order::findOrFail($id);
+        $order->status = "On Process";
+        $order->save();
+
+        $iduser = auth()->id();
+        $product = DB::select(
+            DB::raw("SELECT o.id as idorder, o.invoicenum, o.paymentduedate, o.orderdate, u.id as iduser, o.status, o.paymentstatus, od.quantityordered, s.stock, s.id as idsparepart,
+            (SELECT sum(od.unitprice) from drivedealio.orderdetails as od where od.orders_id = o.id ) as total_price
+            from drivedealio.orders as o INNER JOIN drivedealio.users as u on o.users_id = u.id
+            INNER JOIN drivedealio.orderdetails as od on o.id = od.orders_id
+            INNER JOIN drivedealio.spareparts as s on od.spareparts_id = s.id
+            WHERE o.users_id = $iduser AND o.id = $id;")
+        );
+
+        foreach($product as $p)
+        {
+            $quantityordered = $p->stock - $p->quantity;
+            DB::update("UPDATE drivedealio.spareparts SET stock = :stock, updated_at = :updated_at WHERE id = :id",
+            ['stock' => $quantityordered, 'updated_at' => now(), 'id' => $p->idsparepart]);
+        }
+
+        return redirect()->back()->with('success', 'Status Changed');
+    }
+
+    public function onDelivered($id)
+    {
+        
+    }
+
+    protected function formatDuration($interval)
+    {
+        $formattedDuration = '';
+
+        // Tambahkan jam jika lebih dari 0
+        if ($interval->h > 0) {
+            $formattedDuration .= $interval->h . 'H ';
+        }
+
+        // Tambahkan menit jika lebih dari 0
+        if ($interval->i > 0) {
+            $formattedDuration .= $interval->i . 'M ';
+        }
+
+        // Tambahkan detik jika lebih dari 0
+        if ($interval->s > 0) {
+            $formattedDuration .= $interval->s . 'S';
+        }
+
+        return trim($formattedDuration);
+    }
 
     // Transaksi Sparepart END
 

@@ -7,26 +7,26 @@
     <div class="col-md-12" style="padding: 3vh;">
         <div class="card">
             <div class="card-body col-md-12">
-                <h3>Add New Sparepart</h3>
-                <form action="{{ route('seller.add-sparepart') }}" method="POST" enctype="multipart/form-data">
+                <h3>Edit Sparepart</h3>
+                <form action="{{ route('seller.update-sparepart', $sparepart[0]->idsparepart) }}" method="POST" enctype="multipart/form-data">
                     @csrf
+                    @method('PUT')
                     <div class="row">
                         <div class="col-md-6">
-
                             <div class="col-lg-12 col-md-6 col-12">
                                 <div class="row">
                                     <div class="col-md-6">
                                         <label class="form-label" for="part">Part Number</label>
                                         <div class="col-md-12 mb-2">
                                             <input type="text" class="form-control" id="part"
-                                                placeholder="Part Number" name="partnum" />
+                                                placeholder="Part Number" name="partnum" value="{{ $sparepart[0]->partnumber }}"/>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label" for="part-name">Part Name</label>
                                         <div class="col-md-12 mb-2">
                                             <input type="text" class="form-control" id="part-name"
-                                                placeholder="Part Name" name="partname" />
+                                                placeholder="Part Name" name="partname" value="{{ $sparepart[0]->partname }}"/>
                                         </div>
                                     </div>
                                 </div>
@@ -37,7 +37,7 @@
                                         <label class="form-label" for="vehicle-model">Vehicle Model</label>
                                         <div class="col-md-12 mb-2">
                                             <input type="text" class="form-control" id="vehicle-model"
-                                                placeholder="Vehicle Model Name" name="model" />
+                                                placeholder="Vehicle Model Name" name="model" value="{{ $sparepart[0]->vehiclemodel }}"/>
                                         </div>
                                     </div>
                                 </div>
@@ -46,7 +46,7 @@
                                         <label class="form-label" for="part-brand">Sparepart Brand</label>
                                         <div class="col-md-12 mb-2">
                                             <input type="text" class="form-control" id="part-brand"
-                                                placeholder="Sparepart Brand" name="brand" />
+                                                placeholder="Sparepart Brand" name="brand" value="{{ $sparepart[0]->brand }}"/>
                                         </div>
                                     </div>
                                 </div>
@@ -56,17 +56,14 @@
                                     <label class="form-label" for="part-price">Sparepart Price</label>
                                     <div class="col-md-12 mb-2">
                                         <input type="number" class="form-control" id="part-price"
-                                            placeholder="Sparepart Price" name="price" />
+                                            placeholder="Sparepart Price" name="price" value="{{ $sparepart[0]->unitprice }}"/>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label" for="select-condition">Condition</label>
                                     <div class="col-md-12 mb-2">
-                                        <select class="select2 form-select" id="select-condition" name="condition">
-                                            <option value="">--Choose Condition--</option>
-                                            <option value="New">New</option>
-                                            <option value="Used">Used</option>
-                                        </select>
+                                        <input type="text" class="form-control" id="select-condition"
+                                            placeholder="Condition" name="condition" value="{{ $sparepart[0]->condition }}" readonly/>
                                     </div>
                                 </div>
                             </div>
@@ -75,32 +72,41 @@
                                     <label class="form-label" for="build-year">Build Year</label>
                                     <div class="col-md-12 mb-2">
                                         <input type="text" class="form-control" id="build-year"
-                                            placeholder="Build Year" name="year" />
+                                            placeholder="Build Year" name="year" value="{{ $sparepart[0]->buildyear }}"/>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label" for="part-colour">Colours</label>
                                     <div class="col-md-12 mb-2">
                                         <input type="text" class="form-control" id="part-colour"
-                                            placeholder="Colour" name="colour" />
+                                            placeholder="Colour" name="colour" value="{{ $sparepart[0]->colour }}"/>
                                     </div>
                                 </div>
                             </div>
                             <div class="row">
                                 <div class="col-md-6 mb-1">
                                     <label class="form-label" for="select-cat">Categories</label>
-                                    <select class="select2 form-select" id="select-cat" name="categories">
-                                        <option value="">--Choose Categories--</option>
-                                        @foreach ($cat as $c)
-                                            <option value="{{ $c->id }}">{{ $c->categoriname }}</option>
-                                        @endforeach
-                                    </select>
+                                    <div class="col-md-12 mb-2">
+                                        <input type="text" class="form-control" id="select-cat"
+                                            placeholder="Categories" name="cat" value="{{ $sparepart[0]->categoriname }}" readonly/>
+                                    </div>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label" for="part-stock">Stock</label>
-                                    <div class="col-md-12 mb-2">
-                                        <input type="number" class="form-control" id="part-stock"
-                                            placeholder="Stock" name="stock" />
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label class="form-label" for="part-stock">Current Stock</label>
+                                            <div class="col-md-12 mb-2">
+                                                <input type="number" class="form-control" id="part-stock"
+                                                    placeholder="Stock" name="stock" value="{{ $sparepart[0]->stock }}" readonly/>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label" for="part-stock">Update Stock</label>
+                                            <div class="col-md-12 mb-2">
+                                                <input type="number" class="form-control" id="part-stock"
+                                                    placeholder="Stock" name="addstock">
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -112,50 +118,19 @@
                                         <label class="form-label" for="description">Description</label>
                                         <div class="col-md-12 mb-2">
                                             <textarea name="desc" id="description" class="form-control" placeholder="Product Description" cols="30"
-                                                rows="5"></textarea>
+                                                rows="5">{{ $sparepart[0]->description }}</textarea>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-12 mb-1">
-                                <div class="col-md-12 mb-1">
-                                    <label for="myDropzone" class="form-label">
-                                        <h4>Upload Sparepart Image</h4>
-                                    </label>
-                                    <input type="file" class="form-control" name="image[]" multiple>
-                                </div>
-                            </div>
-                            <div class="d-flex justify-content-end">
-                                <input type="submit" class="btn btn-primary btn-submit" id="submitFile" value="Submit">
-                            </div>
+
+                        </div>
+                        <div class="d-flex justify-content-end">
+                            <input type="submit" class="btn btn-primary btn-submit" id="submitFile" value="Submit">
                         </div>
                     </div>
                 </form>
             </div>
         </div>
     </div>
-
-    <script type="text/javascript">
-        // Note that the name "myDropzone" is the camelized
-        // id of the form.
-        Dropzone.options.dropzone = {
-            paramName: "image", // The name that will be used to transfer the file
-            maxFilesize: 10, // MB
-            maxFiles: 10,
-            acceptedFiles: ".jpeg,.jpg,.png,.gif",
-            addRemoveLinks: true,
-            timeout: 5000,
-            success: function(file, response) {
-                console.log(response);
-            },
-            error: function(file, response) {
-                return false;
-            },
-            init: function() {
-                document.getElementById("#submitFile").addEventListener("click", function() {
-                    dropzone.processQueue();
-                });
-            }
-        };
-    </script>
 @endsection

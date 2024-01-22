@@ -58,7 +58,7 @@ class AdminController extends Controller
         );
 
         $user = DB::select(
-            DB::raw("select u.id, u.email, u.firstname, u.lastname, u.phonenumber, u.address, u.city, u.province, r.name, um.id as idmemberships, m.membershiptype
+            DB::raw("select u.id, u.email, u.firstname, u.lastname, u.phonenumber, r.name, um.id as idmemberships, m.membershiptype
             from drivedealio.users as u INNER JOIN drivedealio.roles as r on u.roles_id = r.id
             LEFT JOIN drivedealio.user_memberships as um on u.id = um.users_id
             LEFT JOIN drivedealio.memberships as m on um.memberships_id = m.id

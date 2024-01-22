@@ -41,8 +41,8 @@
     {{-- End Carousel --}}
 
     {{-- Start Recommendation --}}
-    <div class="card-body" style="padding: 5vh">
-        <div class="mt-1 mb-2 text-center">
+    <div class="card-body">
+        <div class="mb-2 text-center">
             <h2>HOT ITEMS RIGHT NOW</h2>
             <p>People also bid this product</p>
         </div>
@@ -224,8 +224,6 @@
                         repairable Vehicles. Unlock additional features by upgrading to a Bronze to Platinum
                         Membership—you'll be able to jump right into the auction and start bidding in our live auctions!
                     </p>
-
-                    <p>{{ auth()->id() }}</p>
                 </div>
                 <!--/ title text and switch button -->
 

@@ -57,39 +57,39 @@
                     <section id="ecommerce-products" class="grid-view">
                         @foreach ($sparepart as $s)
                             <div class="card ecommerce-card">
-                                <div class="item-img text-center">
+                                <div class="item-img" style="justify-content: center;">
                                     <a href="{{ route('sparepart.show', $s->idsparepart) }}">
-                                        <img class="card-img-top" src="{{ $s->url }}" alt="Card image cap" /></a>
+                                        <img class="card-img-top" src="{{ asset('/images/' . $s->url) }}" alt="Card image cap" style="height : 320px; width:auto; object-fit:fill;"/>
+                                    </a>
                                 </div>
                                 <div class="card-body">
-                                    <h5 class="item-name">
-                                        <a class="text-body" href="{{ route('sparepart.show', $s->idsparepart) }}">{{ $s->partnumber }} - {{ $s->partname }}
-                                            {{ $s->vehiclemodel }}</a>
-                                    </h5>
-                                    <p></p>
-                                    <div class="item-wrapper">
-                                        <div class="item-cost">
-                                            <h6 class="item-price">@currency($s->unitprice)</h6>
+                                    <div class="row">
+                                        <h5 class="item-name">
+                                            <a class="text-body" href="{{ route('sparepart.show', $s->idsparepart) }}">{{ $s->partnumber }} - {{ $s->partname }}
+                                                {{ $s->vehiclemodel }}</a>
+                                        </h5>
+                                        <p></p>
+                                        <div class="item-wrapper">
+                                            <div class="item-cost">
+                                                <h6 class="item-price">@currency($s->unitprice)</h6>
+                                            </div>
+                                        </div>
+                                        <div class="item-wrapper">
+                                            <p>{{ $s->city }}</p>
                                         </div>
                                     </div>
-                                    <div class="item-wrapper">
-                                        <p>{{ $s->city }}</p>
-                                    </div>
-
                                 </div>
-                                <div class="item-options text-center">
-                                    <div class="item-wrapper">
-                                        <div class="item-cost">
-                                            <h4 class="item-price">@currency($s->unitprice)</h4>
-                                        </div>
-                                    </div>
-                                    <a href="#" class="btn btn-light btn-wishlist">
-                                        <i data-feather='eye'></i>
-                                        <span>Wishlist</span>
-                                    </a>
-                                    <form method="POST" action="{{ route('sparepart.addcart', $s->idsparepart) }}">
+                                <div class="item-options text-center" style="justify-content: center;">
+                                    <form method="POST" action="{{ route('wishlist.post', $s->idsparepart) }}" enctype="multipart/form-data" style="display: inline-block">
                                         @csrf
-                                        <button class="btn btn-primary btn-cart">
+                                        <button class="btn btn-light w-100">
+                                            <i data-feather='heart'></i>
+                                            <span class="add-to-cart">Wishlist</span>
+                                        </button>
+                                    </form>
+                                    <form method="POST" action="{{ route('sparepart.addcart', $s->idsparepart) }}" enctype="multipart/form-data" style="display: inline-block">
+                                        @csrf
+                                        <button class="btn btn-primary w-100">
                                             <i class="fa fa-shopping-cart"></i>
                                             <span class="add-to-cart">Add to Cart</span>
                                         </button>

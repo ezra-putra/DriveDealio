@@ -57,9 +57,10 @@
                     <section id="ecommerce-products" class="grid-view">
                         @foreach ($vehicle as $v)
                             <div class="card ecommerce-card">
-                                <div class="item-img text-center">
+                                <div class="item-img" style="justify-content: center;">
                                     <a href="{{ route('vehicle.show', $v->idvehicle) }}">
-                                        <img class="card-img-top" src="{{ $v->url }}" alt="Card image cap" /></a>
+                                        <img class="card-img-top" src="{{ asset('/images/' . $v->url) }}" alt="Card image cap" style="height : 300px; width:auto; object-fit:fill;"/>
+                                    </a>
                                 </div>
                                 <div class="card-body">
                                     <h5 class="item-name">
@@ -83,11 +84,11 @@
                                             <h4 class="item-price">@currency($v->price)</h4>
                                         </div>
                                     </div>
-                                    <a href="#" class="btn btn-light btn-wishlist">
+                                    <a href="#" class="btn btn-light">
                                         <i data-feather='eye'></i>
                                         <span>Watchlist</span>
                                     </a>
-                                    <a href="#" class="btn btn-primary btn-cart">
+                                    <a href="#" class="btn btn-primary">
                                         <i class="fa fa-gavel"></i>
                                         <span class="add-to-cart">Live Bidding</span>
                                     </a>

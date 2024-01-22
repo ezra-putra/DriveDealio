@@ -20,7 +20,7 @@ class InspectorController extends Controller
         );
 
         $vehicle = DB::select(
-            DB::raw("select v.id as idvehicle, CONCAT(v.model,' ', v.variant) as name, v.transmission, v.platenumber,
+            DB::raw("SELECT v.id as idvehicle, CONCAT(v.model,' ', v.variant) as name, v.transmission, v.platenumber,
             v.adstatus, v.inputdate, b.name as brand, u.id, u.firstname, u.address, v.appointments_id, a.id as idappointment, a.status
             FROM drivedealio.vehicles as v INNER JOIN drivedealio.brands as b on v.brands_id = b.id
             INNER JOIN drivedealio.users as u on v.users_id = u.id

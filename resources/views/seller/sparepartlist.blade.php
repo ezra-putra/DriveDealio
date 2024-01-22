@@ -31,8 +31,8 @@
                                     <td>@currency($s->unitprice)</td>
                                     <td>{{ $s->condition }}</td>
                                     <td>
-                                        <a href="#" class="btn btn-icon btn-flat-info">
-                                            <i data-feather="edit"></i>
+                                        <a href="{{ route('sparepart.editform', $s->id) }}" class="btn btn-icon btn-flat-info">
+                                            <i class="fa fa-edit"></i>
                                         </a>
                                         <form method="POST" action="{{ route('sparepart.destroy', $s->id) }}"
                                             style="display: inline-block">

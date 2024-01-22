@@ -12,10 +12,12 @@ class SparepartController extends Controller
     public function index()
     {
         $sparepart = DB::select(
-            DB::raw("SELECT p.id as idpics, p.url, sh.id as idshop, sh.name, sh.city, s.id as idsparepart, s.partnumber, s.partname, s.unitprice, s.stock, s.description,
-            s.vehiclemodel, s.buildyear, s.colour, s.condition, s.shops_id
-            FROM drivedealio.spareparts as s LEFT JOIN drivedealio.pics as p on s.id = p.spareparts_id
-            INNER JOIN drivedealio.shops as sh on s.shops_id = sh.id;")
+            DB::raw("SELECT sh.id as idshop, sh.name, sh.city, s.id as idsparepart, s.partnumber, s.partname, s.unitprice, s.stock, s.description,
+            s.vehiclemodel, s.buildyear, s.colour, s.condition, s.shops_id,
+            (SELECT p.url FROM drivedealio.pics as p WHERE p.spareparts_id = s.id LIMIT 1) as url
+                FROM drivedealio.spareparts as s
+                INNER JOIN drivedealio.shops as sh on s.shops_id = sh.id
+                WHERE s.stock > 0;")
         );
         return view('sparepart.sparepartindex', compact('sparepart'));
     }
@@ -23,7 +25,7 @@ class SparepartController extends Controller
     public function show($id)
     {
         $sparepart = DB::select(
-            DB::raw("SELECT p.id as idpics, p.url, sh.id as idshop, sh.name, sh.city, s.id as idsparepart, s.partnumber, s.partname, s.unitprice, s.stock, s.description,
+            DB::raw("SELECT p.url, sh.id as idshop, sh.name, sh.city, s.id as idsparepart, s.partnumber, s.partname, s.unitprice, s.stock, s.description,
             s.vehiclemodel, s.buildyear, s.colour, s.condition, s.shops_id, s.brand
             FROM drivedealio.spareparts as s LEFT JOIN drivedealio.pics as p on s.id = p.spareparts_id
             INNER JOIN drivedealio.shops as sh on s.shops_id = sh.id;")
@@ -31,16 +33,6 @@ class SparepartController extends Controller
         return view('sparepart.details', compact('sparepart'));
     }
 
-    public function listSparepart()
-    {
-        $iduser = auth()->id();
-        $sparepart = DB::select(
-            DB::raw("SELECT id, partnumber, partname, unitprice, stock, description, vehiclemodel, buildyear, colour, condition, shops_id
-            FROM drivedealio.spareparts WHERE shops_id = (select s.id as idshop from drivedealio.shops as s
-            INNER JOIN drivedealio.users as u on s.users_id = u.id where s.users_id = $iduser);")
-        );
-        return view('seller.sparepartlist', compact('sparepart'));
-    }
 
     public function sparepartCategories()
     {
@@ -59,12 +51,39 @@ class SparepartController extends Controller
             INNER JOIN drivedealio.users AS u ON s.users_id = u.id WHERE s.users_id = $iduser;")
         )[0]->idshop;
 
-        DB::insert("INSERT INTO drivedealio.spareparts(partnumber, unitprice, stock, description, partname, vehiclemodel, buildyear, colour, condition, sparepartcategories_id, shops_id, brand)
-        VALUES(:partnumber, :unitprice, :stock, :description, :partname, :vehiclemodel, :buildyear, :colour, :condition, :sparepartcategories_id, :shops_id, :brand)",
-        ['partnumber' => $request->input('partnum'), 'unitprice' => $request->input('price'), 'stock' => $request->input('stock'),
-        'description' => $request->input('desc'), 'partname' => $request->input('partname'), 'vehiclemodel' => $request->input('model'),
-        'buildyear' => $request->input('year'), 'colour' => $request->input('colour'), 'condition' => $request->input('condition'),
-        'sparepartcategories_id' => $request->input('categories'), 'shops_id' => $id, 'brand' => $request->input('brand')]);
+        $sparepart = new Sparepart();
+        $sparepart->partnumber = $request->input('partnum');
+        $sparepart->unitprice = $request->input('price');
+        $sparepart->stock = $request->input('stock');
+        $sparepart->description = $request->input('desc');
+        $sparepart->partname = $request->input('partname');
+        $sparepart->vehiclemodel = $request->input('model');
+        $sparepart->buildyear = $request->input('year');
+        $sparepart->colour = $request->input('colour');
+        $sparepart->condition = $request->input('condition');
+        $sparepart->brand = $request->input('brand');
+        $sparepart->sparepartcategories_id = $request->input('categories');
+        $sparepart->shops_id = $id;
+        $sparepart->save();
+
+        $date = DB::select(
+            DB::raw("SELECT count(created_at) from drivedealio.spareparts where DATE(created_at) = CURRENT_DATE;")
+        );
+
+        $data = [];
+        $counter = $date[0]->count + 1;
+        foreach($request->file('image') as $image)
+        {
+            $name = $sparepart->created_at->format('ymd'). "-$counter". ".". $image->getClientOriginalExtension();
+            $image->move(public_path('images'), $name);
+            $data[] = [
+                'url' => $name,
+                'spareparts_id' => $sparepart->id,
+            ];
+
+            $counter++;
+        }
+        DB::table('drivedealio.pics')->insert($data);
 
         return redirect('/seller/listsparepart');
     }
@@ -73,8 +92,37 @@ class SparepartController extends Controller
     {
         $sparepart = Sparepart::findOrFail($id);
         $sparepart->delete();
-        // DB::delete('DELETE FROM drivedealio.spareparts where id = :id', ['id' => $sparepart]);
 
         return redirect('/seller/listsparepart');
+    }
+
+    public function wishlistIndex()
+    {
+        $iduser = auth()->id();
+        $wishlist = DB::select(
+            DB::raw("SELECT s.id as idseller, s.name, sp.id as idsparepart, sp.partnumber, sp.partname,
+            sp.vehiclemodel as model, sp.unitprice, sp.stock, w.id as idwishlist, w.users_id, w.spareparts_id, u.id as iduser,
+            (SELECT p.url FROM drivedealio.pics as p WHERE p.spareparts_id = sp.id LIMIT 1) as url
+            FROM drivedealio.shops as s INNER JOIN drivedealio.spareparts as sp on s.id = sp.shops_id
+            INNER JOIN drivedealio.wishlists as w on sp.id = w.spareparts_id
+            INNER JOIN drivedealio.users as u on u.id = w.users_id WHERE w.users_id = $iduser;")
+        );
+
+        return view('sparepart.wishlist', compact('wishlist'));
+    }
+
+    public function addToWishlist($id)
+    {
+        $iduser = auth()->id();
+        DB::insert("INSERT INTO drivedealio.wishlists(users_id, spareparts_id) VALUES(:users_id, :spareparts_id)",
+        ['users_id' => $iduser, 'spareparts_id' => $id]);
+        return redirect()->back()->with(['success' => 'Added to Wishlist']);
+    }
+    
+    public function removeWishlist($id)
+    {
+        DB::delete("DELETE FROM drivedealio.wishlists WHERE id = :id",
+        ['id' => $id]);
+        return redirect()->back()->with(['error' => 'Removed from Wishlist']);
     }
 }

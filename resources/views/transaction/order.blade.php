@@ -1,7 +1,7 @@
 @extends('layout.main')
 @section('content')
 <div class="col-md-12" style="padding: 3vh;">
-    <h3>Auction List</h3>
+    <h3>Order History</h3>
     <div class="row">
         <div class="col-md-4">
             <div class="card">
@@ -12,7 +12,7 @@
         <div class="col-md-8">
             <div class="card ecommerce-card">
                 <div class="card-body col-md-12" style="position: sticky; top: 0;">
-                    <h1>test</h1>
+
                 </div>
             </div>
         </div>

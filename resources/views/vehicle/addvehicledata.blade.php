@@ -7,6 +7,7 @@
         <div class="card">
             <div class="card-body col-md-12">
                 <h3>Input Vehicle Data</h3>
+                <p style="color: red; margin-left: 5px; size: 10px;">*Enter the vehicle data as stated on the STNK and the correct vehicle specifications.</p>
                 <form action="{{ route('vehicle.store') }}" method="POST" enctype="multipart/form-data">
                     <div class="bs-stepper-content row my-2">
                         @csrf
@@ -116,14 +117,7 @@
                                     <label for="myDropzone" class="form-label">
                                         <h4>Upload Vehicle Image</h4>
                                     </label>
-                                    <form class="dropzone" id="dpz-multiple-files">
-
-                                    </form>
-
-                                    <form action="/target" class="dropzone" id="myDropzone">
-                                        <div class="dz-message">Drop images here or click to upload.</div>
-                                    </form>
-
+                                    <input type="file" class="form-control"  name="image[]" multiple>
                                 </div>
                             </div>
 
@@ -147,21 +141,21 @@
 
                             <div class="col-md-12">
                                 <label for="fileStnk" class="form-label">Upload Scan STNK</label>
-                                <input class="form-control" type="file" id="fileStnk" />
+                                <input class="form-control" type="file" id="fileStnk" name="stnk"/>
                                 <p style="color: red; margin-left: 5px; size: 10px;">*Maximum file size is 2MB, and only
                                     PDF file format is accepted.</p>
                             </div>
 
                             <div class="col-md-12">
                                 <label for="fileInvoice" class="form-label">Upload Scan Invoice</label>
-                                <input class="form-control" type="file" id="fileInvoice" />
+                                <input class="form-control" type="file" id="fileInvoice" name="invoice"/>
                                 <p style="color: red; margin-left: 5px; size: 10px;">*Maximum file size is 2MB, and only
                                     PDF file format is accepted.</p>
                             </div>
 
                             <div class="col-md-12">
                                 <label for="fileBpkb" class="form-label">Upload Scan BPKB</label>
-                                <input class="form-control" type="file" id="fileBpkb"wwwwwwwwwwwwwwwwwwwwwww />
+                                <input class="form-control" type="file" id="fileBpkb" name="bpkb"/>
                                 <p style="color: red; margin-left: 5px; size: 10px;">*Maximum file size is 2MB, and only
                                     PDF file format is accepted.</p>
                             </div>

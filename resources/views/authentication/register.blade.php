@@ -99,8 +99,7 @@
                                                 <span>Enter your username password details</span>
                                             </div>
 
-                                            <div class="row">
-                                            </div>
+
                                             <div class="col-md-12 mb-1">
                                                 <label class="form-label" for="email">Email</label>
                                                 <input type="email" name="email" id="email"
@@ -156,34 +155,6 @@
                                                         class="form-control flatpickr-human-friendly"
                                                         placeholder="October 14, 2020" />
                                                 </div>
-                                                <div class="col-6 mb-1">
-                                                    <label class="form-label" for="address">Address</label>
-                                                    <input type="text" name="address" id="address"
-                                                        class="form-control" placeholder="Address" />
-                                                </div>
-
-                                                <div class="col-6 mb-1">
-                                                    <label class="form-label" for="district">District</label>
-                                                    <input type="text" name="district" id="district"
-                                                        class="form-control" placeholder="district" />
-                                                </div>
-
-                                                <div class="col-6 mb-1">
-                                                    <label class="form-label" for="province">Province</label>
-                                                    <input type="text" name="province" id="province"
-                                                        class="form-control" placeholder="Province" />
-                                                </div>
-
-                                                <div class="mb-1 col-md-6">
-                                                    <label class="form-label" for="city">City</label>
-                                                    <input type="text" name="city" id="city"
-                                                        class="form-control" placeholder="City" />
-                                                </div>
-                                                <div class="mb-1 col-md-12">
-                                                    <label class="form-label" for="zip">Zip Code</label>
-                                                    <input type="text" name="zip" id="zip"
-                                                        class="form-control" placeholder="Zip Code" />
-                                                </div>
                                             </div>
 
                                             <div class="d-flex justify-content-center mt-2">
@@ -191,7 +162,7 @@
                                                     <i data-feather="check"
                                                         class="align-middle me-sm-25 me-0"></i>
                                                     <span
-                                                        class="align-middle d-sm-inline-block d-none">Submit</span>
+                                                        class="align-middle d-sm-inline-block d-none">Register</span>
                                                 </button>
                                             </div>
                                         </div>

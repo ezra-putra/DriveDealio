@@ -9,13 +9,15 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title">MyVehicle List</h4>
+                    <h4 class="card-title">MyMemberships</h4>
+                    <a href="#" class="btn btn-icon btn-primary">
+                        <i data-feather="plus" class="me-50"></i>
+                        <span>Register New Membership</span></a>
                 </div>
 
                 <table class="table table-striped">
                     <thead>
                         <tr>
-                            <th scope="col">#</th>
                             <th scope="col">Membership Type</th>
                             <th scope="col">Start Date</th>
                             <th scope="col">End Date</th>
@@ -23,24 +25,19 @@
                             @if (auth()->user()->roles_id === 1)
                                 <th scope="col">Users</th>
                             @endif
-                            <th scope="col">Create at</th>
-                            <th scope="col">Update at</th>
                             <th scope="col">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($member as $m)
                             <tr>
-                                <td>{{ $m->idhasmember }}</td>
                                 <td>{{ $m->membershiptype }}</td>
                                 <td>{{ $m->start }}</td>
                                 <td>{{ $m->end }}</td>
                                 <td>{{ $m->status }}</td>
                                 @if (auth()->user()->roles_id === 1)
-                                    <td>{{ $m->name }}</th>
+                                    <td>{{ $m->firstname }}</th>
                                 @endif
-                                <td>{{ $m->created_at }}</td>
-                                <td>{{ $m->updated_at }}</td>
 
                                 <td>
                                     <div class="dropdown">
@@ -166,28 +163,4 @@
             </div>
         </div>
     </div>
-
-    <script>
-        // Make an AJAX request when the page loads
-        window.addEventListener('DOMContentLoaded', function () {
-            updateMembershipStatuses();
-        });
-
-        function updateMembershipStatuses() {
-            // Make an AJAX request to the controller method
-            fetch('{{ route('expired_post') }}', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                },
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Handle the response, e.g., display a message
-                document.getElementById('ajax-response').innerText = data.message;
-            })
-            .catch(error => console.error('Error:', error));
-        }
-    </script>
 @endsection

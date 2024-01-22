@@ -99,13 +99,13 @@
 
 <!-- BEGIN: Body-->
 
-<body class="horizontal-layout horizontal-menu 1-column navbar-floating footer-static "
-data-open="hover" data-menu="horizontal-menu" data-col="1-column">
+<body class="horizontal-layout horizontal-menu 1-column navbar-floating footer-static " data-open="hover"
+    data-menu="horizontal-menu" data-col="1-column" style="background-color: white">
 
     <!-- BEGIN: Header-->
     <nav class="header-navbar navbar-expand-lg navbar navbar-fixed align-items-right navbar-shadow  "
         style="background-color: white;">
-        <div class="navbar-header ml-auto">
+        <div class="navbar-header ml-auto ms-1">
             @if (auth()->user())
                 @if (auth()->user()->roles_id == 2)
                     <a href="/" class="navbar-brand h1">DriveDealio</a>
@@ -132,7 +132,7 @@ data-open="hover" data-menu="horizontal-menu" data-col="1-column">
                 </form>
 
                 <!-- Navigation Links -->
-                <ul class="nav navbar-nav my-2 justify-content-start">
+                <ul class="nav navbar-nav my-2 justify-content-start ms-1">
                     <li class="nav-item">
                         <a href="/vehicle/car" class="nav-link d-flex align-items-center">Cars</a>
                     </li>
@@ -154,31 +154,185 @@ data-open="hover" data-menu="horizontal-menu" data-col="1-column">
                 </ul>
 
                 <!-- User Links -->
-                <ul class="nav navbar-nav ms-auto">
-                    <li class="nav-item mx-1">
+                <ul class="nav navbar-nav p-1 ms-2">
+                    <li class="nav-item">
                         <a href="/wishlist" class="btn btn-icon">
                             <i class="fa fa-heart"></i> <!-- Ikon mata -->
                         </a>
                     </li>
-                    <li class="nav-item mx-1">
-                        <a href="/cart" class="btn btn-icon">
+
+                    <li class="nav-item dropdown dropdown-notification">
+                        @if (auth()->user())
+                        <span class="badge rounded-pill bg-danger badge-up">5</span>
+                        @else
+                        <span class="badge rounded-pill bg-danger badge-up">0</span>
+                        @endif
+                        <a href="#" class="btn btn-icon" data-bs-toggle="dropdown">
                             <i class="fa fa-shopping-cart"></i> <!-- Ikon keranjang belanjaan -->
                         </a>
-                    </li>
-                    <li class="nav-item mx-1">
-                        <a href="#" class="btn btn-icon">
-                            <i class="fa fa-bell"></i> <!-- Ikon notifikasi -->
-                        </a>
+                        <ul class="dropdown-menu dropdown-menu-media dropdown-menu-end">
+                            <li class="dropdown-menu-header">
+                                <div class="dropdown-header d-flex">
+                                    <h4 class="notification-title mb-0 me-auto">Notifications</h4>
+                                    <div class="badge rounded-pill badge-light-primary">6 New</div>
+                                </div>
+                            </li>
+                            <li class="scrollable-container media-list"><a class="d-flex" href="#">
+                                    <div class="list-item d-flex align-items-start">
+                                        <div class="me-1">
+                                            <div class="avatar"><img
+                                                    src="../../../app-assets/images/portrait/small/avatar-s-15.jpg"
+                                                    alt="avatar" width="32" height="32"></div>
+                                        </div>
+                                        <div class="list-item-body flex-grow-1">
+                                            <p class="media-heading"><span class="fw-bolder">Congratulation Sam
+                                                    🎉</span>winner!</p><small class="notification-text"> Won the
+                                                monthly best seller badge.</small>
+                                        </div>
+                                    </div>
+                                </a><a class="d-flex" href="#">
+                                    <div class="list-item d-flex align-items-start">
+                                        <div class="me-1">
+                                            <div class="avatar"><img
+                                                    src="../../../app-assets/images/portrait/small/avatar-s-3.jpg"
+                                                    alt="avatar" width="32" height="32"></div>
+                                        </div>
+                                        <div class="list-item-body flex-grow-1">
+                                            <p class="media-heading"><span class="fw-bolder">New
+                                                    message</span>&nbsp;received</p><small class="notification-text">
+                                                You have 10 unread messages</small>
+                                        </div>
+                                    </div>
+                                </a><a class="d-flex" href="#">
+                                    <div class="list-item d-flex align-items-start">
+                                        <div class="me-1">
+                                            <div class="avatar bg-light-danger">
+                                                <div class="avatar-content">MD</div>
+                                            </div>
+                                        </div>
+                                        <div class="list-item-body flex-grow-1">
+                                            <p class="media-heading"><span class="fw-bolder">Revised Order
+                                                    👋</span>&nbsp;checkout</p><small class="notification-text"> MD
+                                                Inc. order updated</small>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                            <li class="dropdown-menu-footer">
+                                <a class="btn btn-primary w-100" href="/cart">See Cart</a>
+                            </li>
+                        </ul>
+
                     </li>
                     @if (auth()->user())
-                        <li class="nav-item dropdown dropdown-user">
+                    <li class="nav-item dropdown dropdown-notification">
+                        <span class="badge rounded-pill bg-danger badge-up">5</span>
+                        <a href="#" class="btn btn-icon" data-bs-toggle="dropdown">
+                            <i class="fa fa-bell"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-media dropdown-menu-end">
+                            <li class="dropdown-menu-header">
+                                <div class="dropdown-header d-flex">
+                                    <h4 class="notification-title mb-0 me-auto">Notifications</h4>
+                                </div>
+                            </li>
+                            <li class="scrollable-container media-list">
+                                @forelse ( auth()->user()->unreadNotifications as $n )
+                                <a class="d-flex" href="#">
+                                    <div class="list-item d-flex align-items-start">
+                                        <div class="me-1">
+                                            <div class="avatar"><img
+                                                    src="../../../app-assets/images/portrait/small/avatar-s-15.jpg"
+                                                    alt="avatar" width="32" height="32"></div>
+                                        </div>
+                                        <div class="list-item-body flex-grow-1">
+                                            <p class="media-heading">
+                                                <span class="fw-bolder">
+                                                    {{ $n->data['messages'] }}</span>
+                                            </p>
+                                            <small class="notification-text">
+                                                {{ $n->data['title'] }}
+                                            </small>
+                                        </div>
+                                    </div>
+                                </a>
+                                @empty
+                                <p class="ms-2 mt-1">No Notifications</p>
+                                @endforelse
+                            </li>
+                            <li class="dropdown-menu-footer">
+                                <a class="btn btn-primary w-100" href="#">Read all notifications</a>
+                            </li>
+                        </ul>
+                    </li>
+                    @else
+                    <li class="nav-item dropdown dropdown-notification ">
+                        <span class="badge rounded-pill bg-danger badge-up">0</span>
+                        <a href="#" class="btn btn-icon" data-bs-toggle="dropdown">
+                            <i class="fa fa-bell"></i>
+                        </a>
+                        {{-- <ul class="dropdown-menu dropdown-menu-media dropdown-menu-end">
+                            <li class="dropdown-menu-header">
+                                <div class="dropdown-header d-flex">
+                                    <h4 class="notification-title mb-0 me-auto">Notifications</h4>
+                                    <div class="badge rounded-pill badge-light-primary">6 New</div>
+                                </div>
+                            </li>
+                            <li class="scrollable-container media-list"><a class="d-flex" href="#">
+                                    <div class="list-item d-flex align-items-start">
+                                        <div class="me-1">
+                                            <div class="avatar"><img
+                                                    src="../../../app-assets/images/portrait/small/avatar-s-15.jpg"
+                                                    alt="avatar" width="32" height="32"></div>
+                                        </div>
+                                        <div class="list-item-body flex-grow-1">
+                                            <p class="media-heading"><span class="fw-bolder">Congratulation Sam
+                                                    🎉</span>winner!</p><small class="notification-text"> Won the
+                                                monthly best seller badge.</small>
+                                        </div>
+                                    </div>
+                                </a><a class="d-flex" href="#">
+                                    <div class="list-item d-flex align-items-start">
+                                        <div class="me-1">
+                                            <div class="avatar"><img
+                                                    src="../../../app-assets/images/portrait/small/avatar-s-3.jpg"
+                                                    alt="avatar" width="32" height="32"></div>
+                                        </div>
+                                        <div class="list-item-body flex-grow-1">
+                                            <p class="media-heading"><span class="fw-bolder">New
+                                                    message</span>&nbsp;received</p><small class="notification-text">
+                                                You have 10 unread messages</small>
+                                        </div>
+                                    </div>
+                                </a><a class="d-flex" href="#">
+                                    <div class="list-item d-flex align-items-start">
+                                        <div class="me-1">
+                                            <div class="avatar bg-light-danger">
+                                                <div class="avatar-content">MD</div>
+                                            </div>
+                                        </div>
+                                        <div class="list-item-body flex-grow-1">
+                                            <p class="media-heading"><span class="fw-bolder">Revised Order
+                                                    👋</span>&nbsp;checkout</p><small class="notification-text"> MD
+                                                Inc. order updated</small>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                            <li class="dropdown-menu-footer">
+                                <a class="btn btn-primary w-100" href="#">Read all notifications</a>
+                            </li>
+                        </ul> --}}
+                    </li>
+                    @endif
+                    @if (auth()->user())
+                        <li class="nav-item dropdown dropdown-user ms-5">
                             <a class="nav-link dropdown-toggle dropdown-user-link" id="dropdown-user" href="#"
                                 data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                 <div class="user-nav d-sm-flex d-none"><span
-                                        class="user-name fw-bolder">{{ auth()->user()->firstname }}
-                                        {{ auth()->user()->lastname }}</span></div>
+                                        class="user-name fw-bolder">{{ auth()->user()->firstname }}</span></div>
                                 <span class="avatar"><img class="round" src="{{ auth()->user()->profilepicture }}"
-                                        alt="avatar" height="40" width="40">
+                                        alt="avatar" height="40" width="40" style="object-fit: cover">
                                     <span class="avatar-status-online"></span>
                                 </span>
                             </a>
@@ -207,11 +361,11 @@ data-open="hover" data-menu="horizontal-menu" data-col="1-column">
 
                                 @if (auth()->user()->roles_id === 2)
                                     @if (auth()->user()->sellerstatus == false)
-                                    <a class="dropdown-item" href="/seller/register"><i
-                                        class="fa fa-handshake-o me-50"></i>Become a Seller</a>
+                                        <a class="dropdown-item" href="/seller/register"><i
+                                                class="fa fa-handshake-o me-50"></i>Become a Seller</a>
                                     @else
-                                    <a class="dropdown-item" href="/seller/dashboard"><i
-                                        class="fa fa-bar-chart me-50"></i>Seller Dashboard</a>
+                                        <a class="dropdown-item" href="/seller/dashboard"><i
+                                                class="fa fa-bar-chart me-50"></i>Seller Dashboard</a>
                                     @endif
                                     <a class="dropdown-item" href="/vehicle/myvehicle"><i
                                             class="fa fa-car me-50"></i>MyVehicle List</a>
@@ -250,6 +404,30 @@ data-open="hover" data-menu="horizontal-menu" data-col="1-column">
 
     <!-- BEGIN: Content-->
     <div class="app-content content">
+        @if (session('error'))
+            <div id="errorPopup"
+                style="display: none; background-color: #ff8080; color: #fff; padding: 10px; position: fixed; top: 15%; left: 50%; transform: translateX(-50%); z-index: 1000;">
+                {{ session('error') }}
+            </div>
+            <script>
+                document.getElementById('errorPopup').style.display = 'block';
+                setTimeout(function() {
+                    document.getElementById('errorPopup').style.display = 'none';
+                }, 10000);
+            </script>
+        @endif
+        @if (session('success'))
+            <div id="successPopup"
+                style="display: none; background-color: #80ff80; color: #000; padding: 10px; position: fixed; top: 15%; left: 50%; transform: translateX(-50%); z-index: 1000;">
+                {{ session('success') }}
+            </div>
+            <script>
+                document.getElementById('successPopup').style.display = 'block';
+                setTimeout(function() {
+                    document.getElementById('successPopup').style.display = 'none';
+                }, 10000);
+            </script>
+        @endif
         @yield('content')
     </div>
     <!-- END: Content-->

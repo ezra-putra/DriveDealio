@@ -29,13 +29,7 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-12">
-                                    <label class="form-label" for="addr">Address</label>
-                                    <div class="col-md-12 mb-1">
-                                        <input type="text" class="form-control" id="addr"
-                                            placeholder="Enter Address" name="address" value="{{ $u->address }}" readonly/>
-                                    </div>
-                                </div>
+
 
                                 <div class="col-md-12">
                                     <label for="fileKtp" class="form-label">Upload Scan KTP</label>
@@ -60,8 +54,8 @@
                                 <div class="row custom-options-checkable g-1">
                                     @foreach ($membership as $m)
                                     <div class="col-md-6">
-                                        <input class="custom-option-item-check" type="radio" name="member" value="{{ $m->id }}" id="rdomember{{ $m->id }}" checked />
-                                        <label class="custom-option-item p-1" for="rdomember{{ $m->id }}">
+                                        <input class="custom-option-item-check" type="radio" name="member" value="{{ $m->id }}" id="rdomember-{{ $m->id }}" />
+                                        <label class="custom-option-item p-1" for="rdomember-{{ $m->id }}">
                                             <span class="d-flex justify-content-between flex-wrap mb-50">
                                                 <span class="fw-bolder">{{ $m->membershiptype }}</span>
                                                 <span class="fw-bolder">@currency($m->price)</span>
@@ -74,7 +68,7 @@
                             </div>
                         </div>
                         <div class="d-flex justify-content-end">
-                            <input type="submit" class="btn btn-primary btn-submit" value="Submit & Go to My Vehicle List">
+                            <input type="submit" class="btn btn-primary btn-submit" value="Submit">
                         </div>
                 </form>
             </div>
