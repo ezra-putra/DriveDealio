@@ -17,7 +17,7 @@
                                             <select class="select2 form-select" id="select-date" name="inspectiondate">
                                                 <option value="">--Choose Inspection Date--</option>
                                                 @foreach ($appointment as $a)
-                                                    <option value={{ $a->idappointment }}>{{ $a->name }} -
+                                                    <option value="{{ $a->idappointment }}">{{ $a->name }} -
                                                         {{ $a->appointmentdate }} - {{ $a->appointmenttime }}</option>
                                                 @endforeach
                                             </select>

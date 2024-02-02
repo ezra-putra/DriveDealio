@@ -24,7 +24,7 @@
                     </div>
 
                 </div>
-                <div class="item-options text-center w-100">
+                <div class="item-options text-center w-100 mb-1">
                     <form method="POST" action="{{ route('wishlist.destroy', $w->idwishlist) }}" enctype="multipart/form-data" style="display: inline-block">
                         @csrf
                         @method('DELETE')

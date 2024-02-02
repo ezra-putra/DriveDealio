@@ -6,7 +6,7 @@
     <div class="col-md-12" style="padding: 3vh;">
         <div class="card">
             <div class="card-body col-md-12">
-                <h3>Input Vehicle Data</h3>
+                <h3>Sell My Vehicle</h3>
                 <p style="color: red; margin-left: 5px; size: 10px;">*Enter the vehicle data as stated on the STNK and the correct vehicle specifications.</p>
                 <form action="{{ route('vehicle.store') }}" method="POST" enctype="multipart/form-data">
                     <div class="bs-stepper-content row my-2">
@@ -36,17 +36,17 @@
                                 </div>
 
                                 <div class="row">
-                                    <div class="col-md-7">
+                                    <div class="col-md-8">
                                         <label class="form-label" for="vehiclename">Vehicle Name</label>
                                         <div class="col-md-12 mb-2">
                                             <input type="text" class="form-control" id="vehiclename"
-                                                placeholder="Vehicle Name" name="model" />
+                                                placeholder="Vehicle Name" name="model" required/>
                                         </div>
                                     </div>
-                                    <div class="col-md-5">
+                                    <div class="col-md-4">
                                         <label class="form-label" for="select-year">Vehicle Build Year</label>
                                         <select class="select2 form-select" id="select-year" name="year">
-                                            <option value="NULL">--Choose Vehicle Build Year--</option>
+                                            <option value="NULL">--Build Year--</option>
                                             @foreach ($year as $y)
                                                 <option value={{ $y->id }}>{{ $y->year }}</option>
                                             @endforeach
@@ -55,18 +55,35 @@
                                 </div>
 
                                 <div class="row">
+                                    <div class="col-md-8">
+                                        <label class="form-label" for="vehicleodo">Odometer(km)</label>
+                                        <div class="col-md-12 mb-2">
+                                            <input type="number" step="any" class="form-control" id="vehicleodo"
+                                                placeholder="Vehicle Odometer" name="odo" required/>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label" for="vehicleseats">Vehicle Seats Number</label>
+                                        <div class="col-md-12 mb-2">
+                                            <input type="text" class="form-control" id="vehicleseats"
+                                                placeholder="Vehicle Seats" name="seats" required/>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
                                     <div class="col-md-6">
                                         <label class="form-label" for="vehiclevariant">Vehicle Variants</label>
                                         <div class="col-md-12 mb-2">
                                             <input type="text" class="form-control" id="vehiclevariant"
-                                                placeholder="Vehicle Variants" name="variant" />
+                                                placeholder="Vehicle Variants" name="variant" required/>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label" for="enginecapacity">Vehicle Engine Capacity</label>
                                         <div class="col-md-12 mb-2">
                                             <input type="text" class="form-control" id="enginecapacity"
-                                                placeholder="Vehicle Engine Capacity" name="capacity" />
+                                                placeholder="Vehicle Engine Capacity" name="capacity" required/>
                                         </div>
                                     </div>
                                 </div>
@@ -77,7 +94,7 @@
                                         <label class="form-label" for="platenum">Plate Number</label>
                                         <div class="col-md-12 mb-2">
                                             <input type="text" class="form-control" id="platenum"
-                                                placeholder="Plate Number" name="plate" />
+                                                placeholder="Plate Number" name="plate" required/>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
@@ -96,15 +113,17 @@
                                         <label class="form-label" for="cylinder">Engine Cylinder</label>
                                         <div class="col-md-12 mb-2">
                                             <input type="number" class="form-control" id="cylinder"
-                                                placeholder="Engine Cylinder" name="engcylinder" />
+                                                placeholder="Engine Cylinder" name="engcylinder" required/>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label" for="select-fuel">Vehicle Fuel Type</label>
                                         <select class="select2 form-select" id="select-fuel" name="fuel">
                                             <option value="">--Choose Vehicle Fuel Type--</option>
-                                            <option value="Petrol">Petrol</option>
-                                            <option value="Solar">Solar</option>
+                                            <option value="Petrol">Gas</option>
+                                            <option value="Solar">Diesel</option>
+                                            <option value="Solar">Electric</option>
+                                            <option value="Solar">Hybrid</option>
                                         </select>
                                     </div>
                                 </div>
@@ -117,7 +136,7 @@
                                     <label for="myDropzone" class="form-label">
                                         <h4>Upload Vehicle Image</h4>
                                     </label>
-                                    <input type="file" class="form-control"  name="image[]" multiple>
+                                    <input type="file" class="form-control"  name="image[]" accept=".jpeg/.png/.jpg" multiple>
                                 </div>
                             </div>
 
@@ -126,7 +145,7 @@
                                     <label class="form-label" for="Location">Location</label>
                                     <div class="col-md-12 mb-2">
                                         <input type="text" class="form-control" id="location" placeholder="Location"
-                                            name="loc" />
+                                            name="loc" required/>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -141,21 +160,21 @@
 
                             <div class="col-md-12">
                                 <label for="fileStnk" class="form-label">Upload Scan STNK</label>
-                                <input class="form-control" type="file" id="fileStnk" name="stnk"/>
+                                <input class="form-control" type="file" id="fileStnk" name="stnk" accept=".pdf" required/>
                                 <p style="color: red; margin-left: 5px; size: 10px;">*Maximum file size is 2MB, and only
                                     PDF file format is accepted.</p>
                             </div>
 
                             <div class="col-md-12">
                                 <label for="fileInvoice" class="form-label">Upload Scan Invoice</label>
-                                <input class="form-control" type="file" id="fileInvoice" name="invoice"/>
+                                <input class="form-control" type="file" id="fileInvoice" name="invoice" accept=".pdf"/>
                                 <p style="color: red; margin-left: 5px; size: 10px;">*Maximum file size is 2MB, and only
                                     PDF file format is accepted.</p>
                             </div>
 
                             <div class="col-md-12">
                                 <label for="fileBpkb" class="form-label">Upload Scan BPKB</label>
-                                <input class="form-control" type="file" id="fileBpkb" name="bpkb"/>
+                                <input class="form-control" type="file" id="fileBpkb" name="bpkb" accept=".pdf" required/>
                                 <p style="color: red; margin-left: 5px; size: 10px;">*Maximum file size is 2MB, and only
                                     PDF file format is accepted.</p>
                             </div>

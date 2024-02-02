@@ -69,7 +69,10 @@
                     </div>
                     <!-- Orders Chart Card ends -->
                 </div>
-
+                <a href="/towing" class="btn btn-outline-secondary d-flex justify-content-between align-items-center w-100 mb-1">
+                    <span class="text-start">Towing Package</span>
+                    <i data-feather="chevron-right"></i>
+                </a>
                 <div class="row match-height">
                     <!-- Avg Sessions Chart Card starts -->
                     <div class="col-lg-6 col-12">

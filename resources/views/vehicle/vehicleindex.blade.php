@@ -63,20 +63,18 @@
                                     </a>
                                 </div>
                                 <div class="card-body">
-                                    <h5 class="item-name">
-                                        <a class="text-body" href="{{ route('vehicle.show', $v->idvehicle) }}">{{ $v->model }}
-                                            - {{ $v->variant }}</a>
+                                    <h5 class="item-name mb-1">
+                                        <a class="text-body" href="{{ route('vehicle.show', $v->idvehicle) }}">{{ $v->brand }} - {{ $v->model }}
+                                            {{ $v->variant }}</a>
                                     </h5>
-                                    <p></p>
-                                    <div class="item-wrapper">
-                                        <div class="item-cost">
+                                    <div class="item-wrapper d-block">
+                                        <div class="item-cost mb-1">
                                             <h6 class="item-price">@currency($v->price)</h6>
                                         </div>
-                                    </div>
-                                    <div class="item-wrapper">
-                                        <p>{{ $v->location }}</p>
-                                    </div>
 
+                                        <p>Lot: #<strong style="color: blue;">{{ $v->lot_number }}</strong></p>
+                                        <p>Location: {{ $v->location }}</p>
+                                    </div>
                                 </div>
                                 <div class="item-options text-center">
                                     <div class="item-wrapper">

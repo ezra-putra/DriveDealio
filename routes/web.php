@@ -8,6 +8,7 @@ use App\Http\Controllers\MainController;
 use App\Http\Controllers\MembershipController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\SellerController;
+use App\Http\Controllers\ShippingController;
 use App\Http\Controllers\SparepartController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UserController;
@@ -65,6 +66,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/approve_post/{id}', [MembershipController::class, 'approve_post'])->name('approve_post');
     Route::get('/membership/bilings', [MembershipController::class, 'myBilings'])->name('membership.myBilings');
     Route::get('/update-membership-statuses', [MembershipController::class, 'expired_post'])->name('expired_post');
+    Route::post('/pay-member/{id}', [MembershipController::class, 'paymentPaid'])->name('payment.post');
 
     Route::get('/admin/reviewvehicle/{id}', [VehicleController::class, 'adminEdit'])->name('vehicle.adminEdit');
     Route::get('/approve/{id}', [VehicleController::class, 'approve'])->name('approve_post');
@@ -73,10 +75,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/approveauctions/{id}', [VehicleController::class, 'approveAuction'])->name('vehicle.approveautions');
 
     Route::get('/appointmentconfirmation/{id}', [VehicleController::class, 'acceptAppointment'])->name('acceptAppointment');
-    Route::get('/inspector/inspections/{id}', [VehicleController::class, 'inspections'])->name('inspector.inspections');
-    Route::put('/inspectionUpdate/{id}', [VehicleController::class, 'inspectionsUpdate'])->name('inspectionsUpdate');
-    Route::get('/inspector/grading/{id}', [VehicleController::class, 'grading'])->name('inspector.grading');
-    Route::put('/inspectionGrade/{id}', [VehicleController::class, 'inspectionsGrade'])->name('inspectionsGrade');
+    Route::get('/inspector/inspec/{id}', [VehicleController::class, 'inspec'])->name('inspector.inspec');
+    Route::put('/inspections/{id}', [VehicleController::class, 'inspections'])->name('inspector.inspections');
     Route::get('/inspector/finishgrade/{id}', [VehicleController::class, 'finishGrading'])->name('finishGrading');
 
     Route::get('/admin/dashboard', [AdminController::class, 'dashboard'],function () {
@@ -86,16 +86,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/inspector/dashboard', [InspectorController::class, 'dashboardIndex'], function () {
         return view('inspector.dashboard');
     })->name('inspectordashboard');
-
     Route::get('/appointmentlist', [InspectorController::class, 'appointmentList'])->name('appointmentlist');
-    Route::get('/appointments/add-data', function() {
-        return view('inspector.addappointmentdate');
-    });
     Route::post('/appointments', [InspectorController::class, 'appointmentCreate'])->name('inspector.appointmentCreate');
-
-    Route::get('/auction', function(){
-        return view('auction.listauction');
-    });
 
     Route::get('/seller/dashboard', [SellerController::class, 'dashboard'], function(){
         return view('seller.dashboard');
@@ -104,12 +96,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/seller/listsparepart', [SellerController::class, 'listSparepart'])->name('seller.sparepartlist');
     Route::get('/seller/edit-sparepart/{id}', [SellerController::class, 'sparepartEditForm'])->name('sparepart.editform');
     Route::put('sparepart-update/{id}', [SellerController::class, 'sparepartUpdate'])->name('seller.update-sparepart');
+
     Route::get('/seller/add-sparepart', [SparepartController::class, 'sparepartCategories'], function() {
         return view('seller.addsparepart');
     });
     Route::post('add-sparepart', [SparepartController::class, 'addSparepart'])->name('seller.add-sparepart');
     Route::delete('spareparts/{id}', [SparePartController::class, 'destroy'])->name('sparepart.destroy');
-
     Route::post('/add-wishlist/{id}', [SparepartController::class, 'addToWishlist'])->name('wishlist.post');
     Route::delete('/delete-wishlist/{id}', [SparepartController::class, 'removeWishlist'])->name('wishlist.destroy');
     Route::get('/wishlist',[SparepartController::class, 'wishlistIndex']);
@@ -119,7 +111,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/remove-cart/{id}', [TransactionController::class, 'deletefromCart'])->name('cart.destroy');
     Route::post('/increment-product-quantity/{id}', [TransactionController::class, 'incrementProductQuantity'])->name('increment.quantity');
     Route::post('/decrement-product-quantity/{id}', [TransactionController::class, 'decrementProductQuantity'])->name('decrement.quantity');
-
+    Route::post('add-cart/{id}', [TransactionController::class, 'addNewCart'])->name('details.addcart');
     Route::post('sparepart/add-cart/{id}', [TransactionController::class, 'addToCart'])->name('sparepart.addcart');
     Route::post('sparepart/add-wishlist/{id}', [TransactionController::class, 'addToWishlist'])->name('sparepart.addwishlist');
     Route::post('/createorder', [TransactionController::class, 'createOrderSparepart'])->name('order.post');
@@ -128,20 +120,30 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/payment-paid/{id}', [TransactionController::class, 'paymentPaid'])->name('payment_post');
     Route::get('/payment-cancel/{id}', [TransactionController::class, 'paymentCancel'])->name('payment_cancel');
-    Route::get('/orderhistory', function(){
-        return view('transaction.order');
-    });
+    Route::get('/orderhistory', [TransactionController::class, 'transactionList']);
 
     Route::get('/seller/register', function(){
         return view('seller.sellerregister');
     });
     Route::post('become-seller', [UserController::class, 'becomeSeller'])->name('seller.register');
     Route::get('/user', [UserController::class, 'index']);
+    Route::get('/profile', [UserController::class, 'profile']);
+    Route::post('/set-primary-address/{address}', [UserController::class, 'setPrimaryAddress'])
+    ->name('primary.address');
+
     Route::get('/admin/listseller', [AdminController::class, 'listSeller'])->name('admin.listseller');
     Route::get('/approveseller/{id}', [AdminController::class, 'approveSeller'])->name('admin.approve');
     Route::get('/suspendseller/{id}', [AdminController::class, 'suspendSeller'])->name('admin.suspend');
 
     Route::post('/auction/add-bid/{id}', [AuctionController::class, 'placeBid'])->name('place_bid');
+    Route::get('/auction', [AuctionController::class, 'auctionlist']);
+    Route::get('/auctioncheckout/{id}', [AuctionController::class, 'auctionCheckout'])->name('auction.checkout');
+    Route::post('/createauctionorder/{id}', [AuctionController::class, 'auctionOrders'])->name('auctionorder.post');
+
+    Route::get('/towing', [ShippingController::class, 'towingList']);
+    Route::post('distance-create', [ShippingController::class, 'createTowPackage'])->name('distance.post');
+
+    Route::get('/loan/{id}', [AuctionController::class, 'loanSimulation']);
 
 });
 
@@ -153,3 +155,6 @@ Route::post('/end-bid-status/{id}', [VehicleController::class, 'auctionEndStatus
 
 Route::get('/sparepart', [SparepartController::class, 'index']);
 Route::get('/sparepart/details/{id}', [SparepartController::class, 'show'])->name('sparepart.show');
+
+
+Route::get('/seller/profile/{id}', [SellerController::class, 'sellerProfile'])->name('seller.profile');

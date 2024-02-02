@@ -14,7 +14,6 @@
                             <th scope="col">Vehicle Name</th>
                             <th scope="col">Plate Number</th>
                             <th scope="col">Owner</th>
-                            <th scope="col">Address</th>
                             <th scope="col">Status</th>
                             <th scope="col">Action</th>
                         </tr>
@@ -22,30 +21,22 @@
                     <tbody>
                         @foreach ( $vehicle as $v )
                         <tr>
-
                             <td>{{ $v->idvehicle }}</td>
                             <td>{{ $v->brand }} {{ $v->name }} {{ $v->transmission }}</td>
                             <td>{{ $v->platenumber }}</td>
                             <td>{{ $v->firstname }}</td>
-                            <td>{{ $v->address }}</td>
                             @if (auth()->user()->roles_id === 1)
                             <td>{{ $v->firstname }}</th>
                             @endif
                             <td>{{ $v->adstatus }}</td>
                             <td>
                                 @if ($v->status === 'Booked' && $v->adstatus === 'Inspection')
-                                    <a class="btn btn-icon btn-flat-info" href="{{ route('inspector.inspections', $v->idvehicle) }}">
+                                    <a class="btn btn-icon btn-flat-info" href="{{ route('inspector.inspec', $v->idvehicle) }}">
                                         <i data-feather="eye" class="me-50"></i>
                                         <span>Inspections</span>
                                     </a>
                                 @endif
-                                @if ($v->adstatus === 'Grading')
-                                    <a class="btn btn-icon btn-flat-info" href="{{ route('inspector.grading', $v->idvehicle) }}">
-                                        <i data-feather="edit" class="me-50"></i>
-                                        <span>Grade</span>
-                                    </a>
-                                @endif
-                                @if ($v->adstatus === 'Graded')
+                                @if ($v->adstatus === 'Inspected')
 
                                     <a class="btn btn-icon btn-flat-success" href="{{ route('finishGrading', $v->idvehicle) }}">
                                         <i data-feather="check" class="me-50"></i>

@@ -13,7 +13,7 @@ class SparepartController extends Controller
     {
         $sparepart = DB::select(
             DB::raw("SELECT sh.id as idshop, sh.name, sh.city, s.id as idsparepart, s.partnumber, s.partname, s.unitprice, s.stock, s.description,
-            s.vehiclemodel, s.buildyear, s.colour, s.condition, s.shops_id,
+            s.vehiclemodel, s.buildyear, s.colour, s.condition, s.shops_id, s.weight,
             (SELECT p.url FROM drivedealio.pics as p WHERE p.spareparts_id = s.id LIMIT 1) as url
                 FROM drivedealio.spareparts as s
                 INNER JOIN drivedealio.shops as sh on s.shops_id = sh.id
@@ -25,10 +25,10 @@ class SparepartController extends Controller
     public function show($id)
     {
         $sparepart = DB::select(
-            DB::raw("SELECT p.url, sh.id as idshop, sh.name, sh.city, s.id as idsparepart, s.partnumber, s.partname, s.unitprice, s.stock, s.description,
-            s.vehiclemodel, s.buildyear, s.colour, s.condition, s.shops_id, s.brand
+            DB::raw("SELECT p.url, sh.id as idshop, sh.name, sh.city, sh.province, s.id as idsparepart, s.partnumber, s.partname, s.unitprice, s.stock, s.description,
+            s.vehiclemodel as model, s.buildyear, s.colour, s.condition, s.shops_id, s.brand, s.weight
             FROM drivedealio.spareparts as s LEFT JOIN drivedealio.pics as p on s.id = p.spareparts_id
-            INNER JOIN drivedealio.shops as sh on s.shops_id = sh.id;")
+            INNER JOIN drivedealio.shops as sh on s.shops_id = sh.id where s.id = $id;")
         );
         return view('sparepart.details', compact('sparepart'));
     }
@@ -36,9 +36,6 @@ class SparepartController extends Controller
 
     public function sparepartCategories()
     {
-        $cat = DB::select(
-            DB::raw("SELECT * FROM drivedealio.sparepartcategories;")
-        );
 
         return view('seller.addsparepart', compact('cat'));
     }
@@ -63,6 +60,7 @@ class SparepartController extends Controller
         $sparepart->condition = $request->input('condition');
         $sparepart->brand = $request->input('brand');
         $sparepart->sparepartcategories_id = $request->input('categories');
+        $sparepart->weight = $request->input('weight');
         $sparepart->shops_id = $id;
         $sparepart->save();
 
@@ -118,7 +116,7 @@ class SparepartController extends Controller
         ['users_id' => $iduser, 'spareparts_id' => $id]);
         return redirect()->back()->with(['success' => 'Added to Wishlist']);
     }
-    
+
     public function removeWishlist($id)
     {
         DB::delete("DELETE FROM drivedealio.wishlists WHERE id = :id",

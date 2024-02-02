@@ -29,10 +29,15 @@
                                     </div>
                                 </div>
 
-
-
                                 <div class="col-md-12">
                                     <label for="fileKtp" class="form-label">Upload Scan KTP</label>
+                                    <input class="form-control" type="file" id="fileKtp" />
+                                    <p style="color: red; margin-left: 5px; size: 10px;">*Maximum file size is 2MB, and only
+                                        PDF file format is accepted.</p>
+                                </div>
+
+                                <div class="col-md-12">
+                                    <label for="fileKtp" class="form-label">Upload Selfie with KTP</label>
                                     <input class="form-control" type="file" id="fileKtp" />
                                     <p style="color: red; margin-left: 5px; size: 10px;">*Maximum file size is 2MB, and only
                                         PDF file format is accepted.</p>
@@ -54,7 +59,7 @@
                                 <div class="row custom-options-checkable g-1">
                                     @foreach ($membership as $m)
                                     <div class="col-md-6">
-                                        <input class="custom-option-item-check" type="radio" name="member" value="{{ $m->id }}" id="rdomember-{{ $m->id }}" />
+                                        <input class="custom-option-item-check" type="radio" name="member" value="{{ $m->id }}" id="rdomember-{{ $m->id }}" checked/>
                                         <label class="custom-option-item p-1" for="rdomember-{{ $m->id }}">
                                             <span class="d-flex justify-content-between flex-wrap mb-50">
                                                 <span class="fw-bolder">{{ $m->membershiptype }}</span>

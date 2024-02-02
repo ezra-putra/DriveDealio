@@ -43,17 +43,7 @@
                                                 placeholder="Mechanism Grade" name="mech" />
                                         </div>
                                     </div>
-                                    <div class="col-md-12 mb-1">
-                                        <label class="form-label" for="select-date">Appointment Date</label>
-                                        <select class="select2 form-select" id="select-date" name="dates" readonly>
-                                            <option value="">--Choose Appointment Date--</option>
-                                            @foreach ($appointment as $a)
-                                                <option value="{{ $a->idappointment }}"
-                                                    {{ $a->idappointment == $a->appointments_id ? 'selected' : '' }}>{{ $a->name }} : {{ $a->appointmentdate }} - {{ $a->appointmenttime }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
+                                    
                                 </div>
                             </div>
                         </div>

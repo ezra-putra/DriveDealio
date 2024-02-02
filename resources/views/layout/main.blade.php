@@ -124,7 +124,7 @@
         <div class="navbar-container container-fluid">
             <div class="collapse navbar-collapse" id="navbar-static-collapse">
                 <!-- Search Bar -->
-                <form action="#" method="GET" class="me-1">
+                <form action="#" method="GET" class="">
                     <div class="input-group">
                         <input type="text" name="search" class="form-control" placeholder="Search">
                         <button class="btn btn-outline-primary" type="submit">Search</button>
@@ -154,10 +154,10 @@
                 </ul>
 
                 <!-- User Links -->
-                <ul class="nav navbar-nav p-1 ms-2">
+                <ul class="nav navbar-nav p-1 ms-1">
                     <li class="nav-item">
                         <a href="/wishlist" class="btn btn-icon">
-                            <i class="fa fa-heart"></i> <!-- Ikon mata -->
+                            <i class="fa fa-heart"></i>
                         </a>
                     </li>
 
@@ -168,7 +168,7 @@
                         <span class="badge rounded-pill bg-danger badge-up">0</span>
                         @endif
                         <a href="#" class="btn btn-icon" data-bs-toggle="dropdown">
-                            <i class="fa fa-shopping-cart"></i> <!-- Ikon keranjang belanjaan -->
+                            <i class="fa fa-shopping-cart"></i>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-media dropdown-menu-end">
                             <li class="dropdown-menu-header">
@@ -271,78 +271,39 @@
                         <a href="#" class="btn btn-icon" data-bs-toggle="dropdown">
                             <i class="fa fa-bell"></i>
                         </a>
-                        {{-- <ul class="dropdown-menu dropdown-menu-media dropdown-menu-end">
+                        <ul class="dropdown-menu dropdown-menu-media dropdown-menu-end">
                             <li class="dropdown-menu-header">
                                 <div class="dropdown-header d-flex">
                                     <h4 class="notification-title mb-0 me-auto">Notifications</h4>
-                                    <div class="badge rounded-pill badge-light-primary">6 New</div>
                                 </div>
                             </li>
-                            <li class="scrollable-container media-list"><a class="d-flex" href="#">
-                                    <div class="list-item d-flex align-items-start">
-                                        <div class="me-1">
-                                            <div class="avatar"><img
-                                                    src="../../../app-assets/images/portrait/small/avatar-s-15.jpg"
-                                                    alt="avatar" width="32" height="32"></div>
-                                        </div>
-                                        <div class="list-item-body flex-grow-1">
-                                            <p class="media-heading"><span class="fw-bolder">Congratulation Sam
-                                                    🎉</span>winner!</p><small class="notification-text"> Won the
-                                                monthly best seller badge.</small>
-                                        </div>
-                                    </div>
-                                </a><a class="d-flex" href="#">
-                                    <div class="list-item d-flex align-items-start">
-                                        <div class="me-1">
-                                            <div class="avatar"><img
-                                                    src="../../../app-assets/images/portrait/small/avatar-s-3.jpg"
-                                                    alt="avatar" width="32" height="32"></div>
-                                        </div>
-                                        <div class="list-item-body flex-grow-1">
-                                            <p class="media-heading"><span class="fw-bolder">New
-                                                    message</span>&nbsp;received</p><small class="notification-text">
-                                                You have 10 unread messages</small>
-                                        </div>
-                                    </div>
-                                </a><a class="d-flex" href="#">
-                                    <div class="list-item d-flex align-items-start">
-                                        <div class="me-1">
-                                            <div class="avatar bg-light-danger">
-                                                <div class="avatar-content">MD</div>
-                                            </div>
-                                        </div>
-                                        <div class="list-item-body flex-grow-1">
-                                            <p class="media-heading"><span class="fw-bolder">Revised Order
-                                                    👋</span>&nbsp;checkout</p><small class="notification-text"> MD
-                                                Inc. order updated</small>
-                                        </div>
-                                    </div>
-                                </a>
+                            <li class="scrollable-container media-list">
+                                <p class="ms-2 mt-1">No Notifications</p>
                             </li>
-                            <li class="dropdown-menu-footer">
-                                <a class="btn btn-primary w-100" href="#">Read all notifications</a>
-                            </li>
-                        </ul> --}}
+                        </ul>
                     </li>
                     @endif
                     @if (auth()->user())
-                        <li class="nav-item dropdown dropdown-user ms-5">
+                        <li class="nav-item dropdown dropdown-user ms-1">
                             <a class="nav-link dropdown-toggle dropdown-user-link" id="dropdown-user" href="#"
                                 data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <div class="user-nav d-sm-flex d-none"><span
-                                        class="user-name fw-bolder">{{ auth()->user()->firstname }}</span></div>
                                 <span class="avatar"><img class="round" src="{{ auth()->user()->profilepicture }}"
-                                        alt="avatar" height="40" width="40" style="object-fit: cover">
+                                    alt="avatar" height="40" width="40" style="object-fit: cover">
                                     <span class="avatar-status-online"></span>
                                 </span>
+                                <div class="user-nav d-sm-flex d-none ms-1">
+                                    <span
+                                        class="user-name fw-bolder">{{ auth()->user()->firstname }}
+                                    </span>
+                                </div>
                             </a>
                             <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdown-user">
-                                <a class="dropdown-item" href="page-profile.html">
+                                <a class="dropdown-item" href="/profile">
                                     <i class="me-50" data-feather="user"></i>Profile</a>
-                                <a class="dropdown-item" href="app-email.html">
-                                    <i class="me-50" data-feather="mail"></i>Inbox</a>
-                                <a class="dropdown-item" href="app-chat.html">
+                                <a class="dropdown-item" href="#">
                                     <i class="me-50"data-feather="message-square"></i>Chats</a>
+                                <a class="dropdown-item" href="/orderhistory">
+                                    <i class="me-50" data-feather="file-text"></i>Transaction</a>
                                 @if (auth()->user()->roles_id === 1)
                                     <a class="dropdown-item" href="/user"><i class="fa fa-users me-50"></i>User
                                         List</a>

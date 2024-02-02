@@ -123,7 +123,15 @@
                                     </div>
                                 </div>
                             </div>
-
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label class="form-label" for="part-stock">Weight(Kg)</label>
+                                    <div class="col-md-12 mb-2">
+                                        <input type="float" class="form-control" id="part-stock"
+                                            placeholder="Weight" name="weight" value="{{ $sparepart[0]->weight }}"/>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <div class="d-flex justify-content-end">
                             <input type="submit" class="btn btn-primary btn-submit" id="submitFile" value="Submit">

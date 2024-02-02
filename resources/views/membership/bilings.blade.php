@@ -4,17 +4,54 @@
     <link rel="stylesheet" type="text/css" href="../../../app-assets/css/plugins/forms/form-validation.css">
     <link rel="stylesheet" type="text/css" href="../../../app-assets/css/pages/modal-create-app.css">
 
+    <h3>MyMemberships</h3>
+
+    @if (auth()->user()->roles_id != 1)
+    <div class="col-md-12 mx-auto" style="padding: 3vh;">
+        <div class="card">
+            <div class="card-body col-md-12">
+                <h4>Membership Details</h4>
+                <div class="col-md-12 mt-1">
+                    @if ($member[0]->status != 'Not Active')
+                    <p>Type: {{ $member[0]->name }}</p>
+                    @if ($member[0]->paymentstatus === 'Unpaid')
+                        <p>Status: {{ $member[0]->status }}({{ $member[0]->paymentstatus }})</p>
+                    @else
+                        <p>Status: {{ $member[0]->status }}</p>
+                    @endif
+                    <p>Valid until: {{ $member[0]->end }}</p>
+                    <div class="progress mt-3">
+                        <div class="progress-bar" role="progressbar" style="width: {{ $progressPercentage }}%;" aria-valuemin="{{ $progressPercentage }}" aria-valuemax="100"></div>
+                    </div>
+                    <div class="text-center mt-2">
+                        <span>Expires in {{ $daysRemaining }} Days</span>
+                    </div>
+                    @if ($member[0]->paymentstatus != 'Unpaid')
+                        <a href="{{ url('cancel_post', $member[0]->idhasmember) }}" class="btn btn-danger mt-2 float-end">Cancel Membership</a>
+                    @else
+                    <div class="d-flex justify-content-end">
+                        <a href="#modalPayment" data-bs-toggle="modal" class="btn btn-info mt-2 float-end me-1">Pay</a>
+                        <a href="{{ url('cancel_post', $member[0]->idhasmember) }}" class="btn btn-danger mt-2 float-end">Cancel Membership</a>
+                    </div>
+                    @endif
+                    @else
+                    <h4 class="text-center">No Active Membership</h4>
+                    <div class="text-center">
+                        <a href="/membership/register" class="btn btn-info mt-2">Register Membership</a>
+                    </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 
     <div class="row" id="table-striped" style="padding: 3vh;">
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title">MyMemberships</h4>
-                    <a href="#" class="btn btn-icon btn-primary">
-                        <i data-feather="plus" class="me-50"></i>
-                        <span>Register New Membership</span></a>
+                    <h4>Membership History</h4>
                 </div>
-
                 <table class="table table-striped">
                     <thead>
                         <tr>
@@ -24,143 +61,72 @@
                             <th scope="col">Status</th>
                             @if (auth()->user()->roles_id === 1)
                                 <th scope="col">Users</th>
+                                <th scope="col">Action</th>
                             @endif
-                            <th scope="col">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($member as $m)
                             <tr>
-                                <td>{{ $m->membershiptype }}</td>
+                                <td>{{ $m->name }}</td>
                                 <td>{{ $m->start }}</td>
                                 <td>{{ $m->end }}</td>
                                 <td>{{ $m->status }}</td>
                                 @if (auth()->user()->roles_id === 1)
-                                    <td>{{ $m->firstname }}</th>
+                                    <td>{{ $m->firstname }}</td>
+                                    <td>
+                                        @if ($m->status === 'Pending')
+                                            <a href="{{ url('approve_post', $m->idhasmember) }}" class="btn btn-outline-success">Approve</a>
+                                        @endif
+                                    </td>
                                 @endif
-
-                                <td>
-                                    <div class="dropdown">
-                                        <button type="button" class="btn btn-sm dropdown-toggle hide-arrow py-0"
-                                            data-bs-toggle="dropdown">
-                                            <i data-feather="more-vertical"></i>
-                                        </button>
-                                        <div class="dropdown-menu dropdown-menu-end">
-                                            @if (auth()->user()->roles_id == 1)
-                                                <a href="{{ url('approve_post', $m->idhasmember) }}" class="dropdown-item"
-                                                    @if ($m->status == 'Cancelled' || $m->status == "Approved") style="cursor:not-allowed; pointer-events: none" @endif>
-                                                    <i data-feather="check" class="me-50"></i>
-                                                    <span>Approve</span>
-                                                </a>
-                                                <a href="{{ url('cancel_post', $m->idhasmember) }}" class="dropdown-item"
-                                                    @if ($m->status == 'Approved' || $m->status == 'Cancelled') style="cursor:not-allowed; pointer-events: none" @endif>
-                                                    <i data-feather="x" class="me-50"></i>
-                                                    <span>Cancel</span>
-                                                </a>
-                                            @else
-                                                <a href="{{ url('cancel_post', $m->idhasmember) }}" class="dropdown-item"
-                                                    @if ($m->status == 'Approved') style="cursor:not-allowed; pointer-events: none" @endif>
-                                                    <i data-feather="x" class="me-50"></i>
-                                                    <span>Cancel</span>
-                                                </a>
-                                            @endif
-
-                                        </div>
-                                    </div>
-                                </td>
                             </tr>
                         @endforeach
                     </tbody>
                 </table>
-
-            </div>
-        </div>
-        <div class="modal modal-slide-in new-user-modal fade" id="modals-slide-in">
-            <div class="modal-dialog">
-                <form class="add-new-user modal-content pt-0">
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">×</button>
-                    <div class="modal-header mb-1">
-                        <h5 class="modal-title" id="exampleModalLabel">Add User</h5>
-                    </div>
-                    <div class="modal-body flex-grow-1">
-                        <div class="mb-1">
-                            <label class="form-label" for="basic-icon-default-fullname">Full Name</label>
-                            <input type="text" class="form-control dt-full-name" id="basic-icon-default-fullname"
-                                placeholder="John Doe" name="user-fullname" />
-                        </div>
-                        <div class="mb-1">
-                            <label class="form-label" for="basic-icon-default-uname">Username</label>
-                            <input type="text" id="basic-icon-default-uname" class="form-control dt-uname"
-                                placeholder="Web Developer" name="user-name" />
-                        </div>
-                        <div class="mb-1">
-                            <label class="form-label" for="basic-icon-default-email">Email</label>
-                            <input type="text" id="basic-icon-default-email" class="form-control dt-email"
-                                placeholder="john.doe@example.com" name="user-email" />
-                        </div>
-                        <div class="mb-1">
-                            <label class="form-label" for="basic-icon-default-contact">Contact</label>
-                            <input type="text" id="basic-icon-default-contact" class="form-control dt-contact"
-                                placeholder="+1 (609) 933-44-22" name="user-contact" />
-                        </div>
-                        <div class="mb-1">
-                            <label class="form-label" for="basic-icon-default-company">Company</label>
-                            <input type="text" id="basic-icon-default-company" class="form-control dt-contact"
-                                placeholder="PIXINVENT" name="user-company" />
-                        </div>
-                        <div class="mb-1">
-                            <label class="form-label" for="country">Country</label>
-                            <select id="country" class="select2 form-select">
-                                <option value="Australia">USA</option>
-                                <option value="Bangladesh">Bangladesh</option>
-                                <option value="Belarus">Belarus</option>
-                                <option value="Brazil">Brazil</option>
-                                <option value="Canada">Canada</option>
-                                <option value="China">China</option>
-                                <option value="France">France</option>
-                                <option value="Germany">Germany</option>
-                                <option value="India">India</option>
-                                <option value="Indonesia">Indonesia</option>
-                                <option value="Israel">Israel</option>
-                                <option value="Italy">Italy</option>
-                                <option value="Japan">Japan</option>
-                                <option value="Korea">Korea, Republic of</option>
-                                <option value="Mexico">Mexico</option>
-                                <option value="Philippines">Philippines</option>
-                                <option value="Russia">Russian Federation</option>
-                                <option value="South Africa">South Africa</option>
-                                <option value="Thailand">Thailand</option>
-                                <option value="Turkey">Turkey</option>
-                                <option value="Ukraine">Ukraine</option>
-                                <option value="United Arab Emirates">United Arab Emirates</option>
-                                <option value="United Kingdom">United Kingdom</option>
-                                <option value="United States">United States</option>
-                            </select>
-                        </div>
-                        <div class="mb-1">
-                            <label class="form-label" for="user-role">User Role</label>
-                            <select id="user-role" class="select2 form-select">
-                                <option value="subscriber">Subscriber</option>
-                                <option value="editor">Editor</option>
-                                <option value="maintainer">Maintainer</option>
-                                <option value="author">Author</option>
-                                <option value="admin">Admin</option>
-                            </select>
-                        </div>
-                        <div class="mb-2">
-                            <label class="form-label" for="user-plan">Select Plan</label>
-                            <select id="user-plan" class="select2 form-select">
-                                <option value="basic">Basic</option>
-                                <option value="enterprise">Enterprise</option>
-                                <option value="company">Company</option>
-                                <option value="team">Team</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-primary me-1 data-submit">Submit</button>
-                        <button type="reset" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                    </div>
-                </form>
             </div>
         </div>
     </div>
+
+    {{-- Modal Select Payment --}}
+    <div class="modal fade" id="modalPayment" tabindex="-1" role="basic" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-transparent">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body px-sm-5 mx-50 pb-5">
+                    <h1 class="text-center mb-1" id="addNewCardTitle">Select Payment Method</h1>
+                    <!-- form -->
+                    <form action="{{ route('payment.post', $member[0]->idhasmember) }}" method="POST"
+                        enctype="multipart/form-data" class="row gy-1 gx-2 mt-75" id="payform">
+                        @csrf
+                        <div class="col-12">
+                            <label class="form-label" for="select-pay">Payment Method</label>
+                                <select class="select2 form-select" id="select-pay" name="payment">
+                                    <option value="">--Choose Payment Method--</option>
+                                    <option value="M-Banking">M-Banking</option>
+                                </select>
+                        </div>
+                        <div class="col-12 text-center">
+                            <input type="submit" id="submitBid" class="btn btn-primary me-1 mt-1" value="Pay">
+                            <button type="reset" class="btn btn-outline-secondary mt-1" data-bs-dismiss="modal"
+                                aria-label="Close">
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        var expirationDate = new Date('{{ $member[0]->end }}');
+        var currentDate = new Date();
+        var daysRemaining = Math.ceil((expirationDate - currentDate) / (1000 * 60 * 60 * 24));
+        var progressPercentage = (daysRemaining / 365) * 100;
+        var progressBar = document.querySelector('.progress-bar');
+        progressBar.style.width = progressPercentage + '%';
+    </script>
 @endsection

@@ -37,10 +37,6 @@
                                         </select>
                                     </div>
                                 </div>
-
-
-
-
                                 <div class="row">
                                     <div class="col-md-7">
                                         <label class="form-label" for="vehiclename">Vehicle Name</label>
@@ -191,7 +187,7 @@
                             @foreach ($vehicle as $v)
                             <div class="col-auto">
                                 <a href="{{ url('approve', $v->id) }}" class="btn btn-success">
-                                    <span>Approve & Inspection Schedule</span>
+                                    <span>Approve Data</span>
                                 </a>
                             </div>
                             <div class="col-auto">

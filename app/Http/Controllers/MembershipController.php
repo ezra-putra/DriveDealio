@@ -41,18 +41,19 @@ class MembershipController extends Controller
 
         if(auth()->user()->roles_id === 1){
             $member = DB::select(
-                DB::raw("SELECT m.id as idmember, m.membershiptype, hm.id as idhasmember, hm.status, hm.start, hm.end, u.id as iduser,
+                DB::raw("SELECT m.id as idmember, m.membershiptype as name, hm.id as idhasmember, hm.status, hm.start, hm.end, u.id as iduser,
                 hm.created_at, hm.updated_at , u.roles_id, hm.paymentmethod, hm.paymentstatus, hm.paymentduedate, hm.paymentdate, u.firstname
                 from drivedealio.user_memberships as hm INNER JOIN drivedealio.users as u on hm.users_id = u.id
-                INNER JOIN drivedealio.memberships as m on hm.memberships_id = m.id")
+                INNER JOIN drivedealio.memberships as m on hm.memberships_id = m.id order by hm.created_at desc;")
             );
         }else{
             $member = DB::select(
-                DB::raw("SELECT m.id as idmember, m.membershiptype, hm.id as idhasmember, hm.status, hm.start, hm.end, u.id as iduser,
+                DB::raw("SELECT m.id as idmember, m.membershiptype as name, hm.id as idhasmember, hm.status, hm.start, hm.end, u.id as iduser,
                 hm.created_at, hm.updated_at , u.roles_id, hm.paymentmethod, hm.paymentstatus, hm.paymentduedate, hm.paymentdate
                 from drivedealio.user_memberships as hm INNER JOIN drivedealio.users as u on hm.users_id = u.id
-                INNER JOIN drivedealio.memberships as m on hm.memberships_id = m.id where u.id = $iduser;")
+                INNER JOIN drivedealio.memberships as m on hm.memberships_id = m.id where u.id = $iduser order by hm.created_at desc;")
             );
+
             $endDateTime = Carbon::parse($member[0]->end);
             $now = Carbon::now();
             if($now >= $endDateTime)
@@ -64,19 +65,15 @@ class MembershipController extends Controller
         }
 
         $startDateTime = Carbon::parse($member[0]->created_at);
-        $endDateTime = Carbon::parse($member[0]->paymentduedate);
+        $endDateTime = Carbon::parse($member[0]->end);
         $now = Carbon::now();
         $idhasmember = $member[0]->idhasmember;
-        if ($now >= $endDateTime && $member[0]->paymentstatus == "Unpaid") {
+        if ($now >= $endDateTime) {
             DB::table('drivedealio.user_memberships')
                 ->where('id', $idhasmember)
-                ->update(['status' => 'Cancelled', 'paymentstatus' => 'Unpaid']);
-                $membership = DB::select(
-                    DB::raw("SELECT hm.id as idhasmember, hm.memberships_id, m.id as idmember, m.membershiptype, m.price, hm.users_id as iduser, hm.paymentstatus
-                    FROM drivedealio.user_memberships as hm INNER JOIN drivedealio.memberships as m on hm.memberships_id = m.id
-                    WHERE hm.memberships_id = $idhasmember AND hm.users_id = $iduser;")
-                );
-                $user = User::find($membership[0]->iduser);
+                ->update(['status' => 'Not Active']);
+
+                $user = User::find($iduser);
                 $title = 'Membership expired';
                 $message = 'Your membership has expired, please renew it.';
                 $user->notify(new NotificationsMembership($title ,$message));
@@ -84,7 +81,12 @@ class MembershipController extends Controller
         $interval = $startDateTime->diff($endDateTime);
         $member[0]->duration = $this->formatDuration($interval);
 
-        return view('/membership/bilings', compact('member'));
+        $expirationDate = strtotime($member[0]->end);
+        $currentDate = strtotime(now());
+        $daysRemaining = max(0, ceil(($expirationDate - $currentDate) / (60 * 60 * 24)));
+        $progressPercentage = min(100, max(0, floor(($daysRemaining / 365) * 100)));
+
+        return view('/membership/bilings', compact('member', 'daysRemaining', 'progressPercentage'));
     }
 
     public function approve_post($id)
@@ -93,13 +95,8 @@ class MembershipController extends Controller
         $member->status = 'Active';
         $member->save();
 
-        $user = auth()->id();
-        $membership = DB::select(
-            DB::raw("SELECT hm.id as idhasmember, hm.memberships_id, m.id as idmember, m.membershiptype, m.price, hm.users_id as iduser, hm.paymentstatus
-            FROM drivedealio.user_memberships as hm INNER JOIN drivedealio.memberships as m on hm.memberships_id = m.id
-            WHERE hm.memberships_id = $id AND hm.users_id = $user;")
-        );
-        $user = User::find($membership[0]->iduser);
+        $iduser = auth()->id();
+        $user = User::find($iduser);
         $title = 'Membership status';
         $message = 'Your membership is now active.';
         $user->notify(new NotificationsMembership($title, $message));
@@ -111,11 +108,11 @@ class MembershipController extends Controller
     {
         $member = UserMemberships::findOrFail($id);
         if(auth()->user()->roles_id == 2){
-            $member->status = 'Cancelled';
+            $member->status = 'Not Active';
             $message = 'Your membership Cancelled.';
         }
         if(auth()->user()->roles_id == 1){
-            $member->status = 'Rejected';
+            $member->status = 'Not Active';
 
             $message = 'Your membership rejected by system.';
         }
@@ -155,12 +152,7 @@ class MembershipController extends Controller
                 $member->end = $member->start->copy()->addMonth();
             }
             $member->save();
-            $membership = DB::select(
-                DB::raw("SELECT hm.id as idhasmember, hm.memberships_id, m.id as idmember, m.membershiptype, m.price, hm.users_id as iduser, hm.paymentstatus
-                FROM drivedealio.user_memberships as hm INNER JOIN drivedealio.memberships as m on hm.memberships_id = m.id
-                WHERE hm.memberships_id = $member->memberships_id AND hm.users_id = $member->users_id;")
-            );
-            $user = User::find($membership[0]->iduser);
+            $user = User::find($iduser);
             $title = 'Payment reminder';
             $message = 'Please settle your membership payment.';
             $user->notify(new NotificationsMembership($title, $message));
@@ -173,69 +165,40 @@ class MembershipController extends Controller
         }
     }
 
-    public function payment($id)
+    public function paymentPaid(Request $request, $id)
     {
+        $member = UserMemberships::findOrFail($id);
+        $member->status = "Pending";
+        $member->paymentstatus = "Paid";
+        $member->paymentmethod = $request->input('payment');
+        $member->paymentdate = Carbon::now();
+        $member->save();
 
+        $iduser = auth()->id();
+        $user = User::find($iduser);
+        $title = 'Membership Paid';
+        $message = 'Payment received, wait for confirmation from system.';
+        $user->notify(new NotificationsMembership($title, $message));
+
+        return redirect()->back()->with('success', 'Transaction Success');
     }
 
     protected function formatDuration($interval)
     {
         $formattedDuration = '';
 
-        // Tambahkan jam jika lebih dari 0
         if ($interval->h > 0) {
             $formattedDuration .= $interval->h . 'H ';
         }
 
-        // Tambahkan menit jika lebih dari 0
         if ($interval->i > 0) {
             $formattedDuration .= $interval->i . 'M ';
         }
 
-        // Tambahkan detik jika lebih dari 0
         if ($interval->s > 0) {
             $formattedDuration .= $interval->s . 'S';
         }
-
         return trim($formattedDuration);
     }
 
-    public function show(Membership $membership)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Membership  $membership
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Membership $membership)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Membership  $membership
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Membership $membership)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Membership  $membership
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Membership $membership)
-    {
-        //
-    }
 }

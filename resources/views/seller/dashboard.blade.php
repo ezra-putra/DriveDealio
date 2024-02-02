@@ -23,10 +23,9 @@
                                     </div>
                                 </div>
                                 <div class="text-center">
-                                    <h1 class="mb-1 text-white">Welcome {{ auth()->user()->firstname }},</h1>
+                                    <h1 class="mb-1 text-white">Welcome {{ $shopname[0]->name }}</h1>
                                     <p class="card-text m-auto w-75">
-                                        You have done <strong>57.6%</strong> more sales today. Check your new badge in your
-                                        profile.
+                                        You have <strong>{{ $ordercount[0]->totalorder }}</strong> total order today.
                                     </p>
                                 </div>
                             </div>
@@ -60,7 +59,7 @@
                                         <i data-feather="file-text" class="font-medium-5"></i>
                                     </div>
                                 </div>
-                                <h2 class="fw-bolder mt-1">{{ $ordercount[0]->totalorder }}</h2>
+                                <h2 class="fw-bolder mt-1">{{ $totalorder[0]->totalorder }}</h2>
                                 <p class="card-text">Orders Received</p>
                             </div>
                             <div id="order-chart"></div>

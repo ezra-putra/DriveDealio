@@ -33,33 +33,20 @@
                                                 @else
                                                     <span class="text-danger">In Stock: {{ $c->stock }}</span>
                                                 @endif
-                                                <div class="row" style="display:flex; align-items:center;">
-                                                    <span class="quantity-title">Quantity:</span>
-                                                    <div class="col-md-1">
-                                                        <form action="{{ route('decrement.quantity', $c->idsparepart) }}"
-                                                            method="POST">
-                                                            @csrf
-                                                            <button type="submit" class="btn btn-icon btn-flat-danger"
-                                                                id="decrement-btn">-</button>
-                                                        </form>
-                                                    </div>
-                                                    <div class="col-md-1">
-                                                        <input type="number"
-                                                        style="text-align: center; border:none; width:20px;"
-                                                        name="quantity" class="quantity-counter"
-                                                        value="{{ $c->quantity }}"/>
-                                                    </div>
-                                                    <div class="col-md-1">
-                                                        <form action="{{ route('increment.quantity', $c->idsparepart) }}"
-                                                            method="POST">
-                                                            @csrf
-                                                            <button type="submit" class="btn btn-icon btn-flat-success"
-                                                                id="increment-btn">+</button>
-                                                        </form>
-                                                    </div>
-                                                </div>
-                                                <div class="item-quantity mt-1">
+                                                <div class="d-flex align-items-center">
+                                                    <span class="quantity-title me-2">Quantity:</span>
 
+                                                    <form action="{{ route('decrement.quantity', $c->idsparepart) }}" method="POST" class="me-2">
+                                                        @csrf
+                                                        <button type="submit" class="btn btn-icon btn-flat-danger" id="decrement-btn">-</button>
+                                                    </form>
+
+                                                    <input type="number" style="text-align: center; border:none; width:20px;" name="quantity" class="quantity-counter me-2" value="{{ $c->quantity }}">
+
+                                                    <form action="{{ route('increment.quantity', $c->idsparepart) }}" method="POST" class="me-2">
+                                                        @csrf
+                                                        <button type="submit" class="btn btn-icon btn-flat-success" id="increment-btn">+</button>
+                                                    </form>
                                                 </div>
                                             </div>
                                         </div>
@@ -150,24 +137,6 @@
             var quantityInput = document.querySelector('input[name="quantity"]');
             var newQuantity = parseInt(quantityInput.value) - 1;
             quantityInput.value = newQuantity > 0 ? newQuantity : 1;
-        }
-
-        function updateOrderSummary() {
-            var totalSelectedPrice = 0;
-            document.querySelectorAll('.form-check-input:checked').forEach(function(checkbox) {
-                var id = checkbox.value;
-                var subTotal = parseFloat(document.getElementById('subTotal-' + id).innerText.replace(/[^0-9.-]+/g,
-                    ''));
-                totalSelectedPrice += subTotal;
-            });
-
-            // Convert totalSelectedPrice to a float before formatting
-            var formattedTotalPrice = totalSelectedPrice.toLocaleString('en-US', {
-                style: 'currency',
-                currency: 'IDR' // Change this to your currency code
-            });
-
-            document.getElementById('totalPrice').innerText = formattedTotalPrice;
         }
     </script>
 @endsection

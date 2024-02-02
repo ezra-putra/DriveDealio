@@ -9,5 +9,6 @@ class Appointments extends Model
 {
     use HasFactory;
 
+    protected $table = 'appointments';
     protected $fillable = ['appointmentdate', 'appointmenttime'];
 }

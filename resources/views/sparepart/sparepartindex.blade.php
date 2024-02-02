@@ -57,7 +57,7 @@
                     <section id="ecommerce-products" class="grid-view">
                         @foreach ($sparepart as $s)
                             <div class="card ecommerce-card">
-                                <div class="item-img" style="justify-content: center;">
+                                <div class="item-img mt-1" style="justify-content: center;">
                                     <a href="{{ route('sparepart.show', $s->idsparepart) }}">
                                         <img class="card-img-top" src="{{ asset('/images/' . $s->url) }}" alt="Card image cap" style="height : 320px; width:auto; object-fit:fill;"/>
                                     </a>
