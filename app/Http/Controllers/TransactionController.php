@@ -163,11 +163,9 @@ class TransactionController extends Controller
             $counter = $date[0]->count + 1;
             $order->invoicenum = "INV/" .date("Y/m/d"). "/$counter";
             $order->status = "Waiting for Payment";
-            $order->paymentmethod = $request->input('payment');
             $order->paymentstatus = "Unpaid";
             $order->users_id = $iduser;
             $order->shops_id = $checkout[0]->idseller;
-            $order->paymentduedate = Carbon::now()->addDay();
             // dd($order);
             $order->save();
 
@@ -192,8 +190,7 @@ class TransactionController extends Controller
     {
         $iduser = auth()->id();
         $order = DB::select(
-            DB::raw("SELECT o.id as idorder, u.id as iduser, o.invoicenum, o.orderdate, o.shops_id, o.users_id, o.status,
-            o.paymentmethod, o.paymentstatus, od.orders_id, od.spareparts_id, od.quantityordered, s.name,
+            DB::raw("SELECT o.id as idorder, u.id as iduser, o.invoicenum, o.orderdate, o.shops_id, o.users_id, o.status, o.paymentstatus, od.orders_id, od.spareparts_id, od.quantityordered, s.name,
             (SELECT unitprice from drivedealio.orderdetails where orders_id = o.id) as price,
             (SELECT sum(od.unitprice) from drivedealio.orderdetails as od where od.orders_id = o.id ) as total_price,
             (SELECT CONCAT(partnumber, ' ',partname, ' ', vehiclemodel) from drivedealio.spareparts where shops_id = o.shops_id LIMIT 1) as item_name
@@ -215,24 +212,38 @@ class TransactionController extends Controller
     {
         $iduser = auth()->id();
         $product = DB::select(
-            DB::raw("SELECT o.id as idorder, o.invoicenum, o.paymentduedate, o.orderdate, u.id as iduser, o.status, o.paymentstatus,
-            (SELECT sum(od.unitprice) from drivedealio.orderdetails as od where od.orders_id = o.id ) as total_price
-            from drivedealio.orders as o INNER JOIN drivedealio.users as u on o.users_id = u.id WHERE o.users_id = $iduser AND o.id = $id;")
+            DB::raw("SELECT o.id as idorder, o.invoicenum, o.orderdate, u.id as iduser, o.status, o.paymentstatus, od.quantityordered, s.stock, s.id as idsparepart,
+            (SELECT sum(od.unitprice) from drivedealio.orderdetails as od where od.orders_id = o.id ) as total_price, u.email, u.firstname, u.lastname, u.phonenumber, o.invoicenum
+            from drivedealio.orders as o INNER JOIN drivedealio.users as u on o.users_id = u.id
+            INNER JOIN drivedealio.orderdetails as od on o.id = od.orders_id
+            INNER JOIN drivedealio.spareparts as s on od.spareparts_id = s.id
+            WHERE o.users_id = $iduser AND o.id = $id;")
         );
-        $startDateTime = Carbon::parse($product[0]->orderdate);
-        $endDateTime = Carbon::parse($product[0]->paymentduedate);
-        $now = Carbon::now();
 
-        if ($now >= $endDateTime && $product[0]->paymentstatus == "Unpaid") {
-            DB::table('drivedealio.orders')
-                ->where('id', $id)
-                ->update(['status' => 'Cancelled', 'paymentstatus' => 'Unpaid']);
-        }
+        \Midtrans\Config::$serverKey = 'SB-Mid-server-AOdoK40xyUyq11-i9Cc9ysHM';
+        \Midtrans\Config::$isProduction = false;
+        \Midtrans\Config::$isSanitized = true;
+        \Midtrans\Config::$is3ds = true;
 
-        $interval = $startDateTime->diff($endDateTime);
-        $product[0]->duration = $this->formatDuration($interval);
+        $params = array(
+            'transaction_details' => array(
+                'order_id' => $product[0]->invoicenum,
+                'gross_amount' => $product[0]->total_price,
+            ),
+            'customer_details' => array(
+                'first_name' => $product[0]->firstname,
+                'last_name' => $product[0]->lastname,
+                'email' => $product[0]->email,
+                'phone' => $product[0]->phonenumber,
+            ),
+        );
 
-        return view('transaction.payment', compact('product'));
+        $snapToken = \Midtrans\Snap::getSnapToken($params);
+        $order = Order::findOrFail($id);
+        $order->snap_token = $snapToken;
+        $order->save();
+
+        return view('transaction.payment', compact('product', 'snapToken'));
     }
 
     public function paymentPaid($id)
@@ -262,7 +273,7 @@ class TransactionController extends Controller
 
         $iduser = auth()->id();
         $product = DB::select(
-            DB::raw("SELECT o.id as idorder, o.invoicenum, o.paymentduedate, o.orderdate, u.id as iduser, o.status, o.paymentstatus, od.quantityordered, s.stock, s.id as idsparepart,
+            DB::raw("SELECT o.id as idorder, o.invoicenum, o.orderdate, u.id as iduser, o.status, o.paymentstatus, od.quantityordered, s.stock, s.id as idsparepart,
             (SELECT sum(od.unitprice) from drivedealio.orderdetails as od where od.orders_id = o.id ) as total_price
             from drivedealio.orders as o INNER JOIN drivedealio.users as u on o.users_id = u.id
             INNER JOIN drivedealio.orderdetails as od on o.id = od.orders_id
@@ -282,7 +293,7 @@ class TransactionController extends Controller
 
     public function onDelivered($id)
     {
-
+        
     }
 
     protected function formatDuration($interval)

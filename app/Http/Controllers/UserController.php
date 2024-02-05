@@ -31,7 +31,8 @@ class UserController extends Controller
             DB::raw("SELECT u.id, u.email, u.firstname, u.lastname, u.phonenumber, r.name, um.id as idmemberships, m.membershiptype
             from drivedealio.users as u INNER JOIN drivedealio.roles as r on u.roles_id = r.id
             LEFT JOIN drivedealio.user_memberships as um on u.id = um.users_id
-            LEFT JOIN drivedealio.memberships as m on um.memberships_id = m.id
+            LEFT JOIN drivedealio.member_orders as mo on um.id = mo.user_memberships_id
+            LEFT JOIN drivedealio.memberships as m on m.id = mo.memberships_id
             where r.name != 'Admin' AND (um.status = 'Approved' OR um.status IS NULL) order by u.id asc;")
         );
         // dd($user);

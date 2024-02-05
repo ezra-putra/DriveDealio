@@ -85,14 +85,12 @@ class VehicleController extends Controller
         $vehicle = DB::select(
             DB::raw("SELECT i.url as image, v.id as idvehicle, v.model, v.enginecapacity, v. enginecylinders, v.fueltype, v.transmission, vt.id as idtype, vt.name as type, v.platenumber, i.url, v.adstatus,
             b.id as idbrand, b.name as brand, a.id as idauction, a.start_price as price, a.current_price, a.lot_number as lotnumber, v.location, u.id as iduser, u.firstname as fname, u.lastname as lname,
-            v.variant, a.start_date, a.end_date, v.users_id, v.seatsnumber, c.name as colour, y.year, v.chassis_number, v.engine_number
+            v.variant, a.start_date, a.end_date, v.users_id, v.seatsnumber, v.chassis_number, v.engine_number, v.colour, v.year
             FROM drivedealio.vehicles as v LEFT JOIN drivedealio.images as i on v.id = i.vehicles_id
             LEFT JOIN drivedealio.auctions as a on v.id = a.vehicles_id
             INNER JOIN drivedealio.users as u on v.users_id = u.id
             INNER JOIN drivedealio.brands as b on v.brands_id = b.id
             INNER JOIN drivedealio.vehicletypes as vt on v.vehicletypes_id = vt.id
-            INNER JOIN drivedealio.colours as c on c.id = v.colours_id
-            INNER JOIN drivedealio.productionyears as y on y.id = v.productionyears_id
             where v.id = $id;")
         );
 
@@ -117,7 +115,8 @@ class VehicleController extends Controller
             DB::raw("SELECT u.id as iduser, u.firstname, um.id as idusermember, m.id as idmembership, m.membershiptype, b.id as idbid, b.bidamount,
             a.id as idauction, a.current_price, a.lot_number, v.id as idvehicle, v.model
             FROM drivedealio.users as u INNER JOIN drivedealio.user_memberships as um on u.id = um.users_id
-            INNER JOIN drivedealio.memberships as m on m.id = um.memberships_id
+            INNER JOIN drivedealio.member_orders as mo on um.id = mo.user_memberships_id
+            INNER JOIN drivedealio.memberships as m on m.id = mo.memberships_id
             INNER JOIN drivedealio.bids as b on um.id = b.user_memberships_id
             INNER JOIN drivedealio.auctions as a on a.id = b.auctions_id
             INNER JOIN drivedealio.vehicles as v on a.vehicles_id = v.id
@@ -181,12 +180,6 @@ class VehicleController extends Controller
         $type = DB::select(
             DB::raw('SELECT id, name from drivedealio.vehicletypes; ')
         );
-        $year = DB::select(
-            DB::raw('SELECT * from drivedealio.productionyears order by year asc;')
-        );
-        $color = DB::select(
-            DB::raw('SELECT id, name from drivedealio.colours;')
-        );
         $date = DB::select(
             DB::raw('SELECT id, appointmentdate, appointmenttime from drivedealio.appointments;')
         );
@@ -216,8 +209,8 @@ class VehicleController extends Controller
         $vehicle->users_id = auth()->id();
         $vehicle->brands_id = $request->input('brand');
         $vehicle->vehicletypes_id = $request->input('type');
-        $vehicle->productionyears_id = $request->input('year');
-        $vehicle->colours_id = $request->input('color');
+        $vehicle->year = $request->input('year');
+        $vehicle->colour = $request->input('color');
         $vehicle->adstatus = "Pending";
         $vehicle->inputdate = now();
         $vehicle->save();

@@ -45,12 +45,10 @@
                                     </div>
                                     <div class="col-md-4">
                                         <label class="form-label" for="select-year">Vehicle Build Year</label>
-                                        <select class="select2 form-select" id="select-year" name="year">
-                                            <option value="NULL">--Build Year--</option>
-                                            @foreach ($year as $y)
-                                                <option value={{ $y->id }}>{{ $y->year }}</option>
-                                            @endforeach
-                                        </select>
+                                        <div class="col-md-12 mb-2">
+                                            <input type="text" class="form-control" id="select-year"
+                                                placeholder="Production Year" name="year" required/>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -99,12 +97,10 @@
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label" for="select-color">Vehicle Colour</label>
-                                        <select class="select2 form-select" id="select-color" name="color">
-                                            <option value="">--Choose Vehicle Colour--</option>
-                                            @foreach ($color as $c)
-                                                <option value={{ $c->id }}>{{ $c->name }}</option>
-                                            @endforeach
-                                        </select>
+                                        <div class="col-md-12 mb-2">
+                                            <input type="text" class="form-control" id="select-color"
+                                                placeholder="Colour" name="color" required/>
+                                        </div>
                                     </div>
                                 </div>
 

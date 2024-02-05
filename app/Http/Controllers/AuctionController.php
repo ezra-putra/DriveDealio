@@ -17,7 +17,8 @@ class AuctionController extends Controller
             DB::raw("SELECT u.id as iduser, u.firstname, um.id as idusermember, m.id as idmembership, m.membershiptype, b.id as idbid, b.bidamount,
             a.id as idauction, a.current_price, a.lot_number, v.id as idvehicle, v.model, v.adstatus, a.start_price
             FROM drivedealio.users as u INNER JOIN drivedealio.user_memberships as um on u.id = um.users_id
-            INNER JOIN drivedealio.memberships as m on m.id = um.memberships_id
+            INNER JOIN drivedealio.member_orders as mo on um.id = mo.user_memberships_id
+            INNER JOIN drivedealio.memberships as m on m.id = mo.memberships_id
             INNER JOIN drivedealio.bids as b on um.id = b.user_memberships_id
             INNER JOIN drivedealio.auctions as a on a.id = b.auctions_id
             INNER JOIN drivedealio.vehicles as v on a.vehicles_id = v.id where u.id = $iduser;")
@@ -120,7 +121,8 @@ class AuctionController extends Controller
             DB::raw("SELECT u.id as iduser, u.firstname, um.id as idusermember, m.id as idmembership, m.membershiptype, b.id as idbid, b.bidamount,
             a.id as idauction, a.current_price, a.lot_number, v.id as idvehicle, v.model, v.adstatus, a.start_price
             FROM drivedealio.users as u INNER JOIN drivedealio.user_memberships as um on u.id = um.users_id
-            INNER JOIN drivedealio.memberships as m on m.id = um.memberships_id
+            INNER JOIN drivedealio.member_orders as mo on um.id = mo.user_memberships_id
+            INNER JOIN drivedealio.memberships as m on m.id = mo.memberships_id
             INNER JOIN drivedealio.bids as b on um.id = b.user_memberships_id
             INNER JOIN drivedealio.auctions as a on a.id = b.auctions_id
             INNER JOIN drivedealio.vehicles as v on a.vehicles_id = v.id where u.id = $iduser AND v.id = $id;")
@@ -163,7 +165,8 @@ class AuctionController extends Controller
             DB::raw("SELECT u.id as iduser, u.firstname, um.id as idusermember, m.id as idmembership, m.membershiptype, b.id as idbid, b.bidamount,
             a.id as idauction, a.current_price, a.lot_number, v.id as idvehicle, v.model, v.adstatus, a.start_price
             FROM drivedealio.users as u INNER JOIN drivedealio.user_memberships as um on u.id = um.users_id
-            INNER JOIN drivedealio.memberships as m on m.id = um.memberships_id
+            INNER JOIN drivedealio.member_orders as mo on um.id = mo.user_memberships_id
+            INNER JOIN drivedealio.memberships as m on m.id = mo.memberships_id
             INNER JOIN drivedealio.bids as b on um.id = b.user_memberships_id
             INNER JOIN drivedealio.auctions as a on a.id = b.auctions_id
             INNER JOIN drivedealio.vehicles as v on a.vehicles_id = v.id where u.id = $iduser AND v.id = $id;")

@@ -115,7 +115,11 @@
                             <p style="font-size: 14px; font-weight:700;" class="mt-1" id="subTotal">@currency($finalPrice)</p>
                         </div>
                     </div>
-                    <a href="#modalPayment" data-bs-toggle="modal" class="btn btn-info w-100">Select Payment Method</a>
+                    <form action="{{ route('order.post') }}" method="POST" enctype="multipart/form-data" class="row gy-1 gx-2 mt-75" id="bidForm">
+                    @csrf
+                        <button type="submit" class="btn btn-info w-100">Create Order</a>
+                    </form>
+
                 </div>
             </div>
         </div>
@@ -257,37 +261,6 @@
 </div>
 
 {{-- Modal Select Payment --}}
-<div class="modal fade" id="modalPayment" tabindex="-1" role="basic" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-transparent">
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body px-sm-5 mx-50 pb-5">
-                <h1 class="text-center mb-1" id="addNewCardTitle">Select Payment Method</h1>
-                <!-- form -->
-                <form action="{{ route('order.post') }}" method="POST"
-                    enctype="multipart/form-data" class="row gy-1 gx-2 mt-75" id="bidForm">
-                    @csrf
-                    <div class="col-12">
-                        <label class="form-label" for="select-pay">Payment Method</label>
-                            <select class="select2 form-select" id="select-pay" name="payment">
-                                <option value="">--Choose Payment Method--</option>
-                                <option value="M-Banking">M-Banking</option>
-                            </select>
-                    </div>
-                    <div class="col-12 text-center">
-                        <input type="submit" id="submitBid" class="btn btn-primary me-1 mt-1" value="Create Order">
-                        <button type="reset" class="btn btn-outline-secondary mt-1" data-bs-dismiss="modal"
-                            aria-label="Close">
-                            Cancel
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
 <input type="hidden" name="selectedShipping" id="selectedShipping" value="">
 <script>
     function selectShipping() {
@@ -295,5 +268,8 @@
         document.getElementById('selectedShipping').value = selectedShipping;
         $('#shippingModal').modal('hide');
     }
+
+        // For example trigger on button clicked, or any time you need
+    
 </script>
 @endsection

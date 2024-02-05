@@ -63,10 +63,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('registermember', [MembershipController::class, 'store'])->name('membership.store');
     Route::get('/membership/register', [MembershipController::class, 'register']);
     Route::get('/cancel_post/{id}', [MembershipController::class, 'cancel_post'])->name('cancel_post');
-    Route::get('/approve_post/{id}', [MembershipController::class, 'approve_post'])->name('approve_post');
     Route::get('/membership/bilings', [MembershipController::class, 'myBilings'])->name('membership.myBilings');
     Route::get('/update-membership-statuses', [MembershipController::class, 'expired_post'])->name('expired_post');
-    Route::post('/pay-member/{id}', [MembershipController::class, 'paymentPaid'])->name('payment.post');
+    Route::get('/pay-member/{id}', [MembershipController::class, 'paymentPaid'])->name('payment-post');
 
     Route::get('/admin/reviewvehicle/{id}', [VehicleController::class, 'adminEdit'])->name('vehicle.adminEdit');
     Route::get('/approve/{id}', [VehicleController::class, 'approve'])->name('approve_post');
@@ -117,10 +116,12 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/createorder', [TransactionController::class, 'createOrderSparepart'])->name('order.post');
     Route::get('/payment/{id}', [TransactionController::class, 'paymentIndex']);
     Route::get('/approve-order/{id}', [TransactionController::class, 'approveOrder'])->name('approve_post');
-
     Route::get('/payment-paid/{id}', [TransactionController::class, 'paymentPaid'])->name('payment_post');
     Route::get('/payment-cancel/{id}', [TransactionController::class, 'paymentCancel'])->name('payment_cancel');
     Route::get('/orderhistory', [TransactionController::class, 'transactionList']);
+    Route::get('/order-details', function(){
+        return view('transaction.orderdetails');
+    });
 
     Route::get('/seller/register', function(){
         return view('seller.sellerregister');

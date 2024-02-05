@@ -1,17 +1,9 @@
 @extends('layout.main')
 @section('content')
+<h3>Transaction List</h3>
 <div class="col-md-12" style="padding: 3vh;">
-
     <div class="row">
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-body col-md-12" style="position: sticky; top: 0;">
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-8">
-            <h3>Transaction List</h3>
+        <div class="col-md-8 mx-auto">
             <div class="d-flex flex-column flex-sm-row pt-1 mt-auto mb-1 py-auto">
                 <p style="font-size: 14px; font-weight: 900;">Status :</p>
                 <a href="#" class="btn btn-outline-secondary mx-1">All</a>
@@ -48,11 +40,11 @@
                                 </a>
                             </div>
                         </div>
-                        <div class="col-md-8">
+                        <div class="col-md-8 mx-auto my-auto">
                             <h5 class="my-1">{{ $o->item_name }}</h5>
                             <p class="my-1">{{ $o->quantityordered }} Items x @currency($o->price)</p>
                         </div>
-                        <div class="col-md-2">
+                        <div class="col-md-2 mx-auto my-auto text-center justify-content-end">
                             <p class="my-1">Total Price</p>
                             <p class="my-1">@currency($o->total_price)</p>
                          </div>

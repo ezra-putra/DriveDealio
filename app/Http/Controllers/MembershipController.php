@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\MemberOrder;
 use App\Models\Membership;
 use App\Models\User;
 use App\Models\UserMemberships;
@@ -36,72 +37,28 @@ class MembershipController extends Controller
         return view('membership.register');
     }
 
-    public function myBilings(){
+    public function myBilings()
+    {
         $iduser = auth()->id();
 
         if(auth()->user()->roles_id === 1){
             $member = DB::select(
                 DB::raw("SELECT m.id as idmember, m.membershiptype as name, hm.id as idhasmember, hm.status, hm.start, hm.end, u.id as iduser,
-                hm.created_at, hm.updated_at , u.roles_id, hm.paymentmethod, hm.paymentstatus, hm.paymentduedate, hm.paymentdate, u.firstname
+                hm.created_at, hm.updated_at , u.roles_id, mo.paymentstatus, mo.paymentdate, u.firstname, mo.id as idorder
                 from drivedealio.user_memberships as hm INNER JOIN drivedealio.users as u on hm.users_id = u.id
-                INNER JOIN drivedealio.memberships as m on hm.memberships_id = m.id order by hm.created_at desc;")
+                INNER JOIN drivedealio.member_orders as mo on hm.id = mo.user_memberships_id
+                INNER JOIN drivedealio.memberships as m on m.id = mo.memberships_id order by hm.created_at desc;")
             );
         }else{
             $member = DB::select(
-                DB::raw("SELECT m.id as idmember, m.membershiptype as name, hm.id as idhasmember, hm.status, hm.start, hm.end, u.id as iduser,
-                hm.created_at, hm.updated_at , u.roles_id, hm.paymentmethod, hm.paymentstatus, hm.paymentduedate, hm.paymentdate
+                DB::raw("SELECT m.id as idmember, m.membershiptype as name, hm.id as idhasmember, hm.status, hm.start, hm.end, u.id as iduser, u.firstname, u.lastname, u.email, u.phonenumber,
+                hm.created_at, hm.updated_at , u.roles_id, mo.paymentstatus, mo.paymentdate, mo.id as idorder, mo.price, mo.snap_token
                 from drivedealio.user_memberships as hm INNER JOIN drivedealio.users as u on hm.users_id = u.id
-                INNER JOIN drivedealio.memberships as m on hm.memberships_id = m.id where u.id = $iduser order by hm.created_at desc;")
+                INNER JOIN drivedealio.member_orders as mo on hm.id = mo.user_memberships_id
+                INNER JOIN drivedealio.memberships as m on m.id = mo.memberships_id where u.id = $iduser order by hm.created_at desc;")
             );
-
-            $endDateTime = Carbon::parse($member[0]->end);
-            $now = Carbon::now();
-            if($now >= $endDateTime)
-            {
-                DB::update("UPDATE drivedealio.user_memberships SET status = :status WHERE id = :id",
-                ['status' => "Not Active", 'id' => $member[0]->idhasmember]);
-                return view('/membership/bilings', compact('member'));
-            }
         }
-
-        $startDateTime = Carbon::parse($member[0]->created_at);
-        $endDateTime = Carbon::parse($member[0]->end);
-        $now = Carbon::now();
-        $idhasmember = $member[0]->idhasmember;
-        if ($now >= $endDateTime) {
-            DB::table('drivedealio.user_memberships')
-                ->where('id', $idhasmember)
-                ->update(['status' => 'Not Active']);
-
-                $user = User::find($iduser);
-                $title = 'Membership expired';
-                $message = 'Your membership has expired, please renew it.';
-                $user->notify(new NotificationsMembership($title ,$message));
-            }
-        $interval = $startDateTime->diff($endDateTime);
-        $member[0]->duration = $this->formatDuration($interval);
-
-        $expirationDate = strtotime($member[0]->end);
-        $currentDate = strtotime(now());
-        $daysRemaining = max(0, ceil(($expirationDate - $currentDate) / (60 * 60 * 24)));
-        $progressPercentage = min(100, max(0, floor(($daysRemaining / 365) * 100)));
-
-        return view('/membership/bilings', compact('member', 'daysRemaining', 'progressPercentage'));
-    }
-
-    public function approve_post($id)
-    {
-        $member = UserMemberships::findOrFail($id);
-        $member->status = 'Active';
-        $member->save();
-
-        $iduser = auth()->id();
-        $user = User::find($iduser);
-        $title = 'Membership status';
-        $message = 'Your membership is now active.';
-        $user->notify(new NotificationsMembership($title, $message));
-
-        return back()->with('status', 'Your request has been process!');
+        return view('/membership/bilings', compact('member'));
     }
 
     public function cancel_post($id)
@@ -130,28 +87,67 @@ class MembershipController extends Controller
     public function store(Request $request)
     {
         $iduser = auth()->id();
+
+        $user = DB::select(
+            DB::raw("SELECT id, firstname, lastname, phonenumber, email
+            from drivedealio.users where id=$iduser;")
+        );
+
         $member = DB::select(
-            DB::raw("select m.id as idmember, m.membershiptype, hm.id as idhasmember, hm.status, hm.start, hm.end, u.id as iduser, hm.created_at, hm.updated_at , u.roles_id
+            DB::raw("SELECT m.id as idmember, m.membershiptype as name, hm.id as idhasmember, hm.status, hm.start, hm.end, u.id as iduser, u.firstname, u.lastname, u.email, u.phonenumber,
+            hm.created_at, hm.updated_at , u.roles_id, mo.paymentstatus, mo.paymentdate, mo.id as idorder, mo.price, mo.snap_token
             from drivedealio.user_memberships as hm INNER JOIN drivedealio.users as u on hm.users_id = u.id
-            INNER JOIN drivedealio.memberships as m on hm.memberships_id = m.id where u.id = $iduser AND hm.status = 'Active';")
+            INNER JOIN drivedealio.member_orders as mo on hm.id = mo.user_memberships_id
+            INNER JOIN drivedealio.memberships as m on m.id = mo.memberships_id where u.id = $iduser AND hm.status = 'Active';")
+        );
+
+        $membership = DB::select(
+            DB::raw("select id, membershiptype, price, description FROM drivedealio.memberships;")
+        );
+
+        $date = DB::select(
+            DB::raw("SELECT count(created_at) from drivedealio.member_orders where DATE(created_at) = CURRENT_DATE;")
         );
         if(empty($member))
         {
-            $member = new UserMemberships;
-            $member->users_id = auth()->id();
-            $member->memberships_id = $request->input('member');
-            $member->status = 'Pending';
-            $member->paymentstatus = 'Unpaid';
-            $member->paymentduedate = Carbon::now()->addDay();
-            $member->start = now();
-            if ($member->memberships_id == 3 || $member->memberships_id == 4) {
+            $usermember = new UserMemberships;
+            $usermember->users_id = auth()->id();
+            $usermember->status = 'Pending';
+            $usermember->save();
 
-                $member->end = $member->start->copy()->addMonths(3);
-            } else {
+            $memberorder = new MemberOrder;
+            $counter = $date[0]->count + 1;
+            $memberorder->invoicenum = "INV/" .date("Y/m/d"). "/$counter";
+            $memberorder->user_memberships_id = $usermember->id;
+            $memberorder->memberships_id = $request->input('member');
+            $memberorder->paymentstatus = 'Unpaid';
+            $adminprice = 2000;
+            $memberorder->price = $membership[0]->price + $adminprice;
+            $memberorder->save();
 
-                $member->end = $member->start->copy()->addMonth();
-            }
-            $member->save();
+            \Midtrans\Config::$serverKey = 'SB-Mid-server-AOdoK40xyUyq11-i9Cc9ysHM';
+            \Midtrans\Config::$isProduction = false;
+            \Midtrans\Config::$isSanitized = true;
+            \Midtrans\Config::$is3ds = true;
+
+            $params = array(
+                'transaction_details' => array(
+                    'order_id' => $memberorder->invoicenum,
+                    'gross_amount' => $memberorder->price,
+                ),
+                'customer_details' => array(
+                    'first_name' => $user[0]->firstname,
+                    'last_name' => $user[0]->lastname,
+                    'email' => $user[0]->email,
+                    'phone' => $user[0]->phonenumber,
+                ),
+            );
+
+            $snapToken = \Midtrans\Snap::getSnapToken($params);
+            $orderMember = MemberOrder::findOrFail($memberorder->id);
+            $orderMember->snap_token = $snapToken;
+            $orderMember->save();
+
             $user = User::find($iduser);
             $title = 'Payment reminder';
             $message = 'Please settle your membership payment.';
@@ -165,13 +161,29 @@ class MembershipController extends Controller
         }
     }
 
-    public function paymentPaid(Request $request, $id)
+    public function paymentPaid($id)
     {
-        $member = UserMemberships::findOrFail($id);
-        $member->status = "Pending";
-        $member->paymentstatus = "Paid";
-        $member->paymentmethod = $request->input('payment');
-        $member->paymentdate = Carbon::now();
+        $memberorder = MemberOrder::findOrFail($id);
+        $memberorder->paymentstatus = "Paid";
+        $memberorder->paymentdate = Carbon::now();
+        $memberorder->save();
+
+        $membership = DB::select(
+            DB::raw("SELECT m.id as idmember, m.membershiptype as name, hm.id as idhasmember, hm.status, hm.start, hm.end, u.id as iduser, u.firstname, u.lastname, u.email, u.phonenumber,
+            hm.created_at, hm.updated_at , u.roles_id, mo.paymentstatus, mo.paymentdate, mo.id as idorder, mo.price, mo.snap_token
+            from drivedealio.user_memberships as hm INNER JOIN drivedealio.users as u on hm.users_id = u.id
+            INNER JOIN drivedealio.member_orders as mo on hm.id = mo.user_memberships_id
+            INNER JOIN drivedealio.memberships as m on m.id = mo.memberships_id where mo.id = $id")
+        );
+
+        $member = UserMemberships::findOrFail($membership[0]->idhasmember);
+        $member->status = "Active";
+        $member->start = Carbon::now();
+        if ($member->memberships_id == 3 || $member->memberships_id == 4) {
+            $member->end = $member->start->copy()->addMonths(3);
+        } else {
+            $member->end = $member->start->copy()->addMonth();
+        }
         $member->save();
 
         $iduser = auth()->id();
@@ -180,7 +192,7 @@ class MembershipController extends Controller
         $message = 'Payment received, wait for confirmation from system.';
         $user->notify(new NotificationsMembership($title, $message));
 
-        return redirect()->back()->with('success', 'Transaction Success');
+        return redirect('/membership/bilings')->with('success', 'Payment Success');
     }
 
     protected function formatDuration($interval)

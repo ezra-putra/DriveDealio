@@ -52,16 +52,17 @@ class AdminController extends Controller
     public function dashboard()
     {
         $vehicle = DB::select(
-            DB::raw("select v.id as idvehicle, CONCAT(v.model,' ', v.variant) as name, v.transmission, v.platenumber, v.adstatus, v.inputdate, b.name as brand, u.id, u.firstname
+            DB::raw("SELECT v.id as idvehicle, CONCAT(v.model,' ', v.variant) as name, v.transmission, v.platenumber, v.adstatus, v.inputdate, b.name as brand, u.id, u.firstname
             FROM drivedealio.vehicles as v INNER JOIN drivedealio.brands as b on v.brands_id = b.id
             INNER JOIN drivedealio.users as u on v.users_id = u.id order by v.inputdate asc LIMIT 5;")
         );
 
         $user = DB::select(
-            DB::raw("select u.id, u.email, u.firstname, u.lastname, u.phonenumber, r.name, um.id as idmemberships, m.membershiptype
+            DB::raw("SELECT u.id, u.email, u.firstname, u.lastname, u.phonenumber, r.name, um.id as idmemberships, m.membershiptype
             from drivedealio.users as u INNER JOIN drivedealio.roles as r on u.roles_id = r.id
-            LEFT JOIN drivedealio.user_memberships as um on u.id = um.users_id
-            LEFT JOIN drivedealio.memberships as m on um.memberships_id = m.id
+            INNER JOIN drivedealio.user_memberships as um on u.id = um.users_id
+            LEFT JOIN drivedealio.member_orders as mo on um.id = mo.user_memberships_id
+            INNER JOIN drivedealio.memberships as m on m.id = mo.memberships_id
             where r.name != 'Admin' AND (um.status = 'Approved' OR um.status IS NULL) order by u.id asc LIMIT 5;")
         );
         return view('/admin/dashboard' , compact('vehicle', 'user'));
