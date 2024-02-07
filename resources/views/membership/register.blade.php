@@ -1,10 +1,10 @@
 @extends('layout.main')
 @section('content')
+<h3>Membership Register</h3>
 <form action="{{ route('membership.store') }}" method="POST" enctype="multipart/form-data">
     <div class="col-md-12" style="padding: 3vh;">
         <div class="card">
             <div class="card-body col-md-12">
-                <h3>Membership Register</h3>
                 <form action="" method="POST" enctype="multipart/form-data">
                     <div class="bs-stepper-content row my-2">
                         @csrf
@@ -27,27 +27,6 @@
                                                 placeholder="Enter Phone Number" name="phone" value="{{ $u->phonenumber }}" readonly/>
                                         </div>
                                     </div>
-                                </div>
-
-                                <div class="col-md-12">
-                                    <label for="fileKtp" class="form-label">Upload Scan KTP</label>
-                                    <input class="form-control" type="file" id="fileKtp" />
-                                    <p style="color: red; margin-left: 5px; size: 10px;">*Maximum file size is 2MB, and only
-                                        PDF file format is accepted.</p>
-                                </div>
-
-                                <div class="col-md-12">
-                                    <label for="fileKtp" class="form-label">Upload Selfie with KTP</label>
-                                    <input class="form-control" type="file" id="fileKtp" />
-                                    <p style="color: red; margin-left: 5px; size: 10px;">*Maximum file size is 2MB, and only
-                                        PDF file format is accepted.</p>
-                                </div>
-
-                                <div class="col-md-12">
-                                    <label for="fileNpwp" class="form-label">Upload Scan NPWP</label>
-                                    <input class="form-control" type="file" id="fileNpwp" />
-                                    <p style="color: red; margin-left: 5px; size: 10px;">*Maximum file size is 2MB, and only
-                                        PDF file format is accepted.</p>
                                 </div>
                             </div>
                             @endforeach

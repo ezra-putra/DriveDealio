@@ -60,11 +60,10 @@ class SellerController extends Controller
     {
         $iduser = auth()->id();
         $orderlist = DB::select(
-            DB::raw("SELECT u.id as iduser, u.firstname, o.id as idorder, o.orderdate, o.shops_id, o.users_id, o.invoicenum, o.status, o.paymentstatus, sp.id as idsparepart,
-            (SELECT sum(od.unitprice) from drivedealio.orderdetails as od where od.orders_id = o.id ) as total_price
-            from drivedealio.users as u INNER JOIN drivedealio.orders as o on u.id = o.users_id
-            INNER JOIN drivedealio.orderdetails as od on o.id = od.orders_id
-            INNER JOIN drivedealio.spareparts as sp on od.spareparts_id = sp.id
+            DB::raw("SELECT o.id as idorder, u.id as iduser, o.invoicenum, o.orderdate, o.shops_id, o.users_id, o.status, o.paymentstatus, s.name, u.firstname,
+            (SELECT sum(od.unitprice) from drivedealio.orderdetails as od where od.orders_id = o.id LIMIT 1) as total_price
+            from drivedealio.orders as o INNER JOIN drivedealio.users as u on o.users_id = u.id
+            INNER JOIN drivedealio.shops as s on o.shops_id = s.id
             WHERE o.shops_id = (select s.id as idshop from drivedealio.shops as s
             INNER JOIN drivedealio.users as u on s.users_id = u.id where s.users_id = $iduser) order by o.orderdate desc;")
         );

@@ -79,7 +79,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="item-options text-center" style="justify-content: center;">
+                                <div class="item-options text-center mb-1 w-100" style="justify-content: center;">
                                     <form method="POST" action="{{ route('wishlist.post', $s->idsparepart) }}" enctype="multipart/form-data" style="display: inline-block">
                                         @csrf
                                         <button class="btn btn-light w-100">

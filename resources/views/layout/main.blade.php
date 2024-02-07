@@ -14,7 +14,7 @@
     <title>DriveDealio - Your Trusted Vehicle Auctions and Autoparts</title>
     <link rel="apple-touch-icon" href="../../../app-assets/images/ico/apple-icon-120.png">
     <link rel="shortcut icon" type="image/x-icon" href="../../../app-assets/images/ico/favicon.ico">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500;1,600"
+    <link href="../../../app-assets/fonts/monserat.css"
         rel="stylesheet">
 
     <!-- BEGIN: Vendor CSS-->
@@ -33,7 +33,6 @@
     <link rel="stylesheet" type="text/css" href="../../../app-assets/vendors/css/extensions/swiper.min.css">
 
     <link rel="stylesheet" type="text/css" href="../../../app-assets/css/core/colors/palette-gradient.css">
-    <link rel="stylesheet" type="text/css" href="../../../app-assets/css/pages/app-ecommerce-shop.css">
 
     <link rel="stylesheet" type="text/css"
         href="../../../app-assets/vendors/css/tables/datatable/dataTables.bootstrap5.min.css">
@@ -90,7 +89,6 @@
     <link rel="stylesheet" type="text/css" href="../../../assets/css/style.css">
 
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <script src='https://kit.fontawesome.com/a076d05399.js' crossorigin='anonymous'></script>
 
     <!-- END: Custom CSS-->
 
@@ -438,12 +436,10 @@
     <!-- BEGIN: Theme JS-->
     <script src="../../../app-assets/js/core/app-menu.js"></script>
     <script src="../../../app-assets/js/core/app.js"></script>
-    <script src="../../../app-assets/js/scripts/components.js"></script>
     <!-- END: Theme JS-->
 
     <!-- BEGIN: Page JS-->
     <script src="../../../app-assets/js/scripts/pages/app-ecommerce-details.js"></script>
-    <script src="../../../app-assets/js/scripts/forms/number-input.js"></script>
 
     <script src="../../../app-assets/vendors/js/forms/select/select2.full.min.js"></script>
     <!-- END: Page JS-->
@@ -456,11 +452,8 @@
 
     <!-- BEGIN: Page Vendor JS-->
     <script src="../../../app-assets/vendors/js/ui/jquery.sticky.js"></script>
-    <script src="../../../app-assets/js/scripts/forms/form-select2.js"></script>
 
-    <script src="../../../app-assets/vendors/js/calendar/fullcalendar.min.js"></script>
     <script src="../../../app-assets/vendors/js/extensions/moment.min.js"></script>
-    <script src="../../../app-assets/vendors/js/forms/select/select2.full.min.js"></script>
     <script src="../../../app-assets/vendors/js/forms/validation/jquery.validate.min.js"></script>
     <script src="../../../app-assets/vendors/js/pickers/flatpickr/flatpickr.min.js"></script>
 
@@ -470,13 +463,9 @@
     <!-- BEGIN: Theme JS-->
     <script src="../../../app-assets/js/core/app-menu.js"></script>
     <script src="../../../app-assets/js/core/app.js"></script>
-    <script src="../../../app-assets/js/scripts/components.js"></script>
     <!-- END: Theme JS-->
 
     <!-- BEGIN: Page JS-->
-    <script src="../../../app-assets/js/scripts/pages/app-ecommerce-shop.js"></script>
-
-    <script src="../../../app-assets/js/scripts/forms/form-file-uploader.js"></script>
     <script src="../../../app-assets/vendors/js/file-uploaders/dropzone.min.js"></script>
 
     <script src="../../../app-assets/vendors/js/ui/jquery.sticky.js"></script>
@@ -489,7 +478,6 @@
     <script src="../../../app-assets/js/scripts/pages/page-pricing.js"></script>
 
     <script src="../../../app-assets/js/scripts/pages/app-calendar-events.js"></script>
-    <script src="../../../app-assets/js/scripts/pages/app-calendar.js"></script>
 
     <script src="../../../app-assets/js/scripts/forms/form-wizard.js"></script>
     <!-- END: Page JS-->

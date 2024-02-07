@@ -41,32 +41,4 @@ class RegisterController extends Controller
 
   }
 
-  public function addAddress(Request $request)
-  {
-    $iduser = auth()->id();
-    $address = new Address;
-    $address->users_id = $iduser;
-    $address->name = $request->input('name');
-    $address->address = $request->input('address');
-    $address->province = $request->input('province');
-    $address->city = $request->input('city');
-    $address->district = $request->input('district');
-    $address->zipcode = $request->input('zip');
-
-    $user = DB::select(
-        DB::raw("SELECT count(id) as count from drivedealio.addresses where id = $iduser")
-    );
-    if($user[0]->count = 0)
-    {
-        $address->is_primaryadd = true;
-    }else{
-        $address->is_primaryadd = false;
-    }
-
-
-
-    $address->save();
-    return redirect()->back();
-  }
-
 }

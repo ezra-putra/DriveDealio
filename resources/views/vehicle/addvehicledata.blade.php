@@ -1,12 +1,10 @@
 @extends('layout.main')
 @section('content')
-    <link rel="stylesheet" type="text/css" href="../../../app-assets/vendors/css/file-uploaders/dropzone.min.css">
-    <link rel="stylesheet" type="text/css" href="../../../app-assets/css/plugins/forms/form-file-uploader.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dropzone/5.9.0/dropzone.js"></script>
+    <meta name="csrf_token" content="{{ csrf_token() }}"/>
+    <h3>Sell My Vehicle</h3>
     <div class="col-md-12" style="padding: 3vh;">
         <div class="card">
             <div class="card-body col-md-12">
-                <h3>Sell My Vehicle</h3>
                 <p style="color: red; margin-left: 5px; size: 10px;">*Enter the vehicle data as stated on the STNK and the correct vehicle specifications.</p>
                 <form action="{{ route('vehicle.store') }}" method="POST" enctype="multipart/form-data">
                     <div class="bs-stepper-content row my-2">
@@ -15,24 +13,29 @@
                             <div class="col-lg-12 col-md-6 col-12">
                                 <div class="row">
                                     <div class="col-md-6 mb-1">
-                                        <label class="form-label" for="select-brand">Vehicle Brand</label>
-                                        <select class="select2 form-select" id="select-brand" name="brand">
-                                            <option value="">--Choose Vehicle Brand--</option>
-                                            @foreach ($brand as $b)
-                                                <option value={{ $b->id }}>{{ $b->name }}</option>
+                                        <label class="form-label" for="select-cat">Vehicle Categories</label>
+                                        <select class="form-select" id="select-cat" name="cat">
+                                            <option value="">--Choose Vehicle Type--</option>
+                                            @foreach ($cat as $c)
+                                                <option value={{ $c->id }}>{{ $c->name }}</option>
                                             @endforeach
                                         </select>
                                     </div>
-
                                     <div class="col-md-6 mb-1">
                                         <label class="form-label" for="select-type">Vehicle Type</label>
-                                        <select class="select2 form-select" id="select-type" name="type">
+                                        <select class="form-select" id="select-type" name="type">
                                             <option value="">--Choose Vehicle Type--</option>
-                                            @foreach ($type as $t)
-                                                <option value={{ $t->id }}>{{ $t->name }}</option>
-                                            @endforeach
                                         </select>
                                     </div>
+                                </div>
+                                <div class="col-md-12 mb-1">
+                                    <label class="form-label" for="select-brand">Vehicle Brand</label>
+                                    <select class="form-select" id="select-brand" name="brand">
+                                        <option value="">--Choose Vehicle Brand--</option>
+                                        @foreach ($brand as $b)
+                                            <option value={{ $b->id }}>{{ $b->name }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
 
                                 <div class="row">
@@ -189,14 +192,30 @@
         </div>
     </div>
 
-
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script>
-        // Note that the name "myDropzone" is the camelized
-        // id of the form.
-        Dropzone.options.myDropzone = {
-            paramName: "file", // The name that will be used to transfer the file
-            maxFilesize: 10, // MB
-            maxFiles:10,
-        };
+        $(function () {
+            $.ajaxSetup({
+                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf_token"]').attr('content') }
+            });
+
+            $(function(){
+                $('#select-cat').on('change', function() {
+                    let cat_id = $('#select-cat').val();
+                    $.ajax({
+                        type: 'POST',
+                        url: "{{ route('type') }}",
+                        data: { vehiclecategories_id:cat_id },
+                        cache: false,
+                        success: function(data){
+                            $('#select-type').html(data);
+                        },
+                        error: function(error){
+                            console.log(error);
+                        }
+                    });
+                });
+            });
+        })
     </script>
 @endsection

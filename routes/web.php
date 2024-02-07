@@ -39,7 +39,7 @@ Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
 Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
 Route::post('/register', [RegisterController::class, 'register'])->name('register.post');
 
-Route::post('/addadress', [RegisterController::class, 'addAddress'])->name('address.post');
+Route::post('/addadress', [UserController::class, 'addAddress'])->name('address.post');
 
 Route::get('/', [WelcomeController::class, 'index'], function () {
     return view('welcome');
@@ -57,6 +57,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/vehicle/adddata', [VehicleController::class, 'toFormAddVehicle'])->name('vehicle.addvehicle');
     Route::post('add-vehicle', [VehicleController::class, 'store'])->name('vehicle.store');
+    Route::post('/type', [VehicleController::class, 'type'])->name('type');
     Route::get('/vehicle/setupauction/{id}', [VehicleController::class, 'auctionSetupBtn'])->name('auctionSetupBtn');
     Route::put('/vehicle/auctionsetup/{id}', [VehicleController::class, 'auctionSetup'])->name('auctionSetup');
 
@@ -119,9 +120,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/payment-paid/{id}', [TransactionController::class, 'paymentPaid'])->name('payment_post');
     Route::get('/payment-cancel/{id}', [TransactionController::class, 'paymentCancel'])->name('payment_cancel');
     Route::get('/orderhistory', [TransactionController::class, 'transactionList']);
-    Route::get('/order-details', function(){
-        return view('transaction.orderdetails');
-    });
+    Route::get('/order/order-details/{id}', [TransactionController::class, 'transactionDetails'])->name('transaction.details');
 
     Route::get('/seller/register', function(){
         return view('seller.sellerregister');
@@ -129,8 +128,13 @@ Route::middleware(['auth'])->group(function () {
     Route::post('become-seller', [UserController::class, 'becomeSeller'])->name('seller.register');
     Route::get('/user', [UserController::class, 'index']);
     Route::get('/profile', [UserController::class, 'profile']);
-    Route::post('/set-primary-address/{address}', [UserController::class, 'setPrimaryAddress'])
+    Route::post('/set-primary-address/{id?}', [UserController::class, 'setPrimaryAddress'])
     ->name('primary.address');
+    Route::post('/upload-userinfo', [UserController::class, 'uploadUserInformation'])->name('userinfo.post');
+    Route::post('/regency', [UserController::class, 'regency'])->name('regency');
+    Route::post('/district', [UserController::class, 'district'])->name('district');
+    Route::post('/village', [UserController::class, 'village'])->name('village');
+
 
     Route::get('/admin/listseller', [AdminController::class, 'listSeller'])->name('admin.listseller');
     Route::get('/approveseller/{id}', [AdminController::class, 'approveSeller'])->name('admin.approve');

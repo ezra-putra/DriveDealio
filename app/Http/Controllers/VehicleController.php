@@ -12,6 +12,7 @@ use Carbon\Carbon;
 
 class VehicleController extends Controller
 {
+
     public function car()
     {
         $vehicle = DB::select(
@@ -21,10 +22,14 @@ class VehicleController extends Controller
             INNER JOIN drivedealio.vehicletypes as vt on vt.id = v.vehicletypes_id
             INNER JOIN drivedealio.vehiclecategories as c on c.id = vt.vehiclecategories_id
             INNER JOIN drivedealio.brands as b on v.brands_id = b.id
-            WHERE c.name = 'Car'")
+            WHERE c.name = 'Car' AND v.adstatus = 'Open to Bid';")
         );
         // dd($vehicle);
-        return view('vehicle.vehicleindex', compact('vehicle'));
+
+        $type = DB::select(
+            DB::raw("SELECT * FROM drivedealio.vehicletypes where vehiclecategories_id = 1;")
+        );
+        return view('vehicle.vehicleindex', compact('vehicle', 'type'));
     }
 
 
@@ -39,7 +44,10 @@ class VehicleController extends Controller
             INNER JOIN drivedealio.brands as b on v.brands_id = b.id
             WHERE c.name = 'Motorcycle' AND v.adstatus = 'Open to Bid';")
         );
-        return view('vehicle.vehicleindex', compact('vehicle'));
+        $type = DB::select(
+            DB::raw("SELECT * FROM drivedealio.vehicletypes where vehiclecategories_id = 2;")
+        );
+        return view('vehicle.vehicleindex', compact('vehicle', 'type'));
     }
 
     public function myvehicle()
@@ -93,13 +101,6 @@ class VehicleController extends Controller
             INNER JOIN drivedealio.vehicletypes as vt on v.vehicletypes_id = vt.id
             where v.id = $id;")
         );
-
-        //$ownerinfo
-
-
-        //$buyerinfo
-
-        //$reguler
 
         $bid = DB::select(
             DB::raw("SELECT u.id as iduser, um.id as idusermember, b.id as idbid, a.id as idauction, v.id as idvehicle,
@@ -167,25 +168,31 @@ class VehicleController extends Controller
             DB::raw("SELECT count(id) as vehicle_upload from drivedealio.vehicles where users_id = $iduser;")
         );
 
-        //sepertinya tak hapus karna kurang menguntungkan
-        $usermember = DB::select(
-            DB::raw("SELECT u.id as iduser, u.firstname, um.id as idusermember, um.status, m.membershiptype
-            FROM drivedealio.users as u INNER JOIN drivedealio.user_memberships as um on u.id = um.users_id
-            INNER JOIN drivedealio.memberships as m on um.memberships_id = m.id WHERE u.id = $iduser AND um.status = 'Active';")
-        );
-
         $brand = DB::select(
             DB::raw('SELECT id, name from drivedealio.brands;')
         );
-        $type = DB::select(
-            DB::raw('SELECT id, name from drivedealio.vehicletypes; ')
-        );
+
         $date = DB::select(
             DB::raw('SELECT id, appointmentdate, appointmenttime from drivedealio.appointments;')
         );
+        $cat = DB::select(
+            DB::raw("SELECT id, name from drivedealio.vehiclecategories")
+        );
 
-        return view('vehicle.addvehicledata', compact('brand', 'type', 'year', 'color', 'date'));
+        return view('vehicle.addvehicledata', compact('brand', 'date', 'cat'));
 
+    }
+    public function type(Request $request)
+    {
+        $cat_id = $request->vehiclecategories_id;
+        $type = DB::select(
+            DB::raw("SELECT id, name, vehiclecategories_id from drivedealio.vehicletypes where vehiclecategories_id = $cat_id;")
+        );
+
+        foreach($type as $t)
+        {
+            echo "<option value='$t->id'>$t->name</option>";
+        }
     }
 
     public function create()
@@ -215,6 +222,30 @@ class VehicleController extends Controller
         $vehicle->inputdate = now();
         $vehicle->save();
 
+        if ($request->hasFile('stnk')) {
+            $file = $request->file('stnk');
+            $fileName = "STNK"."-$vehicle->id". "." .$file->getClientOriginalExtension();
+            $file->move(public_path("uploads/vehicle/$vehicle->id"), $fileName);
+
+            DB::update("UPDATE drivedealio.vehicles SET stnk = :stnk where id = :id",
+            ['stnk'=> $fileName, 'id'=>$vehicle->id]);
+        }
+        if ($request->hasFile('bpkb')){
+            $file = $request->file('bpkb');
+            $fileName = "BPKB"."-$vehicle->id". "." .$file->getClientOriginalExtension();
+            $file->move(public_path("uploads/vehicle/$vehicle->id"), $fileName);
+
+            DB::update("UPDATE drivedealio.vehicles SET bpkb = :bpkb where id = :id",
+            ['bpkb'=> $fileName, 'id'=>$vehicle->id]);
+        }
+        if ($request->hasFile('invoice')){
+            $file = $request->file('invoice');
+            $fileName = "INV"."-$vehicle->id". "." .$file->getClientOriginalExtension();
+            $file->move(public_path("uploads/vehicle/$vehicle->id"), $fileName);
+
+            DB::update("UPDATE drivedealio.vehicles SET invoice = :invoice where id = :id",
+            ['invoice'=> $fileName, 'id'=>$vehicle->id]);
+        }
         $date = DB::select(
             DB::raw("SELECT count(inputdate) from drivedealio.vehicles where DATE(inputdate) = CURRENT_DATE;")
         );
@@ -224,7 +255,7 @@ class VehicleController extends Controller
         foreach($request->file('image') as $image)
         {
             $name = $vehicle->inputdate->format('ymd'). "-$counter". "." .$image->getClientOriginalExtension();
-            $image->move(public_path('images'), $name);
+            $image->move(public_path("images/vehicle/$vehicle->id"), $name);
             $data[] = [
                 'url' => $name,
                 'vehicles_id' => $vehicle->id,
@@ -270,7 +301,6 @@ class VehicleController extends Controller
         $vehicle = Vehicle::findOrFail($id);
         $vehicle->adstatus = 'Inspection';
         $vehicle->verificationdate = now();
-
         $vehicle->save();
 
         return redirect('/admin/listvehicle')->with('status', 'Your request has been processed!')->with('approvedVehicleId', $vehicle->id);

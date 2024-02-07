@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\District;
 use App\Models\Order;
 use App\Models\OrderDetail;
+use App\Models\Province;
+use App\Models\Regency;
+use App\Models\Village;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -118,12 +122,18 @@ class TransactionController extends Controller
             (SELECT p.url FROM drivedealio.pics as p WHERE p.spareparts_id = sp.id LIMIT 1) as url
             FROM drivedealio.spareparts as sp INNER JOIN drivedealio.carts as c on sp.id = c.spareparts_id
             INNER JOIN drivedealio.users as u on c.users_id = u.id
-            INNER JOIN drivedealio.shops as s on sp.shops_id = s.id WHERE u.id =  $iduser ")
+            INNER JOIN drivedealio.shops as s on sp.shops_id = s.id WHERE u.id =  $iduser ;")
         );
+
         $address = DB::select(
-            DB::raw("SELECT u.id as iduser, a.id as idaddress, a.name, a.address, a.district, a.city, a.zipcode, a.province, a.is_primaryadd
-            from drivedealio.users as u INNER JOIN drivedealio.addresses as a on u.id = a.users_id where u.id = $iduser AND a.is_primaryadd = true;")
+            DB::raw("SELECT id as idaddress, name, address, district,
+            city, province, village, zipcode, is_primaryadd FROM drivedealio.addresses where users_id = $iduser order by is_primaryadd desc")
         );
+
+        $provinces = Province::all();
+        $regencies = Regency::all();
+        $districts = District::all();
+        $villages = Village::all();
 
         $profile = DB::select(
             DB::raw("SELECT u.id as iduser, u.email, u.profilepicture, u.firstname, u.lastname, u.birthdate, u.phonenumber, a.id as idaddress, a.name, a.address, a.district,
@@ -136,7 +146,7 @@ class TransactionController extends Controller
         )[0];
 
 
-        return view('transaction.checkout', compact('checkout', 'userinfo', 'address', 'profile'));
+        return view('transaction.checkout', compact('checkout', 'userinfo', 'address', 'profile', 'provinces', 'regencies', 'districts', 'villages'));
     }
 
     public function createOrderSparepart(Request $request)
@@ -168,6 +178,7 @@ class TransactionController extends Controller
             $order->shops_id = $checkout[0]->idseller;
             // dd($order);
             $order->save();
+            $shipping = 20000;
 
             foreach($checkout as $c)
             {
@@ -179,7 +190,15 @@ class TransactionController extends Controller
 
                 DB::delete("DELETE FROM drivedealio.carts WHERE id = :id", ['id' => $c->idcart]);
             }
-            return redirect('/payment/'. $order->id)->with('success', 'Transaction Success');
+            $total = DB::select(
+                DB::raw("SELECT sum(unitprice) as price from drivedealio.orderdetails where orders_id = $order->id")
+            );
+            $totalprice = $total[0]->price + $shipping;
+
+            DB::update("UPDATE drivedealio.orders SET total_price = :totalprice where id = :id",
+            ['totalprice' => $totalprice, 'id' => $order->id]);
+
+            return redirect('/payment/'. $order->id)->with('success', 'Order Create');
         }
         else{
             return redirect()->back()->with('error', 'Add Your Address First');
@@ -190,22 +209,33 @@ class TransactionController extends Controller
     {
         $iduser = auth()->id();
         $order = DB::select(
-            DB::raw("SELECT o.id as idorder, u.id as iduser, o.invoicenum, o.orderdate, o.shops_id, o.users_id, o.status, o.paymentstatus, od.orders_id, od.spareparts_id, od.quantityordered, s.name,
-            (SELECT unitprice from drivedealio.orderdetails where orders_id = o.id) as price,
-            (SELECT sum(od.unitprice) from drivedealio.orderdetails as od where od.orders_id = o.id ) as total_price,
-            (SELECT CONCAT(partnumber, ' ',partname, ' ', vehiclemodel) from drivedealio.spareparts where shops_id = o.shops_id LIMIT 1) as item_name
-            from drivedealio.orders as o INNER JOIN drivedealio.orderdetails as od on o.id = od.orders_id
-            INNER JOIN drivedealio.users as u on o.users_id = u.id
+            DB::raw("SELECT o.id as idorder, u.id as iduser, o.invoicenum, o.orderdate, o.shops_id, o.users_id, o.status, o.paymentstatus, s.name, o.total_price
+            from drivedealio.orders as o INNER JOIN drivedealio.users as u on o.users_id = u.id
             INNER JOIN drivedealio.shops as s on o.shops_id = s.id
             where u.id = $iduser order by o.orderdate desc;")
         );
+
 
         return view('transaction.order', compact('order'));
     }
 
     public function transactionDetails($id)
     {
+        $iduser = auth()->id();
+        $order = DB::select(
+            DB::raw("SELECT o.id as idorder, u.id as iduser, o.invoicenum, o.orderdate, o.shops_id, o.users_id, o.status, o.paymentstatus, s.name, o.total_price, s.id as idshop
+            from drivedealio.orders as o INNER JOIN drivedealio.users as u on o.users_id = u.id
+            INNER JOIN drivedealio.shops as s on o.shops_id = s.id
+            where u.id = $iduser AND o.id = $id;")
+        );
+        $orderdetails = DB::select(
+            DB::raw("SELECT od.quantityordered, od.unitprice, CONCAT(sp.partnumber, ' ', sp.partname, ' ', sp.vehiclemodel) as item_name
+            FROM drivedealio.orders as o INNER JOIN drivedealio.orderdetails as od on o.id = od.orders_id
+			INNER JOIN drivedealio.spareparts as sp on od.spareparts_id = sp.id where o.users_id = $iduser AND o.id = $id;")
+        );
+        //dd($orderdetails);
 
+        return view('transaction.orderdetails', compact('orderdetails' ,'order'));
     }
 
     public function paymentIndex($id)
@@ -213,7 +243,7 @@ class TransactionController extends Controller
         $iduser = auth()->id();
         $product = DB::select(
             DB::raw("SELECT o.id as idorder, o.invoicenum, o.orderdate, u.id as iduser, o.status, o.paymentstatus, od.quantityordered, s.stock, s.id as idsparepart,
-            (SELECT sum(od.unitprice) from drivedealio.orderdetails as od where od.orders_id = o.id ) as total_price, u.email, u.firstname, u.lastname, u.phonenumber, o.invoicenum
+            total_price, u.email, u.firstname, u.lastname, u.phonenumber, o.invoicenum
             from drivedealio.orders as o INNER JOIN drivedealio.users as u on o.users_id = u.id
             INNER JOIN drivedealio.orderdetails as od on o.id = od.orders_id
             INNER JOIN drivedealio.spareparts as s on od.spareparts_id = s.id
@@ -293,7 +323,7 @@ class TransactionController extends Controller
 
     public function onDelivered($id)
     {
-        
+
     }
 
     protected function formatDuration($interval)

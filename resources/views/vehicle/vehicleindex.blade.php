@@ -188,12 +188,12 @@
                                 <div id="product-categories">
                                     <h6 class="filter-title">Vehicle Type</h6>
                                     <ul class="list-unstyled categories-list">
-                                        @foreach ($vehicle as $v)
+                                        @foreach ($type as $t)
                                         <li>
                                             <div class="form-check">
                                                 <input type="radio" id="category1" name="category-filter"
                                                     class="form-check-input" checked />
-                                                <label class="form-check-label" for="category1">{{ $v->type }}</label>
+                                                <label class="form-check-label" for="category1">{{ $t->name }}</label>
                                             </div>
                                         </li>
                                         @endforeach

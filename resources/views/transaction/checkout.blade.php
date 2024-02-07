@@ -1,7 +1,8 @@
 @extends('layout.main')
 @section('content')
+<meta name="csrf_token" content="{{ csrf_token() }}"/>
+<h3>Checkout</h3>
 <div class="col-md-12" style="padding: 3vh;">
-    <h3>Checkout</h3>
     <div class="row">
         <div class="col-md-8">
             <div class="card ecommerce-card">
@@ -147,29 +148,44 @@
                                 <input type="text" name="name" id="name"
                                     class="form-control" placeholder="Address Name" />
                             </div>
-                            <div class="col-6 mb-1">
+                            <div class="col-12 mb-1">
                                 <label class="form-label" for="address">Address</label>
                                 <input type="text" name="address" id="address"
                                     class="form-control" placeholder="Address" />
                             </div>
 
-                            <div class="col-6 mb-1">
-                                <label class="form-label" for="district">District</label>
-                                <input type="text" name="district" id="district"
-                                    class="form-control" placeholder="district" />
+                            <div class="col-12 mb-1">
+                                <label class="form-label" for="select-province">Province</label>
+                                <select class="form-select" id="select-province" name="province">
+                                    <option value="">--Choose Province--</option>
+                                    @foreach ($provinces as $p)
+                                        <option value="{{ $p->id }}">{{ $p->name }}</option>
+                                    @endforeach
+                                </select>
                             </div>
+
                             <div class="col-6 mb-1">
-                                <label class="form-label" for="province">Province</label>
-                                <input type="text" name="province" id="province"
-                                    class="form-control" placeholder="Province" />
+                                <label class="form-label" for="select-regencies">Regencies</label>
+                                <select class="form-select" id="select-regencies" name="regencies">
+                                    <option value="">--Choose Regencies--</option>
+                                </select>
+                            </div>
+
+                            <div class="col-6 mb-1">
+                                <label class="form-label" for="select-district">District</label>
+                                    <select class="form-select" id="select-district" name="district">
+                                        <option value="">--Choose District--</option>
+                                    </select>
+                            </div>
+
+                            <div class="col-6 mb-1">
+                                <label class="form-label" for="select-village">Village</label>
+                                    <select class="form-select" id="select-village" name="village">
+                                        <option value="">--Choose Village--</option>
+                                    </select>
                             </div>
 
                             <div class="mb-1 col-md-6">
-                                <label class="form-label" for="city">City</label>
-                                <input type="text" name="city" id="city"
-                                    class="form-control" placeholder="City" />
-                            </div>
-                            <div class="mb-1 col-md-12">
                                 <label class="form-label" for="zip">Zip Code</label>
                                 <input type="text" name="zip" id="zip"
                                     class="form-control" placeholder="Zip Code" />
@@ -205,7 +221,7 @@
                             <div class="card-body col-md-12">
                                 <div class="row">
                                     <div class="col-md-8">
-                                        <p style="font-weight: 600;">{{ $p->name }}</p>
+                                        <p style="font-weight: 600;">{{ $p->firstname }} {{ $p->lastname }}</p>
                                         <p>{{ $p->address }}</p>
                                         <p>{{ $p->district }}, {{ $p->city }}, {{ $p->zipcode }}</p>
                                         <p>{{ $p->province }}</p>
@@ -262,14 +278,68 @@
 
 {{-- Modal Select Payment --}}
 <input type="hidden" name="selectedShipping" id="selectedShipping" value="">
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script>
-    function selectShipping() {
-        var selectedShipping = document.getElementById('shippingOption').value;
-        document.getElementById('selectedShipping').value = selectedShipping;
-        $('#shippingModal').modal('hide');
-    }
+    $(function () {
+        $.ajaxSetup({
+            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf_token"]').attr('content') }
+        });
 
-        // For example trigger on button clicked, or any time you need
-    
+        $(function(){
+            $('#select-province').on('change', function() {
+                let province_id = $('#select-province').val();
+                $.ajax({
+                    type: 'POST',
+                    url: "{{ route('regency') }}",
+                    data: { province_id:province_id },
+                    cache: false,
+
+                    success: function(params){
+                        $('#select-regencies').html(params);
+                    },
+                    error: function(data){
+                        console.log(data);
+                    }
+                })
+            })
+        })
+
+        $(function(){
+            $('#select-regencies').on('change', function() {
+                let regency_id = $('#select-regencies').val();
+                $.ajax({
+                    type: 'POST',
+                    url: "{{ route('district') }}",
+                    data: { regency_id:regency_id },
+                    cache: false,
+
+                    success: function(params){
+                        $('#select-district').html(params);
+                    },
+                    error: function(data){
+                        console.log(data);
+                    }
+                })
+            })
+        })
+        $(function(){
+            $('#select-district').on('change', function() {
+                let district_id = $('#select-district').val();
+                $.ajax({
+                    type: 'POST',
+                    url: "{{ route('village') }}",
+                    data: { district_id:district_id },
+                    cache: false,
+
+                    success: function(params){
+                        $('#select-village').html(params);
+                    },
+                    error: function(data){
+                        console.log(data);
+                    }
+                })
+            })
+        })
+    })
 </script>
 @endsection

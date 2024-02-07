@@ -41,8 +41,8 @@
                             </div>
                         </div>
                         <div class="col-md-8 mx-auto my-auto">
-                            <h5 class="my-1">{{ $o->item_name }}</h5>
-                            <p class="my-1">{{ $o->quantityordered }} Items x @currency($o->price)</p>
+                            {{-- <h5 class="my-1">{{ $o->item_name }}</h5>
+                            <p class="my-1">{{ $o->quantityordered }} Items x @currency($o->price)</p> --}}
                         </div>
                         <div class="col-md-2 mx-auto my-auto text-center justify-content-end">
                             <p class="my-1">Total Price</p>
@@ -50,7 +50,7 @@
                          </div>
                     </div>
                     <div class="d-flex justify-content-end me-3">
-                        <a href="#" class="btn btn-flat-success mx-1">
+                        <a href="{{ route('transaction.details', $o->idorder) }}" class="btn btn-flat-success mx-1">
                             Transaction Details
                         </a>
                         @if ($o->status === 'Waiting for Payment')

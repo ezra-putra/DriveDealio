@@ -506,22 +506,7 @@
     </div>
 </div>
 
-<div class="modal fade" id="alertAuctionEnded" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Auction Has Ended!</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" id="body">
-                <p>The auction has ended. Please take a look to another vehicle that <strong>Open to Bid</strong>!</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" id="btnClose" class="btn btn-outline-secondary w-100" data-bs-dismiss="modal">Go back!</button>
-            </div>
-        </div>
-    </div>
-</div>
+
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
@@ -554,21 +539,6 @@
                 $("#submitBid").prop('disabled', true);
                 $("#btnAddWatchlist").prop('disabled', true);
 
-                var modalAuctionEnded = new bootstrap.Modal(document.getElementById('alertAuctionEnded'));
-
-                // Event listener for the close button inside the modal
-                $('#btnClose').on('click', function () {
-                    // Redirect to the previous page when the close button is clicked
-                    history.go(-1);
-                });
-
-                // Show the modal
-                modalAuctionEnded.show();
-
-                // Redirect to the specified page after showing the modal
-                setTimeout(function () {
-                    history.go(-1);
-                }, 5000); // Replace 5000 with the desired delay in milliseconds
             }
 
         }, 1000);
