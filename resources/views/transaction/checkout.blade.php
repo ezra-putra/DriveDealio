@@ -59,7 +59,7 @@
                                         @php
                                             $subTotal = $c->unitprice * $c->quantity;
                                             $totalPrice += $subTotal;
-                                            $finalPrice = $totalPrice + $shippingCost
+                                            $finalPrice = $totalPrice + $price;
                                         @endphp
                                         <p style="font-size: 14px;" class="mt-1 mb-0">{{ $c->quantity }} x @currency($c->unitprice) = @currency($subTotal)</p>
                                     </div>
@@ -68,9 +68,41 @@
                         </div>
                         @endforeach
 
-                        <div class="col-md-4">
-                            <p class="mb-0">Shipping Duration</p>
-                            <a href="#modalShipping" data-bs-toggle="modal" class="btn btn-info w-100 btn-ship">Select Shipping</a>
+                        <div class="col-md-12 mt-1">
+                            <p class="mb-0">Select Shipping</p>
+                            <div class="card-body">
+                                <div class="row custom-options-checkable g-1">
+                                    @foreach ($shipping as $s)
+                                    <div class="col-md-6">
+                                        <input class="custom-option-item-check" type="radio" name="ship" value="{{ $s->id }}" id="rdoship-{{ $s->id }}" checked/>
+                                        <label class="custom-option-item p-1" for="rdoship-{{ $s->id }}">
+                                            <span class="d-flex justify-content-between flex-wrap mb-50">
+                                                <span class="fw-bolder">{{ $s->name }}</span>
+                                                @php
+                                                    if ($distanceValue > 100.0)
+                                                    {
+                                                        if ($s->id === 1)
+                                                        {
+                                                            $price = ($distanceValue * 50) + ($weight * 4000);
+                                                        }
+                                                        elseif ($s->id === 2)
+                                                        {
+                                                            $price = ($distanceValue * 20) + ($weight * 4000);
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        $price = ($distanceValue * 800) + ($weight * 4000);
+                                                    }
+                                                @endphp
+                                                <span class="fw-bolder">@currency($price)</span>
+                                            </span>
+                                            <small class="d-block">{{ $s->details }}</small>
+                                        </label>
+                                    </div>
+                                    @endforeach
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -90,8 +122,6 @@
         <div class="col-md-4">
             <div class="card">
                 <div class="card-body col-md-12" style="position: sticky; top: 0;">
-                    <a href="#" class="btn btn-outline-secondary w-100">Discount Voucher</a>
-                    <hr style="height:5px;border-width:0;color:gray;background-color:lightgray">
                     <h5>Order Summary</h5>
                     <div class="row">
                         <label for="colFormLabelLg" class="col-sm-8 col-form-label-lg">
@@ -104,7 +134,7 @@
                             <p style="font-size: 14px;font-weight:700; ">Shipping Cost</p>
                         </label>
                         <div class="col-sm-4">
-                            <p style="font-size: 14px; font-weight:700;" class="mt-1" id="subTotal">@currency($shippingCost)</p>
+                            <p style="font-size: 14px; font-weight:700;" class="mt-1" id="shipping">@currency($price)</p>
                         </div>
                     </div>
                     <hr style="height:5px;border-width:0;color:gray;background-color:lightgray">
@@ -113,11 +143,14 @@
                             <h4>Total Price</h4>
                         </label>
                         <div class="col-sm-4">
-                            <p style="font-size: 14px; font-weight:700;" class="mt-1" id="subTotal">@currency($finalPrice)</p>
+                            <p style="font-size: 14px; font-weight:700;" class="mt-1" id="finalPrice" data-final-price="{{ $finalPrice }}">@currency($finalPrice)</p>
                         </div>
                     </div>
                     <form action="{{ route('order.post') }}" method="POST" enctype="multipart/form-data" class="row gy-1 gx-2 mt-75" id="bidForm">
                     @csrf
+                        <input type="hidden" name="shipId" id="selectedShipId" value="">
+                        <input type="hidden" name="ongkirfee" value=>
+                        <input type="hidden" name="weight" value={{ $weight }}>
                         <button type="submit" class="btn btn-info w-100">Create Order</a>
                     </form>
 
@@ -166,7 +199,7 @@
 
                             <div class="col-6 mb-1">
                                 <label class="form-label" for="select-regencies">Regencies</label>
-                                <select class="form-select" id="select-regencies" name="regencies">
+                                <select class="form-select" id="select-regencies" name="regency">
                                     <option value="">--Choose Regencies--</option>
                                 </select>
                             </div>
@@ -248,37 +281,59 @@
     </div>
 </div>
 
-{{-- Modal select Shipping --}}
-<div class="modal fade" id="modalShipping" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Pilih Pengiriman</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="shippingForm">
-                    <div class="form-group">
-                        <label for="shippingOption">Pilihan Pengiriman:</label>
-                        <select class="form-control" id="shippingOption" name="shipments_id">
-                            <!-- Tambahkan opsi pengiriman sesuai kebutuhan -->
-                            <option value="1">1 Hari Sampai</option>
-                            <option value="2">Reguler</option>
-                        </select>
-                    </div>
-                    <button type="button" class="btn btn-primary" onclick="selectShipping()" data-bs-dismiss="modal"
-                    aria-label="Close">Finish</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-{{-- Modal Select Payment --}}
-<input type="hidden" name="selectedShipping" id="selectedShipping" value="">
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+<script>
+    function updateShippingCost() {
+        var selectedRadioButton = document.querySelector('input[name="ship"]:checked');
+        if (selectedRadioButton) {
+            var shippingOptionId = selectedRadioButton.value;
+            var price;
+            var distanceValue = {{ $distanceValue }};
+            var selectedShipIdInput = document.getElementById('selectedShipId');
+            var ongkirFeeInput = document.querySelector('input[name="ongkirfee"]');
+            var finalPriceInput = document.getElementById('finalPrice');
+            var formattedPrice;
+
+            if (distanceValue > 100.0) {
+                if (shippingOptionId === "1") {
+                    price = {{ ($distanceValue * 50) + ($weight * 4000) }};
+                } else if (shippingOptionId === "2") {
+                    price = {{ ($distanceValue * 20) + ($weight * 4000) }};
+                }
+            } else {
+                price = {{ ($distanceValue * 800) + ($weight * 4000) }};
+            }
+
+            price = parseFloat(price);
+
+            // Set value of ongkirfee input
+            ongkirFeeInput.value = price;
+
+            // Set value of selectedShipId input
+            selectedShipIdInput.value = shippingOptionId;
+
+            // Update shipping cost display
+            formattedPrice = formatCurrency(price);
+            document.getElementById("shipping").innerText = formattedPrice;
+
+            // Update final price display
+            var finalPrice = parseFloat(finalPriceInput.dataset.finalPrice);
+            var totalPrice = finalPrice + price;
+            finalPriceInput.dataset.finalPrice = totalPrice;
+            var formattedFinalPrice = formatCurrency(totalPrice);
+            finalPriceInput.innerText = formattedFinalPrice;
+        }
+    }
+
+    var radioButtons = document.querySelectorAll('input[name="ship"]');
+    radioButtons.forEach(function(radioButton) {
+        radioButton.addEventListener('change', updateShippingCost);
+    });
+
+    updateShippingCost();
+</script>
+
 <script>
     $(function () {
         $.ajaxSetup({

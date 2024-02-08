@@ -1,6 +1,5 @@
 @extends('layout.main')
 @section('content')
-
 <meta name="csrf_token" content="{{ csrf_token() }}"/>
 <h3>Profile</h3>
 <div class="col-md-12" style="padding: 3vh;">
@@ -181,7 +180,7 @@
 
                             <div class="col-6 mb-1">
                                 <label class="form-label" for="select-regencies">Regencies</label>
-                                <select class="form-select" id="select-regencies" name="regencies">
+                                <select class="form-select" id="select-regencies" name="regency">
                                     <option value="">--Choose Regencies--</option>
                                 </select>
                             </div>

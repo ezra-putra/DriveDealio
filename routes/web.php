@@ -122,9 +122,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/orderhistory', [TransactionController::class, 'transactionList']);
     Route::get('/order/order-details/{id}', [TransactionController::class, 'transactionDetails'])->name('transaction.details');
 
-    Route::get('/seller/register', function(){
-        return view('seller.sellerregister');
-    });
+    Route::get('/seller/register', [UserController::class, 'toSellerRegister']);
     Route::post('become-seller', [UserController::class, 'becomeSeller'])->name('seller.register');
     Route::get('/user', [UserController::class, 'index']);
     Route::get('/profile', [UserController::class, 'profile']);

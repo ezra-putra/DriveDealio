@@ -6,6 +6,7 @@ use App\Models\Address;
 use App\Models\District;
 use App\Models\Province;
 use App\Models\Regency;
+use App\Models\Seller;
 use App\Models\User;
 use App\Models\Village;
 use Illuminate\Http\Request;
@@ -83,6 +84,7 @@ class UserController extends Controller
         $address->district = District::find($request->input('district'))->name;
         $address->village = Village::find($request->input('village'))->name;
         $address->zipcode = $request->input('zip');
+        // dd($address);
 
         $user = DB::select(
             DB::raw("SELECT count(id) as count from drivedealio.addresses where id = $iduser")
@@ -135,16 +137,30 @@ class UserController extends Controller
         return view('admin.listuser', ['users' => $user]);
     }
 
+    public function toSellerRegister()
+    {
+        $provinces = Province::all();
+        $regencies = Regency::all();
+        $districts = District::all();
+        $villages = Village::all();
+
+        return view('seller.sellerregister', compact('provinces', 'regencies', 'districts', 'villages'));
+    }
+
     public function becomeSeller(Request $request)
     {
         $id = auth()->id();
-
-        DB::insert("INSERT INTO drivedealio.shops(name, address, phonenumber, city, province, district, zipcode, status, users_id)
-        VALUES(:name, :address, :phonenumber, :city, :province, :district, :zipcode, :status, :id)",
-        ['name' => $request->input('shopname'), 'address' => $request->input('shopaddress'),
-        'phonenumber' => $request->input('shopphone'), 'city' => $request->input('shopcity'),
-        'province' => $request->input('shopprovince'), 'district' => $request->input('shopdistrict'),
-        'zipcode' => $request->input('shopzip'), 'status' => 'Pending', 'id' => $id]);
+        $seller = new Seller;
+        $seller->name = $request->input('shopname');
+        $seller->address = $request->input('shopaddress');
+        $seller->phonenumber = $request->input('shopphone');
+        $seller->city = $request->input('regency');
+        $seller->district = $request->input('district');
+        $seller->province = $request->input('province');
+        $seller->zipcode = $request->input('shopzip');
+        $seller->status = 'Pending';
+        $seller->users_id = $id;
+        $seller->save();
 
         DB::update("UPDATE drivedealio.users SET sellerstatus = :sellerstatus WHERE id = :id",
         ['sellerstatus' => 1, 'id' => $id]);

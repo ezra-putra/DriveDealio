@@ -51,7 +51,7 @@
                         <div class="col-md-3">
                             <div class="item-img text-center">
                                 <a href="#">
-                                    <img src="../../../app-assets/images/pages/eCommerce/2.png" class="img-fluid" alt="img-placeholder" width="150" height="150"/>
+                                    <img src="{{ asset('/images/' . $od->url) }}" class="img-fluid" alt="img-placeholder" width="150" height="150"/>
                                 </a>
                             </div>
                         </div>
@@ -59,9 +59,14 @@
                             <h6 class="my-1">{{ $od->item_name }}</h6>
                             <p class="my-1">{{ $od->quantityordered }} Items x @currency($od->unitprice)</p>
                         </div>
+                        @php
+                            $subtotal = 0;
+
+                            $subtotal = $od->unitprice * $od->quantityordered;
+                        @endphp
                         <div class="col-md-4 mx-auto my-auto text-center justify-content-end">
                             <p class="my-1">Total Price</p>
-                            <p class="my-1">@currency($order[0]->total_price)</p>
+                            <p class="my-1">@currency($subtotal)</p>
                         </div>
                     </div>
                     <div class="d-flex justify-content-end me-3">
@@ -78,29 +83,37 @@
             </div>
             <div class="row align-items-center mx-1">
                 <div class="col-md-6 mt-1">
-                    <h5>No. Invoice</h5>
+                    <h5>Courier</h5>
                 </div>
-                <div class="col-md-6 mt-1 d-flex justify-content-end">
-                    <p>{{ $o->invoicenum }}</p>
+                <div class="col-md-6 mt-1">
+                    <p>CourierName</p>
                 </div>
             </div>
             <div class="row align-items-center mx-1">
                 <div class="col-md-6 mt-1">
-                    <h5>Order Date</h5>
+                    <h5>Shipping Number</h5>
                 </div>
-                <div class="col-md-6 mt-1 d-flex justify-content-end">
-                    <p>{{ \Carbon\Carbon::parse($o->orderdate)->isoFormat('DD MMMM YYYY, HH:mm') }}</p>
+                <div class="col-md-6 mt-1">
+                    <p>DDA-45YMAHHAA</p>
                 </div>
             </div>
             <div class="row align-items-center mx-1">
                 <div class="col-md-6 mt-1">
-                    <h5>Order Date</h5>
+                    <h5>Address</h5>
                 </div>
-                <div class="col-md-6 mt-1 d-flex justify-content-end">
-                    <p>{{ \Carbon\Carbon::parse($o->orderdate)->isoFormat('DD MMMM YYYY, HH:mm') }}</p>
+                @foreach ($order as $o)
+                <div class="col-md-6 mt-1">
+                    <p class="mb-1">{{ $o->addressname }}</p>
+                    <p class="mb-1">{{ $o->address }}</p>
+                    <p class="mb-1">{{ $o->district }}, {{ $o->city }}</p>
+                    <p class="mb-1">{{ $o->province }} {{ $o->zipcode }}</p>
                 </div>
+                @endforeach
             </div>
-
+            <hr style="height:4px;border-width:0;color:gray;background-color:lightgray">
+            <div class="col-md-6 mt-1 mx-2">
+                <h5>Payment Details</h5>
+            </div>
         </div>
     </div>
 </div>
