@@ -26,7 +26,11 @@
                             @foreach ($orderlist as $o)
                                 <tr>
                                     <td>{{ $counter++ }}</td>
-                                    <td>{{ $o->invoicenum }}</td>
+                                    <td>
+                                        <a href="{{ route('transaction.details', $o->idorder) }}" aria-expanded="false" class="text-decoration-none">
+                                            <span class="user-name" style="font-size: 14px">{{ $o->invoicenum }}</span>
+                                        </a>
+                                    </td>
                                     <td>{{ $o->firstname }}</td>
                                     <td>{{ \Carbon\Carbon::createFromFormat('Y-m-d H:i:s.u', $o->orderdate)->format('d M Y') }}</td>
                                     <td>@currency($o->total_price)</td>

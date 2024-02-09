@@ -81,12 +81,13 @@
             <div class="col-md-6 mt-1 mx-2">
                 <h5>Delivery Information</h5>
             </div>
+            @foreach ($shippings as $s)
             <div class="row align-items-center mx-1">
                 <div class="col-md-6 mt-1">
-                    <h5>Courier</h5>
+                    <h5>Delivery Package</h5>
                 </div>
                 <div class="col-md-6 mt-1">
-                    <p>CourierName</p>
+                    <p>{{ $s->packagename }} - @currency($s->shipping_fee)</p>
                 </div>
             </div>
             <div class="row align-items-center mx-1">
@@ -94,9 +95,14 @@
                     <h5>Shipping Number</h5>
                 </div>
                 <div class="col-md-6 mt-1">
-                    <p>DDA-45YMAHHAA</p>
+                    @if (!empty($s->shipping_number))
+                        <p>{{ $s->shipping_number }}</p>
+                    @else
+                        <p>-</p>
+                    @endif
                 </div>
             </div>
+            @endforeach
             <div class="row align-items-center mx-1">
                 <div class="col-md-6 mt-1">
                     <h5>Address</h5>
@@ -113,6 +119,38 @@
             <hr style="height:4px;border-width:0;color:gray;background-color:lightgray">
             <div class="col-md-6 mt-1 mx-2">
                 <h5>Payment Details</h5>
+            </div>
+            @foreach ($countItems as $c)
+            <div class="row align-items-center mx-1">
+                <div class="col-md-6 mt-1">
+                    <h5>Total Price({{ $c->count }} Product)</h5>
+                </div>
+                <div class="col-md-6 mt-1">
+                    @foreach ($totalshop as $ts)
+                        <p>@currency($ts->price)</p>
+                    @endforeach
+                </div>
+            </div>
+            @endforeach
+
+            @foreach ($shippings as $s)
+            <div class="row align-items-center mx-1">
+                <div class="col-md-6 mt-1">
+                    <h5>Delivery Fee</h5>
+                </div>
+                <div class="col-md-6 mt-1">
+                    <p>@currency($s->shipping_fee)</p>
+                </div>
+            </div>
+            @endforeach
+            <hr style="height:1px;border-width:0;color:gray;background-color:lightgray">
+            <div class="row align-items-center mx-1">
+                <div class="col-md-6 mt-1">
+                    <h5>Total Shopping</h5>
+                </div>
+                <div class="col-md-6 mt-1">
+                    <h5>@currency($order[0]->total_price)</h5>
+                </div>
             </div>
         </div>
     </div>

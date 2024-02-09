@@ -23,7 +23,11 @@
                                     </div>
                                 </div>
                                 <div class="text-center">
-                                    <h1 class="mb-1 text-white">Welcome {{ $shopname[0]->name }}</h1>
+                                    <h1 class="mb-1 text-white">Welcome
+                                        <a href="{{ route('seller.profile', $shopname[0]->id) }}" aria-expanded="false" class="text-decoration-none text-white">
+                                            <span class="user-name">{{ $shopname[0]->name }}</span>
+                                        </a>
+                                    </h1>
                                     <p class="card-text m-auto w-75">
                                         You have <strong>{{ $ordercount[0]->totalorder }}</strong> total order today.
                                     </p>

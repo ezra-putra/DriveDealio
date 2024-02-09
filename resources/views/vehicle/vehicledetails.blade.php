@@ -11,9 +11,9 @@
                     <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
                 </div>
                 <div class="carousel-inner">
-                    @foreach($vehicle as $v => $image)
+                    @foreach($vehicle as $v => $vehi)
                         <div class="carousel-item {{ $v == 0 ? 'active' : '' }}">
-                            <img src="{{ asset('/images/' . $image->url) }}" class="d-block w-100" alt="Slide {{ $v + 1 }}">
+                            <img src="{{ asset('/images/vehicle/'.$vehi->idvehicle.'/' . $vehi->image) }}" class="d-block w-100" alt="Slide {{ $v + 1 }}">
                         </div>
                     @endforeach
                 </div>
@@ -31,7 +31,8 @@
             <div class="card">
                 <div class="card-body col-md-12">
                     <h3>{{ $vehicle[0]->brand }} {{ $vehicle[0]->model }} - {{ $vehicle[0]->variant }}</h3>
-                    <h1 class="mb-2">@currency($vehicle[0]->price)</h1>
+                    <h1>@currency($vehicle[0]->price)</h1>
+                    <p class="mb-2">{{ $vehicle[0]->location }}</p>
                     <hr style="height:1px;border-width:0;color:gray;background-color:lightgray">
                     <nav>
                         <div class="nav nav-tabs" id="nav-tab" role="tablist">
@@ -187,21 +188,6 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <hr style="height:1px;border-width:0;color:gray;background-color:lightgray">
-                    <h4>Shipping</h4>
-                    <p>From {{ $vehicle[0]->location }}</p>
-                    <nav>
-                        <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                          <button class="nav-link active" id="nav-tow-tab" data-bs-toggle="tab" data-bs-target="#nav-tow" type="button" role="tab" aria-controls="nav-tow" aria-selected="true">Towing</button>
-                          <button class="nav-link" id="nav-carrier-tab" data-bs-toggle="tab" data-bs-target="#nav-carrier" type="button" role="tab" aria-controls="nav-carrier" aria-selected="false">Carrier</button>
-                          <button class="nav-link" id="nav-self-tab" data-bs-toggle="tab" data-bs-target="#nav-self" type="button" role="tab" aria-controls="nav-self" aria-selected="false">Self Drive</button>
-                        </div>
-                    </nav>
-                    <div class="tab-content" id="nav-tabContent">
-                        <div class="tab-pane fade show active" id="nav-tow" role="tabpanel" aria-labelledby="nav-tow-tab">...</div>
-                        <div class="tab-pane fade" id="nav-carrier" role="tabpanel" aria-labelledby="nav-carrier-tab">...</div>
-                        <div class="tab-pane fade" id="nav-self" role="tabpanel" aria-labelledby="nav-self-tab">...</div>
                     </div>
                 </div>
             </div>

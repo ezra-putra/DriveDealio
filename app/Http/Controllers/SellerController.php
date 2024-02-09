@@ -25,7 +25,7 @@ class SellerController extends Controller
     {
         $iduser = auth()->id();
         $shopname = DB::select(
-            DB::raw("select name from drivedealio.shops where users_id = $iduser;")
+            DB::raw("SELECT id, name from drivedealio.shops where users_id = $iduser;")
         );
         $sparepart = DB::select(
             DB::raw("SELECT id, partnumber, partname, unitprice, stock, description, vehiclemodel, buildyear, colour, condition, shops_id
@@ -60,8 +60,7 @@ class SellerController extends Controller
     {
         $iduser = auth()->id();
         $orderlist = DB::select(
-            DB::raw("SELECT o.id as idorder, u.id as iduser, o.invoicenum, o.orderdate, o.shops_id, o.users_id, o.status, o.paymentstatus, s.name, u.firstname,
-            (SELECT sum(od.unitprice) from drivedealio.orderdetails as od where od.orders_id = o.id LIMIT 1) as total_price
+            DB::raw("SELECT o.id as idorder, u.id as iduser, o.invoicenum, o.orderdate, o.shops_id, o.users_id, o.status, o.paymentstatus, s.name, u.firstname, o.total_price
             from drivedealio.orders as o INNER JOIN drivedealio.users as u on o.users_id = u.id
             INNER JOIN drivedealio.shops as s on o.shops_id = s.id
             WHERE o.shops_id = (select s.id as idshop from drivedealio.shops as s

@@ -246,34 +246,6 @@
     </div>
 </div>
 
-{{-- Modal select Shipping --}}
-<div class="modal fade" id="modalShipping" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Pilih Pengiriman</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="shippingForm">
-                    <div class="form-group">
-                        <label for="shippingOption">Pilihan Pengiriman:</label>
-                        <select class="form-control" id="shippingOption" name="shipments_id">
-                            <!-- Tambahkan opsi pengiriman sesuai kebutuhan -->
-                            <option value="1">1 Hari Sampai</option>
-                            <option value="2">Reguler</option>
-                        </select>
-                    </div>
-                    <button type="button" class="btn btn-primary" onclick="selectShipping()" data-bs-dismiss="modal"
-                    aria-label="Close">Finish</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
 {{-- Modal Select Payment --}}
 <div class="modal fade" id="modalPayment" tabindex="-1" role="basic" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
@@ -314,4 +286,6 @@
         $('#shippingModal').modal('hide');
     }
 </script>
+
+
 @endsection

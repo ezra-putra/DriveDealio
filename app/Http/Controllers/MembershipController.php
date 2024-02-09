@@ -117,7 +117,7 @@ class MembershipController extends Controller
 
             $memberorder = new MemberOrder;
             $counter = $date[0]->count + 1;
-            $memberorder->invoicenum = "INV/" .date("Y/m/d"). "/$counter";
+            $memberorder->invoicenum = "INV/MB/" .date("Y/m/d"). "/$counter";
             $memberorder->user_memberships_id = $usermember->id;
             $memberorder->memberships_id = $request->input('member');
             $memberorder->paymentstatus = 'Unpaid';

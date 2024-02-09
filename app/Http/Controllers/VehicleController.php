@@ -16,9 +16,9 @@ class VehicleController extends Controller
     public function car()
     {
         $vehicle = DB::select(
-            DB::raw("SELECT a.start_price as price, i.url, v.id as idvehicle, v.model, v.variant, vt.name as type, c.name, b.name as brand, v.location, a.lot_number, v.adstatus
+            DB::raw("SELECT a.start_price as price, v.id as idvehicle, v.model, v.variant, vt.name as type, c.name, b.name as brand, v.location, a.lot_number, v.adstatus,
+            (SELECT COALESCE(i.url, 'placeholder_url') FROM drivedealio.images as i WHERE i.vehicles_id = v.id LIMIT 1) as url
             from drivedealio.auctions as a INNER JOIN drivedealio.vehicles as v on a.vehicles_id = v.id
-            LEFT JOIN drivedealio.images as i on v.id = i.vehicles_id
             INNER JOIN drivedealio.vehicletypes as vt on vt.id = v.vehicletypes_id
             INNER JOIN drivedealio.vehiclecategories as c on c.id = vt.vehiclecategories_id
             INNER JOIN drivedealio.brands as b on v.brands_id = b.id
@@ -36,9 +36,9 @@ class VehicleController extends Controller
     public function motorcycle()
     {
         $vehicle = DB::select(
-            DB::raw("SELECT a.start_price as price, i.url, v.id as idvehicle, v.model, v.variant, vt.name as type, c.name, b.name as brand, v.location, a.lot_number, v.adstatus
+            DB::raw("SELECT a.start_price as price, v.id as idvehicle, v.model, v.variant, vt.name as type, c.name, b.name as brand, v.location, a.lot_number, v.adstatus,
+            (SELECT COALESCE(i.url, 'placeholder_url') FROM drivedealio.images as i WHERE i.vehicles_id = v.id LIMIT 1) as url
             from drivedealio.auctions as a INNER JOIN drivedealio.vehicles as v on a.vehicles_id = v.id
-            LEFT JOIN drivedealio.images as i on v.id = i.vehicles_id
             INNER JOIN drivedealio.vehicletypes as vt on vt.id = v.vehicletypes_id
             INNER JOIN drivedealio.vehiclecategories as c on c.id = vt.vehiclecategories_id
             INNER JOIN drivedealio.brands as b on v.brands_id = b.id
@@ -74,7 +74,8 @@ class VehicleController extends Controller
             return view('/inspector/listvehicle', compact('vehicle'));
         }else{
             $vehicle = DB::select(
-                DB::raw("SELECT v.id as idvehicle, CONCAT(v.model,' ', v.variant) as name, v.transmission, v.platenumber, v.adstatus, v.inputdate, b.name as brand, u.id as iduser, a.id as idauction, a.start_date, a.end_date
+                DB::raw("SELECT v.id as idvehicle, CONCAT(v.model,' ', v.variant) as name, v.transmission, v.platenumber, v.adstatus, v.inputdate, b.name as brand, u.id as iduser, a.id as idauction, a.start_date, a.end_date,
+                (SELECT i.url FROM drivedealio.images as i WHERE i.vehicles_id = v.id LIMIT 1) as url
                 FROM drivedealio.vehicles as v INNER JOIN drivedealio.brands as b on v.brands_id = b.id
                 INNER JOIN drivedealio.users as u on v.users_id = u.id LEFT JOIN drivedealio.auctions as a on v.id = a.vehicles_id
                 where u.id = $iduser order by v.inputdate asc ;")
@@ -113,16 +114,24 @@ class VehicleController extends Controller
         );
 
         $winner = DB::select(
-            DB::raw("SELECT u.id as iduser, u.firstname, um.id as idusermember, m.id as idmembership, m.membershiptype, b.id as idbid, b.bidamount,
-            a.id as idauction, a.current_price, a.lot_number, v.id as idvehicle, v.model
-            FROM drivedealio.users as u INNER JOIN drivedealio.user_memberships as um on u.id = um.users_id
-            INNER JOIN drivedealio.member_orders as mo on um.id = mo.user_memberships_id
-            INNER JOIN drivedealio.memberships as m on m.id = mo.memberships_id
-            INNER JOIN drivedealio.bids as b on um.id = b.user_memberships_id
-            INNER JOIN drivedealio.auctions as a on a.id = b.auctions_id
-            INNER JOIN drivedealio.vehicles as v on a.vehicles_id = v.id
-            WHERE b.bidamount = a.current_price AND a.vehicles_id = $id;")
+            DB::raw("SELECT iduser, firstname, idusermember, idmembership, membershiptype, idbid, bidamount, idauction, current_price, lot_number, idvehicle, model
+            FROM (
+                SELECT u.id AS iduser, u.firstname, um.id AS idusermember, m.id AS idmembership, m.membershiptype, b.id AS idbid, b.bidamount,
+                        a.id AS idauction, a.current_price, a.lot_number, v.id AS idvehicle, v.model,
+                        ROW_NUMBER() OVER (PARTITION BY v.id ORDER BY b.bidamount DESC) AS row_num
+                FROM drivedealio.users AS u
+                INNER JOIN drivedealio.user_memberships AS um ON u.id = um.users_id
+                INNER JOIN drivedealio.member_orders AS mo ON um.id = mo.user_memberships_id
+                INNER JOIN drivedealio.memberships AS m ON m.id = mo.memberships_id
+                INNER JOIN drivedealio.bids AS b ON um.id = b.user_memberships_id
+                INNER JOIN drivedealio.auctions AS a ON a.id = b.auctions_id
+                INNER JOIN drivedealio.vehicles AS v ON a.vehicles_id = v.id
+            ) AS ranked_bids
+            WHERE row_num <= 3
+            ORDER BY idvehicle, bidamount DESC;")
         );
+
+        // dd($winner);
 
         $inspection = DB::select(
             DB::raw("SELECT exterior, interior, engine, mechanism, inputdate
@@ -138,14 +147,24 @@ class VehicleController extends Controller
             $auctionStatus = 'Auction Ended';
             if (!empty($winner) && isset($winner[0]))
             {
-                if (!AuctionWinner::where('auctions_id', $winner[0]->idauction)->where('users_id', $winner[0]->iduser)->exists())
-                {
-                    $auctionStatus = 'Auction Ended';
-                    $auctionWinner = new AuctionWinner();
-                    $auctionWinner->windate = $endDateTime;
-                    $auctionWinner->auctions_id = $winner[0]->idauction;
-                    $auctionWinner->users_id = $winner[0]->iduser;
-                    $auctionWinner->save();
+                foreach ($winner as $w) {
+                    $existingWinner = AuctionWinner::where('auctions_id', $w->idauction)
+                        ->where('users_id', $w->iduser)
+                        ->exists();
+
+                    if (!$existingWinner) {
+                        $auctionWinner = new AuctionWinner();
+                        $auctionWinner->windate = $endDateTime;
+                        $auctionWinner->auctions_id = $w->idauction;
+                        $auctionWinner->users_id = $w->iduser;
+
+                        if ($w->row_num === 1) {
+                            $auctionWinner->is_winner = true;
+                        } else {
+                            $auctionWinner->is_winner = false;
+                        }
+                        $auctionWinner->save();
+                    }
                 }
             } else {
                 $auctionStatus = 'Setup Auction';
@@ -265,35 +284,29 @@ class VehicleController extends Controller
         }
         DB::table('drivedealio.images')->insert($data);
 
-        return redirect('/vehicle/myvehicle')->with('status', 'Vehicle Data Saved!');
+        return redirect('/vehicle/inspectionappointment/'. $vehicle->id)->with('status', 'Vehicle Data Saved!');
     }
 
     public function adminEdit($id)
     {
         $vhc = Vehicle::findOrFail($id);
         $brand = DB::select(
-            DB::raw('select id, name from drivedealio.brands;')
+            DB::raw('SELECT id, name from drivedealio.brands;')
         );
         $type = DB::select(
-            DB::raw('select * from drivedealio.vehicletypes; ')
-        );
-        $year = DB::select(
-            DB::raw('select * from drivedealio.productionyears;')
-        );
-        $color = DB::select(
-            DB::raw('select id, name from drivedealio.colours;')
+            DB::raw('SELECT * from drivedealio.vehicletypes; ')
         );
         $date = DB::select(
-            DB::raw('select id, appointmentdate, appointmenttime from drivedealio.appointments;')
+            DB::raw('SELECT id, appointmentdate, appointmenttime from drivedealio.appointments;')
         );
         $vehicle = DB::select(
-            DB::raw("select id, model, enginecapacity, enginecylinders, fueltype, transmission, location, adstatus,
-            vehicletypes_id, brands_id, colours_id, productionyears_id, platenumber, variant
+            DB::raw("SELECT id, model, enginecapacity, enginecylinders, fueltype, transmission, location, adstatus,
+            vehicletypes_id, brands_id, platenumber, variant, year, colour
             from drivedealio.vehicles where id = $id;")
         );
 
 
-        return view('admin.detailsvehicle', compact('vehicle', 'vhc', 'brand', 'type', 'year', 'color', 'date'));
+        return view('admin.detailsvehicle', compact('vehicle', 'vhc', 'brand', 'type', 'date'));
     }
 
     public function approve($id)
@@ -351,10 +364,8 @@ class VehicleController extends Controller
         $vehicle = Vehicle::findOrFail($id);
         $vehicle = DB::select(
             DB::raw("SELECT v.id as idvehicle, v.model, v.variant, v.fueltype, v.enginecapacity, v.enginecylinders,
-            v.fueltype, v.transmission, v.platenumber, b.name as brand, c.name, y.year
+            v.fueltype, v.transmission, v.platenumber, b.name as brand, v.colour, v.year
             from drivedealio.vehicles as v INNER JOIN drivedealio.brands as b on v.brands_id = b.id
-            INNER JOIN drivedealio.colours as c on v.colours_id = c.id
-            INNER JOIN drivedealio.productionyears as y on v.productionyears_id = y.id
             where v.id = $id")
         );
         $appointment = DB::select(
@@ -414,6 +425,14 @@ class VehicleController extends Controller
         while (Auction::where('lot_number', $lotNumber)->exists()){
             $lotNumber = 'DDA-' . mt_rand(1000, 9999);
         }
+
+        DB::insert(
+            'INSERT INTO drivedealio.auctions(start_price, vehicles_id, lot_number, start_date, end_date)
+            VALUES(:start_price, :vehicles_id, :lot_number, :start_date, :end_date)',
+            ['start_price' => $request->input('price'), 'vehicles_id' => $id, 'lot_number' => $lotNumber,
+            'start_date' => $request->input('startdate'), 'end_date' => $request->input('enddate')]
+        );
+
         $duration = DB::select(
             DB::raw("SELECT (end_date - start_date) AS time
             FROM drivedealio.auctions WHERE vehicles_id = $id;")
@@ -422,12 +441,6 @@ class VehicleController extends Controller
         DB::update(
             'UPDATE drivedealio.vehicles SET adstatus = :adstatus, adreleasedate = :adreleasedate, auctionduration = :auctionduration WHERE id = :id',
             ['adstatus' => 'Open to Bid', 'adreleasedate' => Carbon::now(), 'auctionduration' => $duration[0]->time, 'id' => $id]
-        );
-        DB::insert(
-            'INSERT INTO drivedealio.auctions(start_price, vehicles_id, lot_number, start_date, end_date)
-            VALUES(:start_price, :vehicles_id, :lot_number, :start_date, :end_date)',
-            ['start_price' => $request->input('price'), 'vehicles_id' => $id, 'lot_number' => $lotNumber,
-            'start_date' => $request->input('startdate'), 'end_date' => $request->input('enddate')]
         );
 
         return redirect('/vehicle/myvehicle')->with('status', 'Your request has been processed!');

@@ -14,7 +14,7 @@
                         </label>
                         <div class="col-sm-6">
                             <p style="font-size: 14px; font-weight: bold" class="mt-1" id="countdown">
-                                {{ $vehicle[0]->brand }} - {{ $vehicle[0]->model }} {{ $vehicle[0]->variant }} {{ $vehicle[0]->year }}, {{ $vehicle[0]->name }}
+                                {{ $vehicle[0]->brand }} - {{ $vehicle[0]->model }} {{ $vehicle[0]->variant }} {{ $vehicle[0]->year }}, {{ $vehicle[0]->colour }}
                             </p>
                         </div>
                     </div>

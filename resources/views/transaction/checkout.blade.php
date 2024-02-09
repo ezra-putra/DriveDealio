@@ -92,7 +92,15 @@
                                                     }
                                                     else
                                                     {
-                                                        $price = ($distanceValue * 800) + ($weight * 4000);
+                                                        if ($s->id === 1)
+                                                        {
+                                                            $price = ($distanceValue * 800) + ($weight * 4000);
+                                                        }
+                                                        elseif ($s->id === 2)
+                                                        {
+                                                            $price = ($distanceValue * 500) + ($weight * 4000);
+                                                        }
+
                                                     }
                                                 @endphp
                                                 <span class="fw-bolder">@currency($price)</span>
@@ -143,7 +151,7 @@
                             <h4>Total Price</h4>
                         </label>
                         <div class="col-sm-4">
-                            <p style="font-size: 14px; font-weight:700;" class="mt-1" id="finalPrice" data-final-price="{{ $finalPrice }}">@currency($finalPrice)</p>
+                            <p style="font-size: 14px; font-weight:700;" class="mt-1" id="finalPrice">@currency($finalPrice)</p>
                         </div>
                     </div>
                     <form action="{{ route('order.post') }}" method="POST" enctype="multipart/form-data" class="row gy-1 gx-2 mt-75" id="bidForm">
@@ -284,6 +292,14 @@
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 
 <script>
+    function formatCurrency(amount) {
+        return new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0,
+            currencyDisplay: 'symbol'
+        }).format(amount);
+    }
     function updateShippingCost() {
         var selectedRadioButton = document.querySelector('input[name="ship"]:checked');
         if (selectedRadioButton) {
@@ -293,7 +309,7 @@
             var selectedShipIdInput = document.getElementById('selectedShipId');
             var ongkirFeeInput = document.querySelector('input[name="ongkirfee"]');
             var finalPriceInput = document.getElementById('finalPrice');
-            var formattedPrice;
+            var formattedPrice = 0;
 
             if (distanceValue > 100.0) {
                 if (shippingOptionId === "1") {
@@ -302,27 +318,27 @@
                     price = {{ ($distanceValue * 20) + ($weight * 4000) }};
                 }
             } else {
-                price = {{ ($distanceValue * 800) + ($weight * 4000) }};
+                if (shippingOptionId === "1") {
+                    price = {{ ($distanceValue * 800) + ($weight * 4000) }};
+                } else if (shippingOptionId === "2") {
+                    price = {{ ($distanceValue * 500) + ($weight * 4000) }};
+                }
             }
 
             price = parseFloat(price);
+            var previousOngkir = parseFloat(ongkirFeeInput.value);
+            var finalPrice = parseFloat(finalPriceInput.dataset.finalPrice) - previousOngkir;
+            finalPrice += price;
 
-            // Set value of ongkirfee input
             ongkirFeeInput.value = price;
-
-            // Set value of selectedShipId input
             selectedShipIdInput.value = shippingOptionId;
 
-            // Update shipping cost display
             formattedPrice = formatCurrency(price);
             document.getElementById("shipping").innerText = formattedPrice;
 
-            // Update final price display
-            var finalPrice = parseFloat(finalPriceInput.dataset.finalPrice);
-            var totalPrice = finalPrice + price;
-            finalPriceInput.dataset.finalPrice = totalPrice;
-            var formattedFinalPrice = formatCurrency(totalPrice);
-            finalPriceInput.innerText = formattedFinalPrice;
+            finalPrice = parseFloat(finalPrice);
+            var formattedFinalPrice = formatCurrency(finalPrice);
+            document.getElementById("finalPrice").innerText = formattedFinalPrice;
         }
     }
 

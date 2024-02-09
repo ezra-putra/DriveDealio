@@ -70,7 +70,7 @@ class AuctionController extends Controller
             if($amount > $currentprice && $currentprice != 0)
             {
                 DB::insert("INSERT INTO drivedealio.bids(bidamount, user_memberships_id, auctions_id) VALUES(:bidamount, :user_memberships_id, :auctions_id)",
-                ['bidamount' => $amount, 'user_memberships_id' => $userMember, 'auctions_id' => $id ]);
+                ['bidamount' => $amount, 'user_memberships_id' => $userMember[0]->idusermember, 'auctions_id' => $id ]);
 
                 DB::update("UPDATE drivedealio.auctions SET current_price = :current WHERE id = :id;" ,
                 ['current' => $amount, 'id' => $id]);

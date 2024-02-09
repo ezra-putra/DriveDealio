@@ -49,15 +49,12 @@
                                     </div>
                                     <div class="col-md-5">
                                         <label class="form-label" for="select-year">Vehicle Build Year</label>
-                                        <select class="select2 form-select" id="select-year" name="year" disabled>
-                                            <option value="NULL">--Choose Vehicle Build Year--</option>
-                                            @foreach ($year as $y)
+                                            <div class="col-md-12 mb-2">
                                                 @foreach ($vehicle as $v)
-                                                    <option value="{{ $y->id }}"
-                                                        {{ $v->productionyears_id == $y->id ? 'selected' : '' }}>
-                                                        {{ $y->year }}</option>
+                                                <input type="text" class="form-control" id="buildyear" disabled
+                                                placeholder="Vehicle Build Year" name="year" value="{{ $v->year }}" />
                                                 @endforeach
-                                            @endforeach
+                                            </div>
                                         </select>
                                     </div>
                                 </div>
@@ -94,16 +91,10 @@
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label" for="select-color">Vehicle Colour</label>
-                                        <select class="select2 form-select" id="select-color" name="color" disabled>
-                                            <option value="">--Choose Vehicle Colour--</option>
-                                            @foreach ($color as $c)
-                                                @foreach ($vehicle as $v)
-                                                    <option value="{{ $c->id }}"
-                                                        {{ $v->colours_id == $c->id ? 'selected' : '' }}>
-                                                        {{ $c->name }}</option>
-                                                @endforeach
-                                            @endforeach
-                                        </select>
+                                        <div class="col-md-12 mb-2">
+                                            <input type="text" class="form-control" id="vehicle-colour" disabled
+                                                placeholder="colour" name="colour" value="{{ $v->colour }}" />
+                                        </div>
                                     </div>
                                 </div>
 

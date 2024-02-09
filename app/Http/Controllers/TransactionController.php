@@ -175,9 +175,9 @@ class TransactionController extends Controller
 
             $distanceValue = (float)preg_replace('/[^0-9.]/', '', $distance);
 
-            if ($distanceValue > 100.0)
+            foreach($shipping as $s)
             {
-                foreach($shipping as $s)
+                if ($distanceValue > 100.0)
                 {
                     if ($s->id === 1)
                     {
@@ -188,15 +188,20 @@ class TransactionController extends Controller
                         $price = ($distanceValue * 20) + ($weight * 4000);
                     }
                 }
+                else
+                {
+                    if ($s->id === 1)
+                    {
+                        $price = ($distanceValue * 800) + ($weight * 4000);
+                    }
+                    elseif ($s->id === 2)
+                    {
+                        $price = ($distanceValue * 500) + ($weight * 4000);
+                    }
+                }
+            }
 
-            }
-            else
-            {
-                $price = ($distanceValue * 800) + ($weight * 4000);
-            }
         }
-
-
         return view('transaction.checkout', compact('checkout', 'userinfo', 'address', 'profile', 'provinces', 'regencies', 'districts', 'villages', 'price', 'shipping', 'weight', 'distanceValue'));
     }
 
@@ -223,31 +228,36 @@ class TransactionController extends Controller
             DB::raw("SELECT u.id as iduser, a.id as idaddress, a.name, a.address, a.district, a.city, a.zipcode, a.province, a.village
             from drivedealio.users as u INNER JOIN drivedealio.addresses as a on u.id = a.users_id where u.id = $iduser AND a.is_primaryadd = true;")
         );
+        $shopaddress = DB::select(
+            DB::raw("SELECT s.city as sellercity, s.district, s.province
+            FROM drivedealio.shops as s INNER JOIN drivedealio.spareparts as sp on s.id = sp.shops_id
+            WHERE s.id = sp.shops_id;")
+        );
 
-        $origin = $checkout[0]->district. ", " .$checkout[0]->sellercity. ", ". $checkout[0]->province;
-        $destination = $address[0]->district. ", " .$address[0]->city. ", " .$address[0]->province;
+        $origin = $shopaddress[0]->district. ", " .$shopaddress[0]->sellercity. ", ". $shopaddress[0]->province;
+        $destination = $addresses[0]->district. ", " .$addresses[0]->city. ", " .$addresses[0]->province;
 
         if(!empty($address))
         {
             $order = new Order;
             $counter = $date[0]->count + 1;
-            $order->invoicenum = "INV/" .date("Y/m/d"). "/$counter";
+            $order->invoicenum = "INV/SP/" .date("Y/m/d"). "/$counter";
             $order->status = "Waiting for Payment";
             $order->paymentstatus = "Unpaid";
             $order->users_id = $iduser;
             $order->shops_id = $checkout[0]->idseller;
             $order->addresses_id = $addresses[0]->idaddress;
-
             // dd($shipping);
-            // $order->save();
+            $order->save();
 
             $shipping = new Shipping;
-            $shipping->shippingfee = $request->input('ongkirfee');
+            $shipping->shipping_fee = $request->input('ongkirfee');
             $shipping->total_weight = $request->input('weight');
             $shipping->origin = $origin;
             $shipping->destination = $destination;
             $shipping->shipments_id = $request->input('shipId');
-            dd($shipping);
+            // dd($shipping);
+            $shipping->save();
 
 
             foreach($checkout as $c)
@@ -263,10 +273,10 @@ class TransactionController extends Controller
             $total = DB::select(
                 DB::raw("SELECT sum(unitprice) as price from drivedealio.orderdetails where orders_id = $order->id")
             );
-            $totalprice = $total[0]->price + $shipping;
+            $totalprice = $total[0]->price + $shipping->shipping_fee;
 
-            DB::update("UPDATE drivedealio.orders SET total_price = :totalprice where id = :id",
-            ['totalprice' => $totalprice, 'id' => $order->id]);
+            DB::update("UPDATE drivedealio.orders SET total_price = :totalprice, shippings_id = :shippings_id where id = :id",
+            ['totalprice' => $totalprice, 'shippings_id'=> $shipping->id, 'id' => $order->id]);
 
             return redirect('/payment/'. $order->id)->with('success', 'Order Create');
         }
@@ -298,18 +308,31 @@ class TransactionController extends Controller
             from drivedealio.orders as o INNER JOIN drivedealio.users as u on o.users_id = u.id
             INNER JOIN drivedealio.shops as s on o.shops_id = s.id
             LEFT JOIN drivedealio.addresses as a on a.id = o.addresses_id
-            where u.id = $iduser AND o.id = $id AND o.addresses_id = a.id;")
+            where o.id = $id AND o.addresses_id = a.id;")
         );
         $orderdetails = DB::select(
             DB::raw("SELECT od.quantityordered, od.unitprice, CONCAT(sp.partnumber, ' ', sp.partname, ' ', sp.vehiclemodel) as item_name,
             (SELECT p.url FROM drivedealio.pics as p WHERE p.spareparts_id = sp.id LIMIT 1) as url
             FROM drivedealio.orders as o INNER JOIN drivedealio.orderdetails as od on o.id = od.orders_id
-			INNER JOIN drivedealio.spareparts as sp on od.spareparts_id = sp.id where o.users_id = $iduser AND o.id = $id;")
+			INNER JOIN drivedealio.spareparts as sp on od.spareparts_id = sp.id where o.id = $id;")
         );
 
+        $shippings = DB::select(
+            DB::raw("SELECT shp.packagename, sh.shipping_number, sh.shipping_fee
+            FROM drivedealio.shipments as shp INNER JOIN drivedealio.shippings as sh on shp.id = sh.shipments_id
+            INNER JOIN drivedealio.orders as o on sh.id = o.shippings_id
+            WHERE o.id = $id;")
+        );
 
+        $countItems = DB::select(
+            DB::raw("SELECT count(quantityordered) as count from drivedealio.orderdetails where orders_id = $id")
+        );
 
-        return view('transaction.orderdetails', compact('orderdetails' ,'order'));
+        $totalshop = DB::select(
+            DB::raw("SELECT sum(unitprice) as price from drivedealio.orderdetails where orders_id = $id")
+        );
+
+        return view('transaction.orderdetails', compact('orderdetails' ,'order', 'shippings', 'countItems', 'totalshop'));
     }
 
     public function paymentIndex($id)
@@ -375,19 +398,19 @@ class TransactionController extends Controller
         $order->status = "On Process";
         $order->save();
 
-        $iduser = auth()->id();
         $product = DB::select(
             DB::raw("SELECT o.id as idorder, o.invoicenum, o.orderdate, u.id as iduser, o.status, o.paymentstatus, od.quantityordered, s.stock, s.id as idsparepart,
             (SELECT sum(od.unitprice) from drivedealio.orderdetails as od where od.orders_id = o.id ) as total_price
             from drivedealio.orders as o INNER JOIN drivedealio.users as u on o.users_id = u.id
             INNER JOIN drivedealio.orderdetails as od on o.id = od.orders_id
             INNER JOIN drivedealio.spareparts as s on od.spareparts_id = s.id
-            WHERE o.users_id = $iduser AND o.id = $id;")
+            WHERE o.id = $id;")
         );
+        // dd($product);
 
         foreach($product as $p)
         {
-            $quantityordered = $p->stock - $p->quantity;
+            $quantityordered = $p->stock - $p->quantityordered;
             DB::update("UPDATE drivedealio.spareparts SET stock = :stock, updated_at = :updated_at WHERE id = :id",
             ['stock' => $quantityordered, 'updated_at' => now(), 'id' => $p->idsparepart]);
         }

@@ -59,7 +59,7 @@
                             <div class="card ecommerce-card">
                                 <div class="item-img" style="justify-content: center;">
                                     <a href="{{ route('vehicle.show', $v->idvehicle) }}">
-                                        <img class="card-img-top" src="{{ asset('/images/' . $v->url) }}" alt="Card image cap" style="height : 300px; width:auto; object-fit:fill;"/>
+                                        <img class="card-img-top" src="{{ asset('/images/vehicle/'.$v->idvehicle.'/' . $v->url) }}" alt="Card image cap" style="height : 300px; width:auto; object-fit:fill;"/>
                                     </a>
                                 </div>
                                 <div class="card-body">
