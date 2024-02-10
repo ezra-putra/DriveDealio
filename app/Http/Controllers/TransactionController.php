@@ -150,6 +150,11 @@ class TransactionController extends Controller
             DB::raw("SELECT id, details, packagename as name from drivedealio.shipments;")
         );
 
+        if (empty($address)) {
+            return redirect('/profile')->with('error', 'Add Your Address First!');
+        }
+
+
         $origin = $checkout[0]->district. ", " .$checkout[0]->sellercity. ", ". $checkout[0]->province;
         $destination = $address[0]->district. ", " .$address[0]->city. ", " .$address[0]->province;
 
@@ -234,11 +239,11 @@ class TransactionController extends Controller
             WHERE s.id = sp.shops_id;")
         );
 
-        $origin = $shopaddress[0]->district. ", " .$shopaddress[0]->sellercity. ", ". $shopaddress[0]->province;
-        $destination = $addresses[0]->district. ", " .$addresses[0]->city. ", " .$addresses[0]->province;
-
         if(!empty($address))
         {
+            $origin = $shopaddress[0]->district. ", " .$shopaddress[0]->sellercity. ", ". $shopaddress[0]->province;
+            $destination = $addresses[0]->district. ", " .$addresses[0]->city. ", " .$addresses[0]->province;
+
             $order = new Order;
             $counter = $date[0]->count + 1;
             $order->invoicenum = "INV/SP/" .date("Y/m/d"). "/$counter";
@@ -340,7 +345,7 @@ class TransactionController extends Controller
         $iduser = auth()->id();
         $product = DB::select(
             DB::raw("SELECT o.id as idorder, o.invoicenum, o.orderdate, u.id as iduser, o.status, o.paymentstatus, od.quantityordered, s.stock, s.id as idsparepart,
-            total_price, u.email, u.firstname, u.lastname, u.phonenumber, o.invoicenum
+            total_price, u.email, u.firstname, u.lastname, u.phonenumber, o.invoicenum, o.snap_token
             from drivedealio.orders as o INNER JOIN drivedealio.users as u on o.users_id = u.id
             INNER JOIN drivedealio.orderdetails as od on o.id = od.orders_id
             INNER JOIN drivedealio.spareparts as s on od.spareparts_id = s.id
@@ -364,13 +369,14 @@ class TransactionController extends Controller
                 'phone' => $product[0]->phonenumber,
             ),
         );
-
         $snapToken = \Midtrans\Snap::getSnapToken($params);
         $order = Order::findOrFail($id);
-        $order->snap_token = $snapToken;
-        $order->save();
+        if(empty($order->snap_token)){
+            $order->snap_token = $snapToken;
+            $order->save();
+        }
 
-        return view('transaction.payment', compact('product', 'snapToken'));
+        return view('transaction.payment', compact('product'));
     }
 
     public function paymentPaid($id)
@@ -385,9 +391,10 @@ class TransactionController extends Controller
     }
     public function paymentCancel($id)
     {
-        DB::table('drivedealio.orders')
-        ->where('id', $id)
-        ->update(['status' => 'Cancelled', 'paymentstatus' => 'Unpaid']);
+        $order = Order::findOrFail($id);
+        $order->status = "Cancelled";
+        $order->paymentstatus = "Unpaid";
+        $order->save();
 
         return redirect('/orderhistory')->with('error', 'Transaction Cancelled');
     }
@@ -418,9 +425,30 @@ class TransactionController extends Controller
         return redirect()->back()->with('success', 'Status Changed');
     }
 
-    public function onDelivered($id)
+    public function onDelivery($id)
     {
+        $shipping = DB::select(
+            DB::raw("SELECT s.id as idshipping, o.orderdate  from drivedealio.orders as o
+            INNER JOIN drivedealio.shippings as s on o.shippings_id = s.id where o.id = $id")
+        );
 
+        if (empty($shipping)) {
+            return redirect()->back()->with('error', 'No delivery data found');
+        }
+        else
+        {
+            $idshipping = $shipping[0]->idshipping;
+            $shipping = Shipping::findOrFail($idshipping);
+            $shipping->shipping_number = "DDA".date("Ymd").$idshipping;
+            $shipping->save();
+
+            $order = Order::findOrFail($id);
+            $order->status = "On Delivery";
+            $order->save();
+            // dd($order);
+
+            return redirect()->back()->with('success', 'Delivery Arranged');
+        }
     }
 
     protected function formatDuration($interval)

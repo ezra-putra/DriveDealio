@@ -17,31 +17,6 @@
                                         </button>
                                         <div class="search-results"> results found</div>
                                     </div>
-                                    <div class="view-options d-flex">
-                                        <div class="btn-group dropdown-sort">
-                                            <button type="button" class="btn btn-outline-primary dropdown-toggle me-1"
-                                                data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                <span class="active-sorting">Featured</span>
-                                            </button>
-                                            <div class="dropdown-menu">
-                                                <a class="dropdown-item" href="#">Featured</a>
-                                                <a class="dropdown-item" href="#">Lowest</a>
-                                                <a class="dropdown-item" href="#">Highest</a>
-                                            </div>
-                                        </div>
-                                        <div class="btn-group" role="group">
-                                            <input type="radio" class="btn-check" name="radio_options" id="radio_option1"
-                                                autocomplete="off" checked />
-                                            <label class="btn btn-icon btn-outline-primary view-btn grid-view-btn"
-                                                for="radio_option1"><i data-feather="grid"
-                                                    class="font-medium-3"></i></label>
-                                            <input type="radio" class="btn-check" name="radio_options" id="radio_option2"
-                                                autocomplete="off" />
-                                            <label class="btn btn-icon btn-outline-primary view-btn list-view-btn"
-                                                for="radio_option2"><i data-feather="list"
-                                                    class="font-medium-3"></i></label>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -71,25 +46,11 @@
                                         <div class="item-cost mb-1">
                                             <h6 class="item-price">@currency($v->price)</h6>
                                         </div>
-
                                         <p>Lot: #<strong style="color: blue;">{{ $v->lot_number }}</strong></p>
                                         <p>Location: {{ $v->location }}</p>
+                                        <p id="countdown_{{ $v->idauction }}">Time Remaining: {{ $vehicle[0]->duration }}</p>
                                     </div>
-                                </div>
-                                <div class="item-options text-center">
-                                    <div class="item-wrapper">
-                                        <div class="item-cost">
-                                            <h4 class="item-price">@currency($v->price)</h4>
-                                        </div>
-                                    </div>
-                                    <a href="#" class="btn btn-light">
-                                        <i data-feather='eye'></i>
-                                        <span>Watchlist</span>
-                                    </a>
-                                    <a href="#" class="btn btn-primary">
-                                        <i class="fa fa-gavel"></i>
-                                        <span class="add-to-cart">Live Bidding</span>
-                                    </a>
+                                    <a href="{{ route('vehicle.show', $v->idvehicle) }}" class="btn btn-flat-info w-100">View Details</a>
                                 </div>
                             </div>
                         @endforeach
@@ -233,4 +194,30 @@
             </div>
         </div>
     </div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    @foreach($vehicle as $item)
+        var startDate_{{ $item->idauction }} = new Date("{{ $item->start_date }}").getTime();
+        var endDate_{{ $item->idauction }} = new Date("{{ $item->end_date }}").getTime();
+    @endforeach
+
+    var x = setInterval(function() {
+        @foreach($vehicle as $item)
+            var now_{{ $item->idauction }} = new Date().getTime();
+            var distance_{{ $item->idauction }} = endDate_{{ $item->idauction }} - now_{{ $item->idauction }};
+            var days_{{ $item->idauction }} = Math.floor(distance_{{ $item->idauction }} / (1000 * 60 * 60 * 24));
+            var hours_{{ $item->idauction }} = Math.floor((distance_{{ $item->idauction }} % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            var minutes_{{ $item->idauction }} = Math.floor((distance_{{ $item->idauction }} % (1000 * 60 * 60)) / (1000 * 60));
+            var seconds_{{ $item->idauction }} = Math.floor((distance_{{ $item->idauction }} % (1000 * 60)) / 1000);
+            document.getElementById("countdown_{{ $item->idauction }}").innerHTML = "Time Remaining: "+ days_{{ $item->idauction }} + "d " + hours_{{ $item->idauction }} + "h "
+            + minutes_{{ $item->idauction }} + "m " + seconds_{{ $item->idauction }} + "s ";
+            if (distance_{{ $item->idauction }} < 0) {
+                clearInterval(x);
+                document.getElementById("countdown_{{ $item->idauction }}").innerHTML = "Auction Ended";
+            }
+        @endforeach
+    }, 1000);
+
+</script>
 @endsection

@@ -42,7 +42,7 @@
                                         </a>
                                         @endif
                                         @if ($o->status == "On Process")
-                                        <a href="#" class="btn btn-icon btn-flat-info">
+                                        <a href="{{ route('delivery_post', $o->idorder) }}" class="btn btn-icon btn-flat-info">
                                             <i data-feather="truck"></i>
                                         </a>
                                         @endif

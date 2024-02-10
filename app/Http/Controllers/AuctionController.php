@@ -15,7 +15,8 @@ class AuctionController extends Controller
         $iduser = auth()->id();
         $list = DB::select(
             DB::raw("SELECT u.id as iduser, u.firstname, um.id as idusermember, m.id as idmembership, m.membershiptype, b.id as idbid, b.bidamount,
-            a.id as idauction, a.current_price, a.lot_number, v.id as idvehicle, v.model, v.adstatus, a.start_price
+            a.id as idauction, a.current_price, a.lot_number, v.id as idvehicle, v.model, v.adstatus, a.start_price, a.start_date, a.end_date,
+            (SELECT COALESCE(i.url, 'placeholder_url') FROM drivedealio.images as i WHERE i.vehicles_id = v.id LIMIT 1) as url
             FROM drivedealio.users as u INNER JOIN drivedealio.user_memberships as um on u.id = um.users_id
             INNER JOIN drivedealio.member_orders as mo on um.id = mo.user_memberships_id
             INNER JOIN drivedealio.memberships as m on m.id = mo.memberships_id
@@ -28,9 +29,10 @@ class AuctionController extends Controller
             DB::raw("SELECT aw.id as idwinner, a.id as idauction, aw.windate, auctions_id, users_id
             FROM drivedealio.auctions as a INNER JOIN drivedealio.auctionwinners as aw on a.id = aw.auctions_id where aw.users_id = $iduser")
         );
-        // $totalbids = DB::select(
-        //     DB::raw("SELECT * FROM drivedealio.bids")
-        // );
+        $startDateTime = Carbon::parse($list[0]->start_date);
+        $endDateTime = Carbon::parse($list[0]->end_date);
+        $interval = $startDateTime->diff($endDateTime);
+        $list[0]->duration = $this->formatDuration($interval);
 
         return view('auction.listauction', compact('list', 'winner'));
     }
@@ -176,11 +178,27 @@ class AuctionController extends Controller
 
     }
 
-    public function addToWatchlist(Request $request, $id)
+    protected function formatDuration($interval)
     {
+        $formattedDuration = '';
 
+        if ($interval->days > 0) {
+            $formattedDuration .= $interval->days . 'D ';
+        }
+
+        if ($interval->h > 0) {
+            $formattedDuration .= $interval->h . 'H ';
+        }
+
+        if ($interval->i > 0) {
+            $formattedDuration .= $interval->i . 'M ';
+        }
+
+        if ($interval->s > 0) {
+            $formattedDuration .= $interval->s . 'S';
+        }
+        return trim($formattedDuration);
     }
-
 
 
 }

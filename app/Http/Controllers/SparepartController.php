@@ -73,7 +73,7 @@ class SparepartController extends Controller
         foreach($request->file('image') as $image)
         {
             $name = $sparepart->created_at->format('ymd'). "-$counter". ".". $image->getClientOriginalExtension();
-            $image->move(public_path('images'), $name);
+            $image->move(public_path("images/sparepart/$sparepart->id"), $name);
             $data[] = [
                 'url' => $name,
                 'spareparts_id' => $sparepart->id,

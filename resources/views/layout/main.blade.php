@@ -101,23 +101,30 @@
     data-menu="horizontal-menu" data-col="1-column" style="background-color: white">
 
     <!-- BEGIN: Header-->
-    <nav class="header-navbar navbar-expand-lg navbar navbar-fixed align-items-right navbar-shadow  "
-        style="background-color: white;">
-        <div class="navbar-header ml-auto ms-1">
+    <nav class="header-navbar navbar-expand-lg navbar navbar-fixed text-center mx-auto navbar-shadow"
+        style="background-color: white; justify-content: center;">
+        <div class="navbar-header ml-auto ms-5 me-2 mx-auto text-center justify-content-center">
             @if (auth()->user())
                 @if (auth()->user()->roles_id == 2)
-                    <a href="/" class="navbar-brand h1">DriveDealio</a>
+                    <a href="/" class="navbar-brand h1">
+                        <img src="{{ asset('/image/logo-drivedealio.png') }}" alt="Logo" class="img-fluid" width="170" height="120">
+                    </a>
                 @endif
                 @if (auth()->user()->roles_id == 1)
-                    <a href="/admin/dashboard" class="navbar-brand h1">DriveDealio</a>
+                    <a href="/admin/dashboard" class="navbar-brand h1">
+                        <img src="{{ asset('/image/logo-drivedealio.png') }}" alt="Logo" class="img-fluid" width="170" height="120">
+                    </a>
                 @endif
                 @if (auth()->user()->roles_id == 3)
-                    <a href="/inspector/dashboard" class="navbar-brand h1">DriveDealio</a>
+                    <a href="/inspector/dashboard" class="navbar-brand h1">
+                        <img src="{{ asset('/image/logo-drivedealio.png') }}" alt="Logo" class="img-fluid" width="170" height="120">
+                    </a>
                 @endif
             @else
-                <a href="/" class="navbar-brand h1">DriveDealio</a>
+                <a href="/" class="navbar-brand h1">
+                    <img src="{{ asset('/image/logo-drivedealio.png') }}" alt="Logo" class="img-fluid" width="170" height="120">
+                </a>
             @endif
-
         </div>
         <div class="navbar-container container-fluid">
             <div class="collapse navbar-collapse" id="navbar-static-collapse">
@@ -298,8 +305,6 @@
                             <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdown-user">
                                 <a class="dropdown-item" href="/profile">
                                     <i class="me-50" data-feather="user"></i>Profile</a>
-                                <a class="dropdown-item" href="#">
-                                    <i class="me-50"data-feather="message-square"></i>Chats</a>
                                 <a class="dropdown-item" href="/orderhistory">
                                     <i class="me-50" data-feather="file-text"></i>Transaction</a>
                                 @if (auth()->user()->roles_id === 1)

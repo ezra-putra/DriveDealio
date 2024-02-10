@@ -247,9 +247,9 @@
                                             <small class="annual-pricing d-none text-muted"></small>
                                         </div>
                                         <ul class="list-group list-group-circle text-start mb-1">
-                                            <li class="list-group-item">{{ $m->benefit1 }}</li>
+                                            {{-- <li class="list-group-item">{{ $m->benefit1 }}</li>
                                             <li class="list-group-item">{{ $m->benefit2 }}</li>
-                                            <li class="list-group-item">{{ $m->benefit3 }}</li>
+                                            <li class="list-group-item">{{ $m->benefit3 }}</li> --}}
                                         </ul>
                                         <a class="btn w-100 btn-outline-success mt-2" href="/membership/register">More Details</a>
                                     </div>

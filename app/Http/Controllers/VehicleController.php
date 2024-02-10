@@ -17,18 +17,21 @@ class VehicleController extends Controller
     {
         $vehicle = DB::select(
             DB::raw("SELECT a.start_price as price, v.id as idvehicle, v.model, v.variant, vt.name as type, c.name, b.name as brand, v.location, a.lot_number, v.adstatus,
-            (SELECT COALESCE(i.url, 'placeholder_url') FROM drivedealio.images as i WHERE i.vehicles_id = v.id LIMIT 1) as url
+            (SELECT COALESCE(i.url, 'placeholder_url') FROM drivedealio.images as i WHERE i.vehicles_id = v.id LIMIT 1) as url, a.start_date, a.end_date, a.id as idauction
             from drivedealio.auctions as a INNER JOIN drivedealio.vehicles as v on a.vehicles_id = v.id
             INNER JOIN drivedealio.vehicletypes as vt on vt.id = v.vehicletypes_id
             INNER JOIN drivedealio.vehiclecategories as c on c.id = vt.vehiclecategories_id
             INNER JOIN drivedealio.brands as b on v.brands_id = b.id
             WHERE c.name = 'Car' AND v.adstatus = 'Open to Bid';")
         );
-        // dd($vehicle);
-
         $type = DB::select(
             DB::raw("SELECT * FROM drivedealio.vehicletypes where vehiclecategories_id = 1;")
         );
+        $startDateTime = Carbon::parse($vehicle[0]->start_date);
+        $endDateTime = Carbon::parse($vehicle[0]->end_date);
+        $interval = $startDateTime->diff($endDateTime);
+        $vehicle[0]->duration = $this->formatDuration($interval);
+
         return view('vehicle.vehicleindex', compact('vehicle', 'type'));
     }
 
@@ -37,7 +40,7 @@ class VehicleController extends Controller
     {
         $vehicle = DB::select(
             DB::raw("SELECT a.start_price as price, v.id as idvehicle, v.model, v.variant, vt.name as type, c.name, b.name as brand, v.location, a.lot_number, v.adstatus,
-            (SELECT COALESCE(i.url, 'placeholder_url') FROM drivedealio.images as i WHERE i.vehicles_id = v.id LIMIT 1) as url
+            (SELECT COALESCE(i.url, 'placeholder_url') FROM drivedealio.images as i WHERE i.vehicles_id = v.id LIMIT 1) as url, a.start_date, a.end_date, a.id as idauction
             from drivedealio.auctions as a INNER JOIN drivedealio.vehicles as v on a.vehicles_id = v.id
             INNER JOIN drivedealio.vehicletypes as vt on vt.id = v.vehicletypes_id
             INNER JOIN drivedealio.vehiclecategories as c on c.id = vt.vehiclecategories_id
@@ -47,6 +50,12 @@ class VehicleController extends Controller
         $type = DB::select(
             DB::raw("SELECT * FROM drivedealio.vehicletypes where vehiclecategories_id = 2;")
         );
+
+        $startDateTime = Carbon::parse($vehicle[0]->start_date);
+        $endDateTime = Carbon::parse($vehicle[0]->end_date);
+        $interval = $startDateTime->diff($endDateTime);
+        $vehicle[0]->duration = $this->formatDuration($interval);
+
         return view('vehicle.vehicleindex', compact('vehicle', 'type'));
     }
 
@@ -78,13 +87,15 @@ class VehicleController extends Controller
                 (SELECT i.url FROM drivedealio.images as i WHERE i.vehicles_id = v.id LIMIT 1) as url
                 FROM drivedealio.vehicles as v INNER JOIN drivedealio.brands as b on v.brands_id = b.id
                 INNER JOIN drivedealio.users as u on v.users_id = u.id LEFT JOIN drivedealio.auctions as a on v.id = a.vehicles_id
-                where u.id = $iduser order by v.inputdate asc ;")
+                where u.id = $iduser order by v.inputdate asc;")
             );
-
-            $startDateTime = Carbon::parse($vehicle[0]->start_date);
-            $endDateTime = Carbon::parse($vehicle[0]->end_date);
-            $interval = $startDateTime->diff($endDateTime);
-            $vehicle[0]->duration = $this->formatDuration($interval);
+            if(!empty($vehicle))
+            {
+                $startDateTime = Carbon::parse($vehicle[0]->start_date);
+                $endDateTime = Carbon::parse($vehicle[0]->end_date);
+                $interval = $startDateTime->diff($endDateTime);
+                $vehicle[0]->duration = $this->formatDuration($interval);
+            }
             return view('/vehicle/myvehicle', compact('vehicle'));
         }
     }
@@ -127,7 +138,7 @@ class VehicleController extends Controller
                 INNER JOIN drivedealio.auctions AS a ON a.id = b.auctions_id
                 INNER JOIN drivedealio.vehicles AS v ON a.vehicles_id = v.id
             ) AS ranked_bids
-            WHERE row_num <= 3
+            WHERE row_num <= 3 AND idvehicle = $id
             ORDER BY idvehicle, bidamount DESC;")
         );
 

@@ -521,10 +521,7 @@
             if (distance < 0) {
                 clearInterval(distance);
                 $("#countdown").html("Auction Ended");
-
                 $("#submitBid").prop('disabled', true);
-                $("#btnAddWatchlist").prop('disabled', true);
-
             }
 
         }, 1000);

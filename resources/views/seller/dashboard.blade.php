@@ -36,7 +36,6 @@
                         </div>
                     </div>
                     <!-- Greetings Card ends -->
-
                     <!-- Subscribers Chart Card starts -->
                     <div class="col-lg-3 col-sm-6 col-12">
                         <div class="card">
@@ -71,11 +70,14 @@
                     </div>
                     <!-- Orders Chart Card ends -->
                 </div>
-
+                <a href="{{ route('seller.profile', $shopname[0]->id) }}" class="btn btn-outline-secondary d-flex justify-content-between align-items-center w-100 mb-1">
+                    <span class="text-start">To Seller Profile</span>
+                    <i data-feather="chevron-right"></i>
+                </a>
                 <div class="row match-height">
                     <div class="col-lg-7 col-12">
                         <div class="card">
-                            <div class="card-header d-flex justify-content-between pb-0">
+                            <div class="card-header d-flex justify-content-between pb-0 mb-1">
                                 <h4 class="card-title">Order Lists</h4>
                                 <div class="justify-items-end">
                                     <a class="btn btn-flat-primary p-50" href="/orderlist">See All</a>
@@ -112,7 +114,7 @@
 
                     <div class="col-lg-5 col-12">
                         <div class="card">
-                            <div class="card-header d-flex justify-content-between pb-0">
+                            <div class="card-header d-flex justify-content-between pb-0 mb-1">
                                 <h4 class="card-title">Sparepart List</h4>
                                 <div class="justify-items-end">
                                     <a class="btn btn-flat-primary p-50" href="/seller/listsparepart">See All</a>

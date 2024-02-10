@@ -97,7 +97,7 @@ class UserController extends Controller
         }
 
         $address->save();
-        return redirect()->back();
+        return redirect()->back()->with('success', 'Address Added!');
     }
 
     public function uploadUserInformation(Request $request)

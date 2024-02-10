@@ -17,12 +17,11 @@ class WelcomeController extends Controller
     public function index()
     {
         $membership = DB::select(
-            DB::raw("SELECT m.*, b.* FROM drivedealio.memberships as m
-            INNER JOIN drivedealio.benefits as b on m.benefits_id = b.id;")
+            DB::raw("SELECT * FROM drivedealio.memberships;")
         );
         $memberships = Session('membership');
         return view('welcome', compact('membership'));
     }
 
-    
+
 }

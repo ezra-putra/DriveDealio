@@ -11,9 +11,7 @@
           src="https://app.sandbox.midtrans.com/snap/snap.js"
           data-client-key="SB-Mid-client-OHRI34QOyaGdOTJv"></script>
     </head>
-
     <h3>MyMemberships</h3>
-
     @if (auth()->user()->roles_id != 1)
     <div class="col-md-12 mx-auto" style="padding: 3vh;">
         <div class="card">

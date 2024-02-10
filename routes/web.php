@@ -117,6 +117,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/createorder', [TransactionController::class, 'createOrderSparepart'])->name('order.post');
     Route::get('/payment/{id}', [TransactionController::class, 'paymentIndex']);
     Route::get('/approve-order/{id}', [TransactionController::class, 'approveOrder'])->name('approve_post');
+    Route::get('/delivery-order/{id}', [TransactionController::class, 'onDelivery'])->name('delivery_post');
     Route::get('/payment-paid/{id}', [TransactionController::class, 'paymentPaid'])->name('payment_post');
     Route::get('/payment-cancel/{id}', [TransactionController::class, 'paymentCancel'])->name('payment_cancel');
     Route::get('/orderhistory', [TransactionController::class, 'transactionList']);
