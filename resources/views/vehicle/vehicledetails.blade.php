@@ -326,13 +326,48 @@
                                 <tr>
                                     <td>{{ $counter++ }}</td>
                                     <td>@currency($b->bidamount)</td>
-                                    <td>{{ $b->datetime }}</td>
+                                    <td>{{ $b->biddatetime }}</td>
                                 </tr>
                                 @endforeach
                             </tbody>
                         </table>
                     </div>
                     @if(empty($bid))
+                        <p class="text-center">NO BID, PLACE BID NOW</p>
+                    @endif
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="col-md-12">
+                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center">
+                    <div>
+                        <h5 class="mb-0">My Bid</h5>
+                        <p class="mb-0">on this Vehicle</p>
+                    </div>
+                </div>
+                <div class="row mt-1">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Bid Ammount</th>
+                                    <th scope="col">Bid Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($mybid as $mb)
+                                <tr>
+                                    <td>@currency($mb->bidamount)</td>
+                                    <td>{{ $mb->biddatetime }}</td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    @if(empty($mybid))
                         <p class="text-center">NO BID, PLACE BID NOW</p>
                     @endif
 

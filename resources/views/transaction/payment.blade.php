@@ -4,7 +4,7 @@
 <script type="text/javascript" src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="SB-Mid-client-OHRI34QOyaGdOTJv"></script>
 <script type="text/javascript">
     window.addEventListener('load', function () {
-        window.snap.embed('{{ $product[0]->snap_token }}', {
+        window.snap.embed('{{ $snap_token }}', {
             embedId: 'snap-container',
             onSuccess: function(result){
                 window.location.href = '{{ route('payment_post', $product[0]->idorder) }}';

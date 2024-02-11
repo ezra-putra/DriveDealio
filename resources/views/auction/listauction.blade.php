@@ -85,7 +85,7 @@
                         @foreach ($winner as $w)
                             @if ($w->auctions_id === $l->idauction)
                             <a href="{{ route('auction.checkout', $l->idvehicle) }}" class="btn btn-info">
-                                Continue
+                                Checkout
                             </a>
                             @endif
                         @endforeach

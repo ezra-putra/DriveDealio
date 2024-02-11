@@ -277,8 +277,8 @@ class TransactionController extends Controller
             }
             $total = DB::select(
                 DB::raw("SELECT sum(unitprice) as price from drivedealio.orderdetails where orders_id = $order->id")
-            );
-            $totalprice = $total[0]->price + $shipping->shipping_fee;
+            )[0]->price;
+            $totalprice = $total + $shipping->shipping_fee;
 
             DB::update("UPDATE drivedealio.orders SET total_price = :totalprice, shippings_id = :shippings_id where id = :id",
             ['totalprice' => $totalprice, 'shippings_id'=> $shipping->id, 'id' => $order->id]);
@@ -345,7 +345,8 @@ class TransactionController extends Controller
         $iduser = auth()->id();
         $product = DB::select(
             DB::raw("SELECT o.id as idorder, o.invoicenum, o.orderdate, u.id as iduser, o.status, o.paymentstatus, od.quantityordered, s.stock, s.id as idsparepart,
-            total_price, u.email, u.firstname, u.lastname, u.phonenumber, o.invoicenum, o.snap_token
+            total_price, u.email, u.firstname, u.lastname, u.phonenumber, o.invoicenum, od.unitprice,
+            CONCAT(s.partnumber, '-', s.partname, ' ', s.vehiclemodel) as name
             from drivedealio.orders as o INNER JOIN drivedealio.users as u on o.users_id = u.id
             INNER JOIN drivedealio.orderdetails as od on o.id = od.orders_id
             INNER JOIN drivedealio.spareparts as s on od.spareparts_id = s.id
@@ -369,14 +370,19 @@ class TransactionController extends Controller
                 'phone' => $product[0]->phonenumber,
             ),
         );
+
+        //dd($product[0]->snap_token);
         $snapToken = \Midtrans\Snap::getSnapToken($params);
         $order = Order::findOrFail($id);
         if(empty($order->snap_token)){
             $order->snap_token = $snapToken;
             $order->save();
         }
+        $snap_token = DB::select(
+            DB::raw("SELECT snap_token from drivedealio.orders where id = $id")
+        )[0]->snap_token;
 
-        return view('transaction.payment', compact('product'));
+        return view('transaction.payment', compact('product', 'snap_token'));
     }
 
     public function paymentPaid($id)

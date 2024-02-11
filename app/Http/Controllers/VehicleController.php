@@ -116,12 +116,23 @@ class VehicleController extends Controller
 
         $bid = DB::select(
             DB::raw("SELECT u.id as iduser, um.id as idusermember, b.id as idbid, a.id as idauction, v.id as idvehicle,
-            CONCAT(u.firstname, ' ', u.lastname) as name, b.bidamount, TO_TIMESTAMP(b.date || ' ' || b.time, 'YYYY-MM-DD HH24:MI:SS') as  datetime
+            CONCAT(u.firstname, ' ', u.lastname) as name, b.bidamount, b.biddatetime
             FROM drivedealio.users as u INNER JOIN drivedealio.user_memberships as um on u.id = um.users_id
             INNER JOIN drivedealio.bids as b on um.id = b.user_memberships_id
             INNER JOIN drivedealio.auctions as a on b.auctions_id = a.id
             INNER JOIN drivedealio.vehicles as v on a.vehicles_id = v.id
             WHERE v.id = $id ORDER BY b.bidamount DESC LIMIT 5;")
+        );
+
+        $iduser = auth()->id();
+        $mybid = DB::select(
+            DB::raw("SELECT u.id as iduser, um.id as idusermember, b.id as idbid, a.id as idauction, v.id as idvehicle,
+            CONCAT(u.firstname, ' ', u.lastname) as name, b.bidamount, b.biddatetime
+            FROM drivedealio.users as u INNER JOIN drivedealio.user_memberships as um on u.id = um.users_id
+            INNER JOIN drivedealio.bids as b on um.id = b.user_memberships_id
+            INNER JOIN drivedealio.auctions as a on b.auctions_id = a.id
+            INNER JOIN drivedealio.vehicles as v on a.vehicles_id = v.id
+            WHERE v.id = $id AND um.users_id = $iduser ORDER BY b.bidamount DESC LIMIT 5;")
         );
 
         $winner = DB::select(
@@ -188,7 +199,7 @@ class VehicleController extends Controller
         $interval = $startDateTime->diff($endDateTime);
         $vehicle[0]->duration = $this->formatDuration($interval);
 
-        return view('vehicle.vehicledetails', compact('vehicle', 'bid', 'winner', 'inspection'));
+        return view('vehicle.vehicledetails', compact('vehicle', 'bid', 'winner', 'inspection', 'mybid'));
     }
 
     public function toFormAddVehicle()
@@ -356,8 +367,10 @@ class VehicleController extends Controller
             from drivedealio.appointments as a INNER JOIN drivedealio.vehicles as v on a.id = v.appointments_id
             WHERE v.id = $id;")
         );
+
         DB::update("UPDATE drivedealio.appointments SET status = :status WHERE id = :id",
         ['status' => 'Booked', 'id' => $appointment[0]->idappointment]);
+
         return redirect('/vehicle/myvehicle')->with('status', 'Your request has been processed!');
     }
 

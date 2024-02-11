@@ -141,21 +141,18 @@ Route::middleware(['auth'])->group(function () {
 
     Route::post('/auction/add-bid/{id}', [AuctionController::class, 'placeBid'])->name('place_bid');
     Route::get('/auction', [AuctionController::class, 'auctionlist']);
-    Route::get('/auctioncheckout/{id}', [AuctionController::class, 'auctionCheckout'])->name('auction.checkout');
+    Route::get('/auctioncheckout', [AuctionController::class, 'auctionCheckout'])->name('auction.checkout');
     Route::post('/createauctionorder/{id}', [AuctionController::class, 'auctionOrders'])->name('auctionorder.post');
+    Route::get('/loan/{id}', [AuctionController::class, 'loanSimulation']);
 
     Route::get('/towing', [ShippingController::class, 'towingList']);
     Route::post('distance-create', [ShippingController::class, 'createTowPackage'])->name('distance.post');
-
-    Route::get('/loan/{id}', [AuctionController::class, 'loanSimulation']);
-
 });
 
 Route::get('/vehicle/car', [VehicleController::class, 'car']);
 Route::get('/vehicle/motorcycle', [VehicleController::class, 'motorcycle']);
 Route::get('/vehicle/details/{id}', [VehicleController::class, 'show'])->name('vehicle.show');
 Route::get('/vehicle/myvehicle', [VehicleController::class, 'myvehicle'])->name('vehicle.myvehicle');
-Route::post('/end-bid-status/{id}', [VehicleController::class, 'auctionEndStatus'])->name('vehicle.end-bid');
 
 Route::get('/sparepart', [SparepartController::class, 'index']);
 Route::get('/sparepart/details/{id}', [SparepartController::class, 'show'])->name('sparepart.show');

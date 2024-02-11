@@ -29,18 +29,18 @@ class LoginController extends Controller
         if(auth()->attempt($credential)){
 
             if(auth()->user()->roles_id == 2){
-                return redirect()->route('welcome')->with('success', 'LOGIN SUCCESS');
+                return redirect()->route('welcome');
             }
             if(auth()->user()->roles_id == 1){
-                return redirect()->route('admindashboard')->with('success', 'LOGIN SUCCESS');
+                return redirect()->route('admindashboard');
             }
             if(auth()->user()->roles_id == 3){
-                return redirect()->route('inspectordashboard')->with('success', 'LOGIN SUCCESS');
+                return redirect()->route('inspectordashboard');
             }
         }
 
         return redirect()->back()->withInput()->withErrors([
-            'email' => 'Invalid Login Credentials.',
+            'email' => 'Incorrect Password or Email.',
         ]);
     }
 }
