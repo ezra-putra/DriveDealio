@@ -13,7 +13,7 @@
                 window.location.href = '{{ url('/orderhistory') }}';
             },
             onError: function(result){
-                window.location.href = '{{ route('payment_cancel', $product[0]->idorder) }}';
+                window.location.href = '{{ url('/orderhistory') }}';
             },
             onClose: function(){
                 window.location.href = '{{ url('/orderhistory') }}';

@@ -9,14 +9,30 @@ use Illuminate\Support\Facades\DB;
 
 class AdminController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
+    public function listUser()
     {
-        //
+        $user = DB::select(
+            DB::raw("SELECT u.id, u.email, u.firstname, u.lastname, u.phonenumber, r.name
+            from drivedealio.users as u INNER JOIN drivedealio.roles as r on u.roles_id = r.id
+            order by u.id asc;")
+        );
+        $useradmin = DB::select(
+            DB::raw("SELECT u.id, u.email, u.firstname, u.lastname, u.phonenumber, r.name
+            from drivedealio.users as u INNER JOIN drivedealio.roles as r on u.roles_id = r.id
+            WHERE r.name = 'Admin' order by u.id asc;")
+        );
+        $userinspector = DB::select(
+            DB::raw("SELECT u.id, u.email, u.firstname, u.lastname, u.phonenumber, r.name
+            from drivedealio.users as u INNER JOIN drivedealio.roles as r on u.roles_id = r.id
+            WHERE r.name = 'Inspector' order by u.id asc;")
+        );
+        $userbuyer = DB::select(
+            DB::raw("SELECT u.id, u.email, u.firstname, u.lastname, u.phonenumber, r.name
+            from drivedealio.users as u INNER JOIN drivedealio.roles as r on u.roles_id = r.id
+            WHERE r.name = 'Buyer' order by u.id asc;")
+        );
+        // dd($user);
+        return view('admin.listuser', compact('user', 'useradmin', 'userinspector', 'userbuyer'));
     }
 
     public function listSeller()
@@ -34,7 +50,7 @@ class AdminController extends Controller
     public function approveSeller($id)
     {
         DB::update("UPDATE drivedealio.shops SET status = :status where id = :id" ,
-        ['status' => 'Approve', 'id' => $id]);
+        ['status' => 'Active', 'id' => $id]);
 
         return view('/admin/listseller');
     }
@@ -58,14 +74,18 @@ class AdminController extends Controller
         );
 
         $user = DB::select(
-            DB::raw("SELECT u.id, u.email, u.firstname, u.lastname, u.phonenumber, r.name, um.id as idmemberships, m.membershiptype
+            DB::raw("SELECT u.id, u.email, u.firstname, u.lastname, u.phonenumber, r.name
             from drivedealio.users as u INNER JOIN drivedealio.roles as r on u.roles_id = r.id
-            INNER JOIN drivedealio.user_memberships as um on u.id = um.users_id
-            LEFT JOIN drivedealio.member_orders as mo on um.id = mo.user_memberships_id
-            INNER JOIN drivedealio.memberships as m on m.id = mo.memberships_id
-            where r.name != 'Admin' AND (um.status = 'Approved' OR um.status IS NULL) order by u.id asc LIMIT 5;")
+            order by u.id asc LIMIT 5;")
         );
-        return view('/admin/dashboard' , compact('vehicle', 'user'));
+
+        $seller = DB::select(
+            DB::raw("SELECT s.id as idshop, s.name as shopname, CONCAT(s.address, ' ', s.city, ', ', s.province) as address, s.phonenumber,
+            s.status, u.id as iduser, u.firstname, u.sellerstatus
+            FROM drivedealio.shops as s INNER JOIN drivedealio.users as u
+            ON s.users_id = u.id WHERE u.sellerstatus IS true")
+        );
+        return view('/admin/dashboard' , compact('vehicle', 'user', 'seller'));
     }
 
     /**

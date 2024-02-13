@@ -123,7 +123,6 @@
                             <p style="font-size: 14px; font-weight:700;" class="mt-1" id="subTotal">@currency($totalPrice)</p>
                         </div>
                     </div>
-                    <hr style="height:5px;border-width:0;color:gray;background-color:lightgray">
                 </div>
             </div>
         </div>
@@ -151,7 +150,7 @@
                             <h4>Total Price</h4>
                         </label>
                         <div class="col-sm-4">
-                            <p style="font-size: 14px; font-weight:700;" class="mt-1" id="finalPrice">@currency($finalPrice)</p>
+                            <p style="font-size: 14px; font-weight:700;" class="mt-1" id="finalPrice">@currency($totalPrice)</p>
                         </div>
                     </div>
                     <form action="{{ route('order.post') }}" method="POST" enctype="multipart/form-data" class="row gy-1 gx-2 mt-75" id="bidForm">
@@ -159,6 +158,7 @@
                         <input type="hidden" name="shipId" id="selectedShipId" value="">
                         <input type="hidden" name="ongkirfee" value=>
                         <input type="hidden" name="weight" value={{ $weight }}>
+                        <input type="hidden" name="totalPrice" value=>
                         <button type="submit" class="btn btn-info w-100">Create Order</a>
                     </form>
 
@@ -308,7 +308,8 @@
             var distanceValue = {{ $distanceValue }};
             var selectedShipIdInput = document.getElementById('selectedShipId');
             var ongkirFeeInput = document.querySelector('input[name="ongkirfee"]');
-            var finalPriceInput = document.getElementById('finalPrice');
+            var finalPriceInput = document.querySelector('input[name="totalPrice"]');
+            var totalPrice = {{ $totalPrice }};
             var formattedPrice = 0;
 
             if (distanceValue > 100.0) {
@@ -327,11 +328,11 @@
 
             price = parseFloat(price);
             var previousOngkir = parseFloat(ongkirFeeInput.value);
-            var finalPrice = parseFloat(finalPriceInput.dataset.finalPrice) - previousOngkir;
-            finalPrice += price;
+            var finalPrice = parseFloat(totalPrice) + price;
 
             ongkirFeeInput.value = price;
             selectedShipIdInput.value = shippingOptionId;
+            finalPriceInput.value = finalPrice;
 
             formattedPrice = formatCurrency(price);
             document.getElementById("shipping").innerText = formattedPrice;

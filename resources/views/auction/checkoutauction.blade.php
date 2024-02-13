@@ -9,15 +9,15 @@
                 <div class="card-body col-md-12" style="position: sticky; top: 0;">
                     <h5>Address</h5>
                     <hr style="height:1px;border-width:0;color:gray;background-color:lightgray">
-                    {{-- <p style="font-weight: 800">{{ $userinfo->firstname }} {{ $userinfo->lastname }}</p> --}}
-                    {{-- <p>{{ $userinfo->phonenumber }}</p> --}}
-                    {{-- @foreach ($address as $a) --}}
-                    {{-- <p style="font-weight: 500;">{{ $a->name }}</p> --}}
-                    {{-- <p>{{ $a->address }}</p> --}}
-                    {{-- <p>{{ $a->district }}, {{ $a->city }}, {{ $a->zipcode }}</p> --}}
-                    {{-- <p>{{ $a->province }}</p> --}}
-                    {{-- @endforeach --}}
-                    {{-- @if (auth()->user() && auth()->user()->roles_id === 2)
+                    <p style="font-weight: 800">{{ $userinfo->firstname }} {{ $userinfo->lastname }}</p>
+                    <p>{{ $userinfo->phonenumber }}</p>
+                    @foreach ($address as $a)
+                    <p style="font-weight: 500;">{{ $a->name }}</p>
+                    <p>{{ $a->address }}</p>
+                    <p>{{ $a->district }}, {{ $a->city }}, {{ $a->zipcode }}</p>
+                    <p>{{ $a->province }}</p>
+                    @endforeach
+                    @if (auth()->user() && auth()->user()->roles_id === 2)
                         @if (empty($address))
                         <div class="row">
                             <div class="col-md-2">
@@ -27,27 +27,23 @@
                             </div>
                         </div>
                         @endif
-                    @endif --}}
+                    @endif
                     <hr style="height:1px;border-width:0;color:gray;background-color:lightgray;">
                     <div class="d-flex flex-column flex-sm-row pt-1 mt-auto mb-1">
                         <a class="btn btn-outline-secondary" data-bs-toggle="modal" href="#modalAddress">Add New Address</a>
                         <a class="btn btn-outline-secondary mx-1" data-bs-toggle="modal" href="#modalSelAddress">Select Another Address</a>
                     </div>
                     <hr style="height:5px;border-width:0;color:gray;background-color:lightgray;">
-                    <h6>Seller name</h6>
-                    <p>City</p>
-
-                    {{-- <div class="row">
+                    <div class="row">
                         @php
                             $subTotal = 0;
                             $totalPrice = 0;
-                            $shippingCost = 1700000;
                         @endphp
                         @foreach ($vehicle as $v)
-                        <div class="col-md-2">
+                        <div class="col-md-2 mt-1">
                             <div class="item-img">
                                 <a href="#">
-                                    <img src="" alt="img-placeholder" style="width: 150px; height: auto;"/>
+                                    <img src="{{ asset('/images/vehicle/'.$v->idvehicle.'/' . $v->url) }}" alt="img-placeholder" style="width: 150px; height: auto;"/>
                                 </a>
                             </div>
                         </div>
@@ -55,11 +51,10 @@
                             <div class="card-body">
                                 <div class="col-md-6">
                                     <div class="item-name mb-1">
-                                        <h5 class="mb-0"><a href="#" class="text-body">{{ $v->model }}</a></h5>
+                                        <h5 class="mb-0"><a href="#" class="text-body">{{ $v->brand }} - {{ $v->model }} {{ $v->variant }} {{ $v->transmission }} {{ $v->colour }}, {{ $v->year }}</a></h5>
                                         @php
                                             $subTotal = $v->current_price;
                                             $totalPrice += $subTotal;
-                                            $finalPrice = $totalPrice + $shippingCost
                                         @endphp
                                         <p style="font-size: 14px;" class="mt-1 mb-0">@currency($v->current_price)</p>
                                     </div>
@@ -68,22 +63,78 @@
                         </div>
                         @endforeach
 
-                        <div class="col-md-4">
-                            <p class="mb-0">Shipping Duration</p>
-                            <a href="#modalShipping" data-bs-toggle="modal" class="btn btn-info w-100 btn-ship">Select Shipping</a>
-                        </div>
-                    </div> --}}
-
-                    <hr style="height:1px;border-width:0;color:gray;background-color:lightgray">
-                    <div class="row">
-                        <label for="colFormLabelLg" class="col-sm-8 col-form-label-lg">
-                            <p style="font-size: 14px;font-weight:700; ">Subtotal</p>
-                        </label>
-                        <div class="col-sm-4">
-                            <p style="font-size: 14px; font-weight:700;" class="mt-1" id="subTotal">@currency(0)</p>
+                        <div class="col-md-12">
+                            <p class="mb-0 mt-1">Select Shipping</p>
+                            <div class="card-body">
+                                <div class="row custom-options-checkable g-1">
+                                    @foreach ($transporters as $t)
+                                    <div class="col-md-6">
+                                        <input class="custom-option-item-check" type="radio" name="ship" value="{{ $t->id }}" id="rdoship-{{ $t->id }}" checked/>
+                                        <label class="custom-option-item p-1" for="rdoship-{{ $t->id }}">
+                                            <span class="d-flex justify-content-between flex-wrap mb-50">
+                                                <span class="fw-bolder">{{ $t->name }}</span>
+                                                @php
+                                                    if ($distanceValue > 100.0)
+                                                    {
+                                                        if($categories[0]->id === 1)
+                                                        {
+                                                            if ($t->id === 1)
+                                                            {
+                                                                $price = $distanceValue * 7000;
+                                                            }
+                                                            elseif ($t->id === 2)
+                                                            {
+                                                                $price = $distanceValue * 4000;
+                                                            }
+                                                        }
+                                                        else if($categories[0]->id === 2)
+                                                        {
+                                                            if ($t->id === 1)
+                                                            {
+                                                                $price = $distanceValue * 4500;
+                                                            }
+                                                            elseif ($t->id === 2)
+                                                            {
+                                                                $price = $distanceValue * 2000;
+                                                            }
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        if($categories[0]->id === 1)
+                                                        {
+                                                            if ($t->id === 1)
+                                                            {
+                                                                $price = $distanceValue * 41000;
+                                                            }
+                                                            elseif ($t->id === 2)
+                                                            {
+                                                                $price = $distanceValue * 22000;
+                                                            }
+                                                        }
+                                                        else if($categories[0]->id === 2)
+                                                        {
+                                                            if ($t->id === 1)
+                                                            {
+                                                                $price = $distanceValue * 20500;
+                                                            }
+                                                            elseif ($t->id === 2)
+                                                            {
+                                                                $price = $distanceValue * 10000;
+                                                            }
+                                                        }
+                                                    }
+                                                @endphp
+                                                <span class="fw-bolder">@currency($price)</span>
+                                            </span>
+                                            <small class="d-block">{{ $t->details }}</small>
+                                        </label>
+                                    </div>
+                                    @endforeach
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <hr style="height:5px;border-width:0;color:gray;background-color:lightgray">
                 </div>
             </div>
         </div>
@@ -97,13 +148,13 @@
                             <p style="font-size: 14px;font-weight:700; ">Subtotal</p>
                         </label>
                         <div class="col-sm-4">
-                            <p style="font-size: 14px; font-weight:700;" class="mt-1" id="subTotal">@currency(0)</p>
+                            <p style="font-size: 14px; font-weight:700;" class="mt-1" id="subTotal">@currency($subTotal)</p>
                         </div>
                         <label for="colFormLabelLg" class="col-sm-8 col-form-label-lg">
                             <p style="font-size: 14px;font-weight:700; ">Shipping Cost</p>
                         </label>
                         <div class="col-sm-4">
-                            <p style="font-size: 14px; font-weight:700;" class="mt-1" id="subTotal">@currency(0)</p>
+                            <p style="font-size: 14px; font-weight:700;" class="mt-1" id="shipping">@currency($price)</p>
                         </div>
                     </div>
                     <hr style="height:5px;border-width:0;color:gray;background-color:lightgray">
@@ -112,15 +163,25 @@
                             <h4>Total Price</h4>
                         </label>
                         <div class="col-sm-4">
-                            <p style="font-size: 14px; font-weight:700;" class="mt-1" id="subTotal">@currency(0)</p>
+                            <p style="font-size: 14px; font-weight:700;" class="mt-1" id="finalPrice">@currency($totalPrice)</p>
                         </div>
                     </div>
+                    @if (!empty($order))
+                        <h5>Select Payment Method</h5>
+                        <a href="{{ url('/paymentauction', $order[0]->idorder) }}" class="btn btn-info w-100 mb-1">Pay with Virtual Account</a>
+                        <a href="{{ url('/loan', $order[0]->idorder) }}" class="btn btn-outline-info w-100 mb-1">Apply for Loan</a>
+                    @else
                     <form action="{{ route('auctionorder.post', $vehicle[0]->idvehicle) }}" method="POST" enctype="multipart/form-data" class="mt-1 w-100" id="bidForm">
                         @csrf
-                        <a href="#modalPayment" data-bs-toggle="modal" class="btn btn-info w-100 mb-1">Create Order</a>
+                        <input type="hidden" name="shipId" id="selectedShipId" value="">
+                        <input type="hidden" name="towFee" value="">
+                        <input type="hidden" name="totalPrice" value="">
+                        <button type="submit" class="btn btn-info w-100">Create Order</button>
                     </form>
+                    @endif
+                    <input type="hidden" name="categories" id="vehicleCategories" value="{{ $categories[0]->id }}">
 
-                    <a href="#" data-bs-toggle="modal" class="btn btn-outline-info w-100">Apply for Loan</a>
+
                 </div>
             </div>
         </div>
@@ -250,6 +311,88 @@
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+<script>
+    function formatCurrency(amount) {
+        return new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0,
+            currencyDisplay: 'symbol'
+        }).format(amount);
+    }
+    function updateShippingCost() {
+        var selectedRadioButton = document.querySelector('input[name="ship"]:checked');
+        var CheckoutVehicleCategories = document.querySelector('input[name="categories"]');
+        if (selectedRadioButton) {
+            var shippingOptionId = selectedRadioButton.value;
+            var vehicleCategories = CheckoutVehicleCategories.value;
+            var price;
+            var distanceValue = parseFloat({{ $distanceValue }});
+            var selectedShipIdInput = document.getElementById('selectedShipId');
+            var towFeeInput = document.querySelector('input[name="towFee"]');
+            var finalPriceInput = document.querySelector('input[name="totalPrice"]');
+            var totalPrice = {{ $totalPrice }};
+            var formattedPrice = 0;
+
+            if (distanceValue > 100.0) {
+                if(vehicleCategories === "1"){
+                    if (shippingOptionId === "1") {
+                        price = {{ $distanceValue * 7000 }};
+                    } else if (shippingOptionId === "2") {
+                        price = {{ $distanceValue * 4000 }};
+                    }
+                }
+                else if(vehicleCategories === "2"){
+                    if (shippingOptionId === "1") {
+                        price = {{ $distanceValue * 4500 }};
+                    } else if (shippingOptionId === "2") {
+                        price = {{ $distanceValue * 2000 }};
+                    }
+                }
+
+            } else {
+                if(vehicleCategories === "1"){
+                    if (shippingOptionId === "1") {
+                        price = {{ $distanceValue * 41000 }};
+                    } else if (shippingOptionId === "2") {
+                        price = {{ $distanceValue * 22000 }};
+                    }
+                }
+                else if(vehicleCategories === "2"){
+                    if (shippingOptionId === "1") {
+                        price = {{ $distanceValue * 20500 }};
+                    } else if (shippingOptionId === "2") {
+                        price = {{ $distanceValue * 10000 }};
+                    }
+                }
+            }
+
+            price = parseFloat(price);
+            var finalPrice = parseFloat(totalPrice) + price;
+            // finalPrice += price;
+
+            towFeeInput.value = price;
+            selectedShipIdInput.value = shippingOptionId;
+            finalPriceInput.value = finalPrice;
+
+            formattedPrice = formatCurrency(price);
+            document.getElementById("shipping").innerText = formattedPrice;
+
+            finalPrice = parseFloat(finalPrice);
+            var formattedFinalPrice = formatCurrency(finalPrice);
+            document.getElementById("finalPrice").innerText = formattedFinalPrice;
+        }
+    }
+
+    var radioButtons = document.querySelectorAll('input[name="ship"]');
+    radioButtons.forEach(function(radioButton) {
+        radioButton.addEventListener('change', updateShippingCost);
+    });
+
+    updateShippingCost();
+
+</script>
 
 <script>
     $(function () {

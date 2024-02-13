@@ -76,12 +76,12 @@
 
                         <span class="quantity-title me-2">Quantity:</span>
 
-                        <button type="submit" class="btn btn-icon btn-flat-danger me-2" id="decrement-btn">-</button>
+                        <button class="btn btn-icon btn-flat-danger me-2" id="decrement-btn">-</button>
 
                         <input type="number" id="quantity" style="text-align: center; border: none; width: 20px;" name="quantity" class="quantity-counter me-2" value="1" max="{{ $sparepart[0]->stock }}"
                         oninput="updateQuantityLimit(this)">
 
-                        <button type="submit" class="btn btn-icon btn-flat-success me-2" id="increment-btn">+</button>
+                        <button class="btn btn-icon btn-flat-success me-2" id="increment-btn">+</button>
 
                     </div>
                     <div class="row mt-2">
@@ -95,9 +95,9 @@
                     </div>
                     <form method="POST" action="{{ route('details.addcart', $sparepart[0]->idsparepart) }}" enctype="multipart/form-data">
                         @csrf
+                        <input type="hidden" name="quantity" id="finalQuantity" value="1">
                         <button type="submit" class="btn btn-info w-100 my-1">Add to Cart</button>
                     </form>
-                    <a href="/checkout" class="btn btn-outline-secondary w-100">Buy Now</a>
                 </div>
             </div>
 
@@ -336,13 +336,16 @@
         }
         else{
             quantityInput.value = parseInt(quantityInput.value) + 1;
+            updateQuantity(quantityInput);
         }
+
     }
 
     function decrementQuantity() {
         var quantityInput = document.querySelector('input[name="quantity"]');
         var newQuantity = parseInt(quantityInput.value) - 1;
         quantityInput.value = newQuantity > 0 ? newQuantity : 1;
+        updateQuantity(quantityInput);
     }
 
     function updateQuantityLimit(input)
@@ -355,8 +358,9 @@
         }
     }
 
-    function openPopup(message) {
-
+    function updateQuantity(input) {
+        var quantityValue = input.value;
+        document.getElementById('finalQuantity').value = quantityValue;
     }
 </script>
 @endsection

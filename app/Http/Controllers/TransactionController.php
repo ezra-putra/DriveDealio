@@ -275,13 +275,11 @@ class TransactionController extends Controller
 
                 DB::delete("DELETE FROM drivedealio.carts WHERE id = :id", ['id' => $c->idcart]);
             }
-            $total = DB::select(
-                DB::raw("SELECT sum(unitprice) as price from drivedealio.orderdetails where orders_id = $order->id")
-            )[0]->price;
-            $totalprice = $total + $shipping->shipping_fee;
 
-            DB::update("UPDATE drivedealio.orders SET total_price = :totalprice, shippings_id = :shippings_id where id = :id",
-            ['totalprice' => $totalprice, 'shippings_id'=> $shipping->id, 'id' => $order->id]);
+            $order = Order::findOrFail($order->id);
+            $order->total_price = $request->input('totalPrice');
+            $order->shippings_id = $shipping->id;
+            $order->save();
 
             return redirect('/payment/'. $order->id)->with('success', 'Order Create');
         }
@@ -395,6 +393,7 @@ class TransactionController extends Controller
 
         return redirect('/orderhistory')->with('success', 'Transaction Success');
     }
+    
     public function paymentCancel($id)
     {
         $order = Order::findOrFail($id);
@@ -445,7 +444,7 @@ class TransactionController extends Controller
         {
             $idshipping = $shipping[0]->idshipping;
             $shipping = Shipping::findOrFail($idshipping);
-            $shipping->shipping_number = "DDA".date("Ymd").$idshipping;
+            $shipping->shipping_number = "DDA".date("ymd").$idshipping;
             $shipping->save();
 
             $order = Order::findOrFail($id);

@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Appointment;
 use App\Models\Inspector;
-use App\Models\Appointments;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -72,7 +72,7 @@ class InspectorController extends Controller
 
     public function appointmentCreate(Request $request){
         $idInspector = auth()->user()->id;
-        $appointment = new Appointments();
+        $appointment = new Appointment;
         $appointment->appointmentdate = $request->input('appointmentdate');
         $appointment->appointmenttime = $request->input('appointmenttime');
         $appointment->status = "Available";

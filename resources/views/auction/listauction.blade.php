@@ -27,7 +27,7 @@
             </div>
         </div>
 
-        @if (!empty($list))
+
         <div class="col-md-8">
             <h3>Auction History</h3>
             <div class="d-flex flex-column flex-sm-row pt-1 mt-auto mb-1 py-auto">
@@ -37,14 +37,14 @@
                 <a href="#" class="btn btn-outline-secondary me-1">Success</a>
                 <a href="#" class="btn btn-outline-secondary me-1">Failed</a>
             </div>
+        @if (!empty($list))
             @foreach ($list as $l)
             <div class="card ecommerce-card mt-1">
                 <div class="card-body col-md-12 d-flex flex-column" style="position: sticky; top: 0;">
                     @foreach ($winner as $w)
                         @if ($w->auctions_id === $l->idauction)
                             <div class="col-md-8 w-100" style="background-color: lightgreen">
-                                <h4 class="text-start ms-1 my-1">You win the auction</h4>
-                                <p class="ms-1">*please click continue to continue the process</p>
+                                <h4 class="text-center ms-1 my-1">You win the auction</h4>
                             </div>
                         @endif
                     @endforeach
@@ -59,6 +59,16 @@
                                 @endif
                             </div>
                             <p class="mx-1 mb-0">#{{ $l->lot_number }}</p>
+                            @if ($order[0]->idvehicle === $l->idvehicle)
+                            <div class="d-flex align-items-center mx-1 my-auto">
+                                @if ($order[0]->status === 'Waiting for Payment' || $order[0]->status === 'Waiting for Confirmation')
+                                    <span class="badge bg-light-warning text-danger">{{ $order[0]->status }}</span>
+                                @else
+                                    <span class="badge bg-light-success text-success">{{ $order[0]->status }}</span>
+                                @endif
+                            </div>
+                            <p class="mx-1 mb-0">#{{ $order[0]->invoicenum }}</p>
+                            @endif
                         </div>
                     </div>
                     <div class="row">
@@ -82,20 +92,26 @@
                         <a href="{{ route('vehicle.show', $l->idvehicle) }}" class="btn btn-flat-success">
                             Vehicle Details
                         </a>
-                        @foreach ($winner as $w)
-                            @if ($w->auctions_id === $l->idauction)
-                            <a href="{{ route('auction.checkout', $l->idvehicle) }}" class="btn btn-info">
-                                Checkout
-                            </a>
-                            @endif
-                        @endforeach
+                        @if ($order[0]->paymentstatus === "Unpaid")
+                            @foreach ($winner as $w)
+                                @if ($w->auctions_id === $l->idauction)
+                                <a href="{{ route('auction.checkout', $l->idvehicle) }}" class="btn btn-info">
+                                    Checkout
+                                </a>
+                                @endif
+                            @endforeach
+                        @else
+                        <a href="#" class="btn btn-flat-success">
+                            Order Details
+                        </a>
+                        @endif
                     </div>
                 </div>
             </div>
             @endforeach
-            @else
-                <p class="text-center mt-1">NO BIDS</p>
         </div>
+        @else
+            <p class="text-center mt-1">It's quite up here:( Start bid now!</p>
         @endif
     </div>
 </div>

@@ -47,7 +47,6 @@
                                             <h6 class="item-price">@currency($v->price)</h6>
                                         </div>
                                         <p>Lot: #<strong style="color: blue;">{{ $v->lot_number }}</strong></p>
-                                        <p>Location: {{ $v->location }}</p>
                                         <p id="countdown_{{ $v->idauction }}">Time Remaining: {{ $vehicle[0]->duration }}</p>
                                     </div>
                                     <a href="{{ route('vehicle.show', $v->idvehicle) }}" class="btn btn-flat-info w-100">View Details</a>

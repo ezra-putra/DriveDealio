@@ -135,13 +135,6 @@
 
                             <div class="row">
                                 <div class="col-md-6">
-                                    <label class="form-label" for="Location">Location</label>
-                                    <div class="col-md-12 mb-2">
-                                        <input type="text" class="form-control" id="location" placeholder="Location"
-                                            disabled name="loc" value="{{ $v->location }}" />
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
                                     <label class="form-label" for="select-transmission">Vehicle Transmission</label>
                                     <select class="select2 form-select" id="select-transmission" name="trans" disabled>
                                         <option value="">--Choose Vehicle Transmission--</option>

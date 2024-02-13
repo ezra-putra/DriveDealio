@@ -6,14 +6,9 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0,minimal-ui">
-    <meta name="description"
-        content="Vuexy admin is super flexible, powerful, clean &amp; modern responsive bootstrap 4 admin template with unlimited possibilities.">
-    <meta name="keywords"
-        content="admin template, Vuexy admin template, dashboard template, flat admin template, responsive admin template, web app">
     <meta name="author" content="PIXINVENT">
     <title>DriveDealio - Your Trusted Vehicle Auctions and Autoparts</title>
-    <link rel="apple-touch-icon" href="../../../app-assets/images/ico/apple-icon-120.png">
-    <link rel="shortcut icon" type="image/x-icon" href="../../../app-assets/images/ico/favicon.ico">
+    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('/app-assets/images/ico/favicon.ico') }}">
     <link href="../../../app-assets/fonts/monserat.css"
         rel="stylesheet">
 
@@ -308,12 +303,6 @@
                                 <a class="dropdown-item" href="/orderhistory">
                                     <i class="me-50" data-feather="file-text"></i>Transaction</a>
                                 @if (auth()->user()->roles_id === 1)
-                                    <a class="dropdown-item" href="/user"><i class="fa fa-users me-50"></i>User
-                                        List</a>
-                                    <a class="dropdown-item" href="/admin/listvehicle"><i
-                                            class="fa fa-car me-50"></i>Vehicle List</a>
-                                    <a class="dropdown-item" href="/admin/listseller"><i
-                                            class="fa fa-handshake-o me-50"></i>Seller List</a>
                                     <a class="dropdown-item" href="/"><i
                                             class="fa fa-shopping-cart me-50"></i>To E-Commerce</a>
                                 @endif

@@ -130,8 +130,7 @@
                                         <tr>
                                             <th scope="col">#</th>
                                             <th scope="col">Name</th>
-                                            <th scope="col">Membership Type</th>
-                                            <th scope="col">Status</th>
+                                            <th scope="col">Email</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -142,8 +141,7 @@
                                         <tr>
                                             <td>{{ $counter++ }}</td>
                                             <td>{{ $u->firstname }} {{ $u->lastname }}</td>
-                                            <td>{{ $u->membershiptype }}</td>
-                                            <td></td>
+                                            <td>{{ $u->email }}</td>
                                         </tr>
                                         @endforeach
                                 </table>
@@ -164,8 +162,7 @@
                                     <thead>
                                         <tr>
                                             <th scope="col">#</th>
-                                            <th scope="col">Name</th>
-                                            <th scope="col">Membership Type</th>
+                                            <th scope="col">Invoice</th>
                                             <th scope="col">Status</th>
                                         </tr>
                                     </thead>
@@ -177,7 +174,6 @@
                                         <tr>
                                             <td>{{ $counter++ }}</td>
                                             <td>{{ $u->firstname }} {{ $u->lastname }}</td>
-                                            <td>{{ $u->membershiptype }}</td>
                                             <td></td>
                                         </tr>
                                         @endforeach
@@ -189,9 +185,9 @@
                     <div class="col-lg-6 col-12">
                         <div class="card">
                             <div class="card-header d-flex justify-content-between pb-0">
-                                <h4 class="card-title">Seller List</h4>
+                                <h4 class="card-title">seller List</h4>
                                 <div class="justify-items-end">
-                                    <a class="btn btn-flat-primary p-50" href="/user">See All</a>
+                                    <a class="btn btn-flat-primary p-50" href="/admin/listseller">See All</a>
                                 </div>
                             </div>
                             <div class="table-responsive">
@@ -199,8 +195,8 @@
                                     <thead>
                                         <tr>
                                             <th scope="col">#</th>
-                                            <th scope="col">Name</th>
-                                            <th scope="col">Membership Type</th>
+                                            <th scope="col">Seller Name</th>
+                                            <th scope="col">Owner</th>
                                             <th scope="col">Status</th>
                                         </tr>
                                     </thead>
@@ -208,12 +204,12 @@
                                         @php
                                             $counter = 1
                                         @endphp
-                                        @foreach ($user as $u)
+                                        @foreach ($seller as $s)
                                         <tr>
                                             <td>{{ $counter++ }}</td>
-                                            <td>{{ $u->firstname }} {{ $u->lastname }}</td>
-                                            <td>{{ $u->membershiptype }}</td>
-                                            <td></td>
+                                            <td>{{ $s->shopname }}</td>
+                                            <td>{{ $s->firstname }}</td>
+                                            <td>{{ $s->status }}</td>
                                         </tr>
                                         @endforeach
                                 </table>

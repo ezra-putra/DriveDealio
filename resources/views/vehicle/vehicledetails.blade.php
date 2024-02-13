@@ -32,7 +32,6 @@
                 <div class="card-body col-md-12">
                     <h3>{{ $vehicle[0]->brand }} {{ $vehicle[0]->model }} - {{ $vehicle[0]->variant }}</h3>
                     <h1>@currency($vehicle[0]->price)</h1>
-                    <p class="mb-2">{{ $vehicle[0]->location }}</p>
                     <hr style="height:1px;border-width:0;color:gray;background-color:lightgray">
                     <nav>
                         <div class="nav nav-tabs" id="nav-tab" role="tablist">

@@ -36,7 +36,7 @@
                                 </a>
                                 @endif
 
-                                @if ($s->status == 'Approve')
+                                @if ($s->status == 'Active')
                                 <a class="btn btn-icon btn-flat-danger" href="{{ route('admin.suspend', $s->idshop) }}">
                                     <i data-feather="x" class="me-50"></i>
                                     <span>Suspend</span>

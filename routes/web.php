@@ -82,6 +82,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/admin/dashboard', [AdminController::class, 'dashboard'],function () {
         return view('admin.dashboard');
     })->name('admindashboard');
+    Route::get('/admin/listseller', [AdminController::class, 'listSeller'])->name('admin.listseller');
+    Route::get('/approveseller/{id}', [AdminController::class, 'approveSeller'])->name('admin.approve');
+    Route::get('/suspendseller/{id}', [AdminController::class, 'suspendSeller'])->name('admin.suspend');
+    Route::get('/user', [AdminController::class, 'listUser']);
 
     Route::get('/inspector/dashboard', [InspectorController::class, 'dashboardIndex'], function () {
         return view('inspector.dashboard');
@@ -125,7 +129,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/seller/register', [UserController::class, 'toSellerRegister']);
     Route::post('become-seller', [UserController::class, 'becomeSeller'])->name('seller.register');
-    Route::get('/user', [UserController::class, 'index']);
+
     Route::get('/profile', [UserController::class, 'profile']);
     Route::post('/set-primary-address/{id?}', [UserController::class, 'setPrimaryAddress'])
     ->name('primary.address');
@@ -134,16 +138,16 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/district', [UserController::class, 'district'])->name('district');
     Route::post('/village', [UserController::class, 'village'])->name('village');
 
-
-    Route::get('/admin/listseller', [AdminController::class, 'listSeller'])->name('admin.listseller');
-    Route::get('/approveseller/{id}', [AdminController::class, 'approveSeller'])->name('admin.approve');
-    Route::get('/suspendseller/{id}', [AdminController::class, 'suspendSeller'])->name('admin.suspend');
-
     Route::post('/auction/add-bid/{id}', [AuctionController::class, 'placeBid'])->name('place_bid');
     Route::get('/auction', [AuctionController::class, 'auctionlist']);
-    Route::get('/auctioncheckout', [AuctionController::class, 'auctionCheckout'])->name('auction.checkout');
+    Route::get('/auctioncheckout/{id}', [AuctionController::class, 'auctionCheckout'])->name('auction.checkout');
     Route::post('/createauctionorder/{id}', [AuctionController::class, 'auctionOrders'])->name('auctionorder.post');
-    Route::get('/loan/{id}', [AuctionController::class, 'loanSimulation']);
+    Route::get('/paymentauction/{id}', [AuctionController::class, 'paymentIndex']);
+    Route::get('/auction-paid/{id}', [AuctionController::class, 'paymentPaid'])->name('payment.post');
+    Route::get('/approveauction-order/{id}', [AuctionController::class, 'approveOrder'])->name('approveauction.post');
+    Route::get('/deliverytowings-order/{id}', [AuctionController::class, 'onDelivery'])->name('deliveryauction.post');
+    Route::get('/loan/{id}', [AuctionController::class, 'loan'])->name('loan.get');
+    Route::post('/loan-apply/{id}', [AuctionController::class, 'applyLoan'])->name('loan.post');
 
     Route::get('/towing', [ShippingController::class, 'towingList']);
     Route::post('distance-create', [ShippingController::class, 'createTowPackage'])->name('distance.post');

@@ -1,10 +1,11 @@
 @extends('layout.main')
 @section('content')
+<h3>MyVehicle List</h3>
     <div class="row" id="table-striped" style="padding: 3vh;">
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h4 class="card-title">MyVehicle List</h4>
+                    <h4 class="card-title">MyVehicle</h4>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-striped">
@@ -49,6 +50,66 @@
                                                 href="{{ route('vehicle.appointment', $v->idvehicle) }}">
                                                 <i data-feather="calendar" class="me-50"></i>
                                                 <span>Inspection Date</span>
+                                            </a>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                @if (empty($vehicle))
+                    <p class="text-center mt-1">No Vehicle Data</p>
+                    <div class="text-center">
+                        <a class="btn btn-outline-info mb-1 w-25" href="/vehicle/adddata">Sell My Vehicle</a>
+                    </div>
+                @endif
+            </div>
+        </div>
+    </div>
+
+    <div class="row" id="table-striped" style="padding: 3vh;">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Vehicle Order List</h4>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Invoice Number</th>
+                                <th scope="col">Vehicle Name</th>
+                                <th scope="col">Order Date</th>
+                                <th scope="col">Order Status</th>
+                                <th scope="col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @php
+                                $counter = 1
+                            @endphp
+                            @foreach ($order as $o)
+                                <tr>
+                                    <td>{{ $counter++ }}</td>
+                                    <td>{{ $o->invoicenum }}</td>
+                                    <td>{{ $o->brand }} {{ $o->vehiclename }} {{ $o->transmission }}</td>
+                                    <td>{{ $o->orderdate }}</td>
+                                    <td>{{ $o->status }}</td>
+                                    <td>
+                                        @if ($o->status === 'Waiting for Confirmation')
+                                            <a class="btn btn-icon btn-flat-success"
+                                                href="{{ route('approveauction.post', $o->idorder) }}">
+                                                <i data-feather="check" class="me-50"></i>
+                                                <span>Confirm Order</span>
+                                            </a>
+                                        @endif
+                                        @if ($o->status === 'On Process')
+                                            <a class="btn btn-icon btn-flat-success"
+                                                href="{{ route('deliveryauction.post', $o->idorder) }}">
+                                                <i data-feather="truck" class="me-50"></i>
+                                                <span>Arrange Delivery</span>
                                             </a>
                                         @endif
                                     </td>

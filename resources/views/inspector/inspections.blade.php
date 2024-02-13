@@ -83,6 +83,14 @@
                                         placeholder="Chassis Number" name="chassis" />
                                 </div>
                             </div>
+                            <div class="col-md-12">
+                                <label class="form-label" for="vehicleodo">Odometer(km)</label>
+                                <div class="col-md-12 mb-2">
+                                    <input type="number" step="any" class="form-control" id="vehicleodo"
+                                        placeholder="Vehicle Odometer" name="odo" required/>
+                                </div>
+                            </div>
+                            <hr style="height:4px;border-width:0;color:gray;background-color:lightgray">
                             <h5>Grading</h5>
                             <div class="col-md-6 mb-1">
                                 <label class="form-label" for="exteriorgrade">Exterior</label>

@@ -64,7 +64,7 @@
         // Initialize Flatpickr with minDate option
         flatpickr("#dateInput", {
             minDate: minDate,
-            dateFormat: "Y-m-d" // Optional: Set the desired date format
+            dateFormat: "Y-m-d"
         });
     </script>
 @endsection

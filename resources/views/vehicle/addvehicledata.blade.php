@@ -56,23 +56,6 @@
                                 </div>
 
                                 <div class="row">
-                                    <div class="col-md-8">
-                                        <label class="form-label" for="vehicleodo">Odometer(km)</label>
-                                        <div class="col-md-12 mb-2">
-                                            <input type="number" step="any" class="form-control" id="vehicleodo"
-                                                placeholder="Vehicle Odometer" name="odo" required/>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label" for="vehicleseats">Vehicle Seats Number</label>
-                                        <div class="col-md-12 mb-2">
-                                            <input type="text" class="form-control" id="vehicleseats"
-                                                placeholder="Vehicle Seats" name="seats" required/>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row">
                                     <div class="col-md-6">
                                         <label class="form-label" for="vehiclevariant">Vehicle Variants</label>
                                         <div class="col-md-12 mb-2">
@@ -89,24 +72,6 @@
                                     </div>
                                 </div>
 
-
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <label class="form-label" for="platenum">Plate Number</label>
-                                        <div class="col-md-12 mb-2">
-                                            <input type="text" class="form-control" id="platenum"
-                                                placeholder="Plate Number" name="plate" required/>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label" for="select-color">Vehicle Colour</label>
-                                        <div class="col-md-12 mb-2">
-                                            <input type="text" class="form-control" id="select-color"
-                                                placeholder="Colour" name="color" required/>
-                                        </div>
-                                    </div>
-                                </div>
-
                                 <div class="row">
                                     <div class="col-md-6">
                                         <label class="form-label" for="cylinder">Engine Cylinder</label>
@@ -115,7 +80,7 @@
                                                 placeholder="Engine Cylinder" name="engcylinder" required/>
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
+                                    <div class="col-md-3">
                                         <label class="form-label" for="select-fuel">Vehicle Fuel Type</label>
                                         <select class="select2 form-select" id="select-fuel" name="fuel">
                                             <option value="">--Choose Vehicle Fuel Type--</option>
@@ -125,7 +90,40 @@
                                             <option value="Solar">Hybrid</option>
                                         </select>
                                     </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label" for="select-transmission">Vehicle Transmission</label>
+                                        <select class="select2 form-select" id="select-transmission" name="trans">
+                                            <option value="">--Choose Vehicle Transmission--</option>
+                                            <option value="AT">Automatic</option>
+                                            <option value="MT">Manual</option>
+                                        </select>
+                                    </div>
                                 </div>
+
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label class="form-label" for="platenum">Plate Number</label>
+                                        <div class="col-md-12 mb-2">
+                                            <input type="text" class="form-control" id="platenum"
+                                                placeholder="Plate Number" name="plate" required/>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label" for="select-color">Vehicle Colour</label>
+                                        <div class="col-md-12 mb-2">
+                                            <input type="text" class="form-control" id="select-color"
+                                                placeholder="Colour" name="color" required/>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label" for="vehicleseats">Vehicle Seats Number</label>
+                                        <div class="col-md-12 mb-2">
+                                            <input type="text" class="form-control" id="vehicleseats"
+                                                placeholder="Vehicle Seats" name="seats" required/>
+                                        </div>
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
 
@@ -136,24 +134,6 @@
                                         <h4>Upload Vehicle Image</h4>
                                     </label>
                                     <input type="file" class="form-control"  name="image[]" accept=".jpeg/.png/.jpg" multiple>
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <label class="form-label" for="Location">Location</label>
-                                    <div class="col-md-12 mb-2">
-                                        <input type="text" class="form-control" id="location" placeholder="Location"
-                                            name="loc" required/>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label" for="select-transmission">Vehicle Transmission</label>
-                                    <select class="select2 form-select" id="select-transmission" name="trans">
-                                        <option value="">--Choose Vehicle Transmission--</option>
-                                        <option value="AT">Automatic</option>
-                                        <option value="Manual">Manual</option>
-                                    </select>
                                 </div>
                             </div>
 
@@ -184,7 +164,7 @@
                                 <span class="align-middle d-sm-inline-block d-none">Save as Draft</span>
                             </button>
                             <input type="submit" class="btn btn-primary btn-submit"
-                                value="Submit & Go to My Vehicle List">
+                                value="Submit">
                         </div>
                     </div>
                 </form>
