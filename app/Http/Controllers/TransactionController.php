@@ -292,19 +292,32 @@ class TransactionController extends Controller
     {
         $iduser = auth()->id();
         $order = DB::select(
-            DB::raw("SELECT o.id as idorder, u.id as iduser, o.invoicenum, o.orderdate, o.shops_id, o.users_id, o.status, o.paymentstatus, s.name, o.total_price
+            DB::raw("SELECT o.id as idorder, u.id as iduser, o.invoicenum, o.orderdate, o.shops_id, o.users_id, o.status, o.paymentstatus, s.name, o.total_price, s.id as idshop
             from drivedealio.orders as o INNER JOIN drivedealio.users as u on o.users_id = u.id
             INNER JOIN drivedealio.shops as s on o.shops_id = s.id
             where u.id = $iduser order by o.orderdate desc;")
         );
 
+        $auctionorder = DB::select(
+            DB::raw("SELECT CONCAT(v.model, ' ', v.variant, ' ', v.transmission, ' ', v.colour, ', ', v.year) as vehiclename, a.lot_number, aw.id as idwinner, ao.orderdate,
+            ao.invoicenum, ao.total_price, u.firstname, u.lastname, u.email, u.phonenumber, ao.id as idorder, ao.status, v.id as idvehicle, a.current_price,
+            (SELECT COALESCE(i.url, 'placeholder_url') FROM drivedealio.images as i WHERE i.vehicles_id = v.id LIMIT 1) as url, b.name as brand
+            FROM drivedealio.vehicles as v INNER JOIN drivedealio.auctions as a on v.id = a.vehicles_id
+            INNER JOIN drivedealio.auctionwinners as aw on a.id = aw.auctions_id
+            INNER JOIN drivedealio.auction_orders as ao on aw.id = ao.auctionwinners_id
+            INNER JOIN drivedealio.users as u on aw.users_id = u.id
+            INNER JOIN drivedealio.brands as b on v.brands_id = b.id
+            WHERE u.id = $iduser order by ao.orderdate desc;")
+        );
 
-        return view('transaction.order', compact('order'));
+        return view('transaction.order', compact('order', 'auctionorder'));
     }
 
-    public function transactionDetails($id)
+    public function transactionDetails(Request $request)
     {
-        $iduser = auth()->id();
+        $id = ($request->get('id'));
+        $data = Order::find($id);
+
         $order = DB::select(
             DB::raw("SELECT o.id as idorder, u.id as iduser, o.invoicenum, o.orderdate, o.shops_id, o.users_id, o.status, o.paymentstatus, s.name, o.total_price, s.id as idshop,
             a.name as addressname, a.address, a.province, a.city, a.district, a.village, a.zipcode
@@ -313,6 +326,7 @@ class TransactionController extends Controller
             LEFT JOIN drivedealio.addresses as a on a.id = o.addresses_id
             where o.id = $id AND o.addresses_id = a.id;")
         );
+
         $orderdetails = DB::select(
             DB::raw("SELECT od.quantityordered, od.unitprice, CONCAT(sp.partnumber, ' ', sp.partname, ' ', sp.vehiclemodel) as item_name,
             (SELECT p.url FROM drivedealio.pics as p WHERE p.spareparts_id = sp.id LIMIT 1) as url
@@ -323,19 +337,19 @@ class TransactionController extends Controller
         $shippings = DB::select(
             DB::raw("SELECT shp.packagename, sh.shipping_number, sh.shipping_fee
             FROM drivedealio.shipments as shp INNER JOIN drivedealio.shippings as sh on shp.id = sh.shipments_id
-            INNER JOIN drivedealio.orders as o on sh.id = o.shippings_id
-            WHERE o.id = $id;")
+            INNER JOIN drivedealio.orders as o on sh.id = o.shippings_id where o.id = $id;")
         );
 
         $countItems = DB::select(
-            DB::raw("SELECT count(quantityordered) as count from drivedealio.orderdetails where orders_id = $id")
+            DB::raw("SELECT count(quantityordered) as count from drivedealio.orderdetails where orders_id = $id;")
         );
 
         $totalshop = DB::select(
-            DB::raw("SELECT sum(unitprice) as price from drivedealio.orderdetails where orders_id = $id")
+            DB::raw("SELECT sum(unitprice) as price from drivedealio.orderdetails where orders_id = $id;")
         );
-
-        return view('transaction.orderdetails', compact('orderdetails' ,'order', 'shippings', 'countItems', 'totalshop'));
+        return response()->json(array(
+            'msg'=> view('transaction.orderdetails',compact('data', 'order', 'orderdetails', 'shippings', 'countItems', 'totalshop'))->render()
+        ),200);
     }
 
     public function paymentIndex($id)
@@ -393,7 +407,7 @@ class TransactionController extends Controller
 
         return redirect('/orderhistory')->with('success', 'Transaction Success');
     }
-    
+
     public function paymentCancel($id)
     {
         $order = Order::findOrFail($id);

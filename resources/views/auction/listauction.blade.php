@@ -59,16 +59,7 @@
                                 @endif
                             </div>
                             <p class="mx-1 mb-0">#{{ $l->lot_number }}</p>
-                            @if ($order[0]->idvehicle === $l->idvehicle)
-                            <div class="d-flex align-items-center mx-1 my-auto">
-                                @if ($order[0]->status === 'Waiting for Payment' || $order[0]->status === 'Waiting for Confirmation')
-                                    <span class="badge bg-light-warning text-danger">{{ $order[0]->status }}</span>
-                                @else
-                                    <span class="badge bg-light-success text-success">{{ $order[0]->status }}</span>
-                                @endif
-                            </div>
-                            <p class="mx-1 mb-0">#{{ $order[0]->invoicenum }}</p>
-                            @endif
+                            <p class="mx-1 mb-0">My Bid: @currency($l->bidamount)</p>
                         </div>
                     </div>
                     <div class="row">
@@ -80,11 +71,11 @@
                             </div>
                         </div>
                         <div class="col-md-8">
-                            <h5 class="my-1">{{ $l->model }}</h5>
+                            <h5 class="my-1">{{ $l->brand }} - {{ $l->model }} {{ $l->variant }} {{ $l->transmission }} {{ $l->colour }}, {{ $l->year }}</h5>
                             <p class="my-1">Start Price: @currency($l->start_price)</p>
                         </div>
                         <div class="col-md-2">
-                            <p class="my-1">Current Price</p>
+                            <p class="my-1">Current Bid</p>
                             <p class="my-1">@currency($l->current_price)</p>
                          </div>
                     </div>
@@ -92,19 +83,13 @@
                         <a href="{{ route('vehicle.show', $l->idvehicle) }}" class="btn btn-flat-success">
                             Vehicle Details
                         </a>
-                        @if ($order[0]->paymentstatus === "Unpaid")
-                            @foreach ($winner as $w)
-                                @if ($w->auctions_id === $l->idauction)
+                        @foreach ($winner as $w)
+                            @if ($w->auctions_id === $l->idauction && empty($order))
                                 <a href="{{ route('auction.checkout', $l->idvehicle) }}" class="btn btn-info">
                                     Checkout
                                 </a>
-                                @endif
-                            @endforeach
-                        @else
-                        <a href="#" class="btn btn-flat-success">
-                            Order Details
-                        </a>
-                        @endif
+                            @endif
+                        @endforeach
                     </div>
                 </div>
             </div>
@@ -115,6 +100,7 @@
         @endif
     </div>
 </div>
+
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>

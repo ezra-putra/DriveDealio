@@ -69,10 +69,20 @@
                     </div>
                     <!-- Orders Chart Card ends -->
                 </div>
-                <a href="https://dashboard.sandbox.midtrans.com/" class="btn btn-outline-secondary d-flex justify-content-between align-items-center w-100 mb-1">
-                    <span class="text-start">Payment Report</span>
-                    <i data-feather="chevron-right"></i>
-                </a>
+                <div class="row">
+                    <div class="col-md-6">
+                        <a href="https://dashboard.sandbox.midtrans.com/" class="btn btn-outline-secondary d-flex justify-content-between align-items-center w-100 mb-1">
+                            <span class="text-start">Payment Report</span>
+                            <i data-feather="chevron-right"></i>
+                        </a>
+                    </div>
+                    <div class="col-md-6">
+                        <a href="/loan-list" class="btn btn-outline-secondary d-flex justify-content-between align-items-center w-100 mb-1">
+                            <span class="text-start">Loan List</span>
+                            <i data-feather="chevron-right"></i>
+                        </a>
+                    </div>
+                </div>
                 <div class="row match-height">
                     <!-- Avg Sessions Chart Card starts -->
                     <div class="col-lg-6 col-12">

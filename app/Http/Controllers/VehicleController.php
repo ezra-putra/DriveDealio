@@ -168,8 +168,6 @@ class VehicleController extends Controller
             from drivedealio.inspections where vehicles_id = $id;")
         );
 
-
-
         $startDateTime = Carbon::parse($vehicle[0]->start_date);
         $endDateTime = Carbon::parse($vehicle[0]->end_date);
 

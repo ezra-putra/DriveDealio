@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Admin;
+use App\Models\Loan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -86,6 +87,32 @@ class AdminController extends Controller
             ON s.users_id = u.id WHERE u.sellerstatus IS true")
         );
         return view('/admin/dashboard' , compact('vehicle', 'user', 'seller'));
+    }
+
+    public function loanList()
+    {
+        $loan = DB::select(
+            DB::raw("SELECT ao.invoicenum, ao.total_price, l.monthlypayment, l.loantenor, l.downpayment, l.status, u.firstname, u.lastname, u.phonenumber, l.id as idloan
+            FROM drivedealio.auction_orders as ao INNER JOIN drivedealio.loans as l on ao.id = l.auction_orders_id
+            INNER JOIN drivedealio.users as u on l.users_id = u.id")
+        );
+        return view('admin.loanlist', compact('loan'));
+    }
+
+    public function approveLoan($id)
+    {
+        $loan = Loan::findOrFail($id);
+        $loan->status = "Approved";
+        $loan->save();
+        return redirect()->back()->with('success', 'Loan Status Changed!');
+    }
+
+    public function rejectLoan($id)
+    {
+        $loan = Loan::findOrFail($id);
+        $loan->status = "Reject";
+        $loan->save();
+        return redirect()->back()->with('success', 'Loan Status Changed!');
     }
 
     /**

@@ -86,6 +86,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/approveseller/{id}', [AdminController::class, 'approveSeller'])->name('admin.approve');
     Route::get('/suspendseller/{id}', [AdminController::class, 'suspendSeller'])->name('admin.suspend');
     Route::get('/user', [AdminController::class, 'listUser']);
+    Route::get('/loan-list', [AdminController::class, 'loanList']);
+    Route::get('/approve-loan/{id}', [AdminController::class, 'approveLoan'])->name('loan.approve');
+    Route::get('/reject-loan/{id}', [AdminController::class, 'rejectLoan'])->name('loan.reject');
 
     Route::get('/inspector/dashboard', [InspectorController::class, 'dashboardIndex'], function () {
         return view('inspector.dashboard');
@@ -125,7 +128,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/payment-paid/{id}', [TransactionController::class, 'paymentPaid'])->name('payment_post');
     Route::get('/payment-cancel/{id}', [TransactionController::class, 'paymentCancel'])->name('payment_cancel');
     Route::get('/orderhistory', [TransactionController::class, 'transactionList']);
-    Route::get('/order/order-details/{id}', [TransactionController::class, 'transactionDetails'])->name('transaction.details');
+    Route::post('/order/order-details', [TransactionController::class, 'transactionDetails'])->name('transaction.details');
 
     Route::get('/seller/register', [UserController::class, 'toSellerRegister']);
     Route::post('become-seller', [UserController::class, 'becomeSeller'])->name('seller.register');

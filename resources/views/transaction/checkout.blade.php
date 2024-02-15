@@ -248,7 +248,7 @@
 
 {{-- Modal Select Address --}}
 <div class="modal fade" id="modalSelAddress" tabindex="-1" role="basic" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-wide" style="max-width: 750px">
         <div class="modal-content">
             <div class="modal-header bg-transparent">
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
