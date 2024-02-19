@@ -30,7 +30,12 @@ class SparepartController extends Controller
             FROM drivedealio.spareparts as s LEFT JOIN drivedealio.pics as p on s.id = p.spareparts_id
             INNER JOIN drivedealio.shops as sh on s.shops_id = sh.id where s.id = $id;")
         );
-        return view('sparepart.details', compact('sparepart'));
+        $review = DB::select(
+            DB::raw("SELECT r.id as idreview ,r.rating, r.message, r.reviewdate, u.id as iduser, u.firstname, u.lastname
+            INNER JOIN drivedalio.users as u INNER JOIN drivedalio.reviews as r on u.id = r.users_id
+            WHERE r.spareparts_id = $id;")
+        );
+        return view('sparepart.details', compact('sparepart', 'review'));
     }
 
 

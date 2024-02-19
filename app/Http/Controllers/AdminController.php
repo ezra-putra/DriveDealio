@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Admin;
 use App\Models\Loan;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -103,6 +104,7 @@ class AdminController extends Controller
     {
         $loan = Loan::findOrFail($id);
         $loan->status = "Approved";
+        $loan->verificationdate = Carbon::now();
         $loan->save();
         return redirect()->back()->with('success', 'Loan Status Changed!');
     }

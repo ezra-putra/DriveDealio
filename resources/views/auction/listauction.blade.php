@@ -43,9 +43,9 @@
                 <div class="card-body col-md-12 d-flex flex-column" style="position: sticky; top: 0;">
                     @foreach ($winner as $w)
                         @if ($w->auctions_id === $l->idauction)
-                            <div class="col-md-8 w-100" style="background-color: lightgreen">
-                                <h4 class="text-center ms-1 my-1">You win the auction</h4>
-                            </div>
+                        <div class="col-md-8 w-100" style="background-color: lightgreen">
+                            <h4 class="text-center ms-1 my-1">You win the auction</h4>
+                        </div>
                         @endif
                     @endforeach
                     <div class="d-flex align-items-center">
@@ -84,11 +84,13 @@
                             Vehicle Details
                         </a>
                         @foreach ($winner as $w)
-                            @if ($w->auctions_id === $l->idauction && empty($order))
-                                <a href="{{ route('auction.checkout', $l->idvehicle) }}" class="btn btn-info">
-                                    Checkout
-                                </a>
+                        @if (empty($order))
+                            @if ($w->auctions_id === $l->idauction)
+                            <a href="{{ route('auction.checkout', $l->idvehicle) }}" class="btn btn-info">
+                                Checkout
+                            </a>
                             @endif
+                        @endif
                         @endforeach
                     </div>
                 </div>

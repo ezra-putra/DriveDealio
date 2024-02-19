@@ -151,6 +151,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/deliverytowings-order/{id}', [AuctionController::class, 'onDelivery'])->name('deliveryauction.post');
     Route::get('/loan/{id}', [AuctionController::class, 'loan'])->name('loan.get');
     Route::post('/loan-apply/{id}', [AuctionController::class, 'applyLoan'])->name('loan.post');
+    Route::get('/down-payment/{id}', [AuctionController::class, 'payDownPayment']);
+    Route::get('/downpayment-paid/{id}', [AuctionController::class, 'downPaymentPaid'])->name('downpayment.post');
 
     Route::get('/towing', [ShippingController::class, 'towingList']);
     Route::post('distance-create', [ShippingController::class, 'createTowPackage'])->name('distance.post');

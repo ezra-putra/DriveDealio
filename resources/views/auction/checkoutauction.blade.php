@@ -168,8 +168,8 @@
                     </div>
                     @if (!empty($order))
                         <h5>Select Payment Method</h5>
-                        <a href="{{ url('/paymentauction', $order[0]->idorder) }}" class="btn btn-info w-100 mb-1">Pay with Virtual Account</a>
-                        <a href="{{ url('/loan', $order[0]->idorder) }}" class="btn btn-outline-info w-100 mb-1">Apply for Loan</a>
+                        <a href="{{ url('/paymentauction', $order[0]->id) }}" class="btn btn-info w-100 mb-1">Pay with Virtual Account</a>
+                        <a href="{{ url('/loan', $order[0]->id) }}" class="btn btn-outline-info w-100 mb-1">Apply for Loan</a>
                     @else
                     <form action="{{ route('auctionorder.post', $vehicle[0]->idvehicle) }}" method="POST" enctype="multipart/form-data" class="mt-1 w-100" id="bidForm">
                         @csrf

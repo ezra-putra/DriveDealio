@@ -93,6 +93,7 @@
                                         @endif
                                     </div>
                                     <p class="mx-1 mb-0">#{{ $ao->invoicenum }}</p>
+                                    <span class="badge bg-light-success text-success">{{ $ao->paymentmethod }}</span>
                                 </div>
                             </div>
                             <div class="row">
@@ -113,12 +114,24 @@
                                 </div>
                             </div>
                             <div class="d-flex justify-content-end me-1">
-                                <a href="{{ route('vehicle.show', $ao->idvehicle) }}" class="btn btn-flat-success">
+                                <a href="{{ route('vehicle.show', $ao->idvehicle) }}" class="btn btn-flat-success me-1">
                                     Vehicle Details
                                 </a>
-                                <a href="#" class="btn btn-flat-success">
+                                <a href="#" class="btn btn-flat-success me-1">
                                     Order Details
                                 </a>
+
+                                @if ($ao->paymentmethod === 'DriveDealio Loan')
+                                    @if ($ao->loanstatus === 'Approved')
+                                        @if ($ao->paymentstatus === 'Unpaid')
+                                        <a href="{{ url('/down-payment', $ao->idorder) }}" class="btn btn-info">
+                                            Pay Down Payment
+                                        </a>
+                                        @else
+
+                                        @endif
+                                    @endif
+                                @endif
                             </div>
                         </div>
                     </div>

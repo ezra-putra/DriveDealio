@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\Province;
 use App\Models\Regency;
+use App\Models\Review;
 use App\Models\Shipping;
 use App\Models\Village;
 use Carbon\Carbon;
@@ -300,13 +301,14 @@ class TransactionController extends Controller
 
         $auctionorder = DB::select(
             DB::raw("SELECT CONCAT(v.model, ' ', v.variant, ' ', v.transmission, ' ', v.colour, ', ', v.year) as vehiclename, a.lot_number, aw.id as idwinner, ao.orderdate,
-            ao.invoicenum, ao.total_price, u.firstname, u.lastname, u.email, u.phonenumber, ao.id as idorder, ao.status, v.id as idvehicle, a.current_price,
-            (SELECT COALESCE(i.url, 'placeholder_url') FROM drivedealio.images as i WHERE i.vehicles_id = v.id LIMIT 1) as url, b.name as brand
+            ao.invoicenum, ao.total_price, u.firstname, u.lastname, u.email, u.phonenumber, ao.id as idorder, ao.status, v.id as idvehicle, a.current_price, ao.paymentmethod, l.status as loanstatus,
+            (SELECT COALESCE(i.url, 'placeholder_url') FROM drivedealio.images as i WHERE i.vehicles_id = v.id LIMIT 1) as url, b.name as brand, ao.paymentstatus
             FROM drivedealio.vehicles as v INNER JOIN drivedealio.auctions as a on v.id = a.vehicles_id
             INNER JOIN drivedealio.auctionwinners as aw on a.id = aw.auctions_id
             INNER JOIN drivedealio.auction_orders as ao on aw.id = ao.auctionwinners_id
             INNER JOIN drivedealio.users as u on aw.users_id = u.id
             INNER JOIN drivedealio.brands as b on v.brands_id = b.id
+            LEFT JOIN drivedealio.loans as l on ao.id = l.auction_orders_id
             WHERE u.id = $iduser order by ao.orderdate desc;")
         );
 
@@ -463,11 +465,36 @@ class TransactionController extends Controller
 
             $order = Order::findOrFail($id);
             $order->status = "On Delivery";
+            $order->shippingdate = Carbon::now();
             $order->save();
             // dd($order);
 
             return redirect()->back()->with('success', 'Delivery Arranged');
         }
+    }
+
+    public function finishedOrder($id)
+    {
+        $order = Order::findOrFail($id);
+        $order->status = "Finished";
+        $order->receivedate = Carbon::now();
+        $order->save();
+
+        return redirect()->back()->with('success', 'Order Finished!');
+    }
+
+    public function addReview(Request $request)
+    {
+        $iduser = auth()->id();
+        $review = new Review;
+        $review->rating = $request->input('rating');
+        $review->message = $request->input('message');
+        $review->reviewdate = Carbon::now();
+        $review->spareparts_id = $request->input('id');
+        $review->users_id = $iduser;
+        $review->save();
+
+        return redirect()->back()->with('success', 'Review Submited');
     }
 
     protected function formatDuration($interval)
