@@ -92,58 +92,6 @@
                         </div>
                         <div class="card">
                             <div class="card-body">
-                                <!-- Price Filter starts -->
-                                <div class="multi-range-price">
-                                    <h6 class="filter-title mt-0">Multi Range</h6>
-                                    <ul class="list-unstyled price-range" id="price-range">
-                                        <li>
-                                            <div class="form-check">
-                                                <input type="radio" id="priceAll" name="price-range"
-                                                    class="form-check-input" checked />
-                                                <label class="form-check-label" for="priceAll">All</label>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <div class="form-check">
-                                                <input type="radio" id="priceRange1" name="price-range"
-                                                    class="form-check-input" />
-                                                <label class="form-check-label" for="priceRange1">&lt;=$10</label>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <div class="form-check">
-                                                <input type="radio" id="priceRange2" name="price-range"
-                                                    class="form-check-input" />
-                                                <label class="form-check-label" for="priceRange2">$10 - $100</label>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <div class="form-check">
-                                                <input type="radio" id="priceARange3" name="price-range"
-                                                    class="form-check-input" />
-                                                <label class="form-check-label" for="priceARange3">$100 - $500</label>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <div class="form-check">
-                                                <input type="radio" id="priceRange4" name="price-range"
-                                                    class="form-check-input" />
-                                                <label class="form-check-label" for="priceRange4">&gt;= $500</label>
-                                            </div>
-                                        </li>
-                                    </ul>
-                                </div>
-                                <!-- Price Filter ends -->
-
-                                <!-- Price Slider starts -->
-                                <div class="price-slider">
-                                    <h6 class="filter-title">Price Range</h6>
-                                    <div class="price-slider">
-                                        <div class="range-slider mt-2" id="price-slider"></div>
-                                    </div>
-                                </div>
-                                <!-- Price Range ends -->
-
                                 <!-- Categories Starts -->
                                 <div id="product-categories">
                                     <h6 class="filter-title">Vehicle Type</h6>
@@ -166,13 +114,12 @@
                                 <div class="brands">
                                     <h6 class="filter-title">Brands</h6>
                                     <ul class="list-unstyled brand-list">
-                                        @foreach ($vehicle as $v)
+                                        @foreach ($brand as $b)
                                         <li>
                                             <div class="form-check">
                                                 <input type="checkbox" class="form-check-input" id="productBrand1" />
-                                                <label class="form-check-label" for="productBrand1">{{ $v->brand }}</label>
+                                                <label class="form-check-label" for="productBrand1">{{ $b->name }}</label>
                                             </div>
-                                            <span>746</span>
                                         </li>
                                         @endforeach
                                     </ul>

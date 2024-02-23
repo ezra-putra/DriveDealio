@@ -302,7 +302,7 @@ class TransactionController extends Controller
         $auctionorder = DB::select(
             DB::raw("SELECT CONCAT(v.model, ' ', v.variant, ' ', v.transmission, ' ', v.colour, ', ', v.year) as vehiclename, a.lot_number, aw.id as idwinner, ao.orderdate,
             ao.invoicenum, ao.total_price, u.firstname, u.lastname, u.email, u.phonenumber, ao.id as idorder, ao.status, v.id as idvehicle, a.current_price, ao.paymentmethod, l.status as loanstatus,
-            (SELECT COALESCE(i.url, 'placeholder_url') FROM drivedealio.images as i WHERE i.vehicles_id = v.id LIMIT 1) as url, b.name as brand, ao.paymentstatus
+            (SELECT COALESCE(i.url, 'placeholder_url') FROM drivedealio.images as i WHERE i.vehicles_id = v.id LIMIT 1) as url, b.name as brand, ao.paymentstatus, l.id as idloan
             FROM drivedealio.vehicles as v INNER JOIN drivedealio.auctions as a on v.id = a.vehicles_id
             INNER JOIN drivedealio.auctionwinners as aw on a.id = aw.auctions_id
             INNER JOIN drivedealio.auction_orders as ao on aw.id = ao.auctionwinners_id
@@ -311,6 +311,8 @@ class TransactionController extends Controller
             LEFT JOIN drivedealio.loans as l on ao.id = l.auction_orders_id
             WHERE u.id = $iduser order by ao.orderdate desc;")
         );
+
+        // dd($auctionorder);
 
         return view('transaction.order', compact('order', 'auctionorder'));
     }

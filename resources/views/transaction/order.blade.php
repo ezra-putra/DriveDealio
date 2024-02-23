@@ -28,54 +28,54 @@
                 <div class="tab-pane fade show active" id="v-pills-sparepart" role="tabpanel" aria-labelledby="v-pills-sparepart-tab">
                 @if (!empty($order))
                 @foreach ($order as $o)
-                <div class="card ecommerce-card mt-1">
-                    <div class="card-body col-md-12 d-flex flex-column" style="position: sticky; top: 0;">
-                        <div class="d-flex align-items-center">
-                            <div class="d-flex flex-column flex-sm-row pt-1 mb-1 align-items-center">
-                                <p class="mx-1 mb-0">{{ \Carbon\Carbon::parse($o->orderdate)->format('j M Y') }}</p>
-                                <div class="d-flex align-items-center mx-5 my-auto">
-                                    @if ($o->status === 'Cancelled')
-                                    <span class="badge bg-light-danger text-danger">{{ $o->status }}</span>
-                                    @elseif ($o->status === 'Waiting for Payment' || $o->status === 'Waiting for Confirmation')
-                                    <span class="badge bg-light-warning text-danger">{{ $o->status }}</span>
-                                    @else
-                                    <span class="badge bg-light-success text-success">{{ $o->status }}</span>
-                                    @endif
+                    <div class="card ecommerce-card mt-1">
+                        <div class="card-body col-md-12 d-flex flex-column" style="position: sticky; top: 0;">
+                            <div class="d-flex align-items-center">
+                                <div class="d-flex flex-column flex-sm-row pt-1 mb-1 align-items-center">
+                                    <p class="mx-1 mb-0">{{ \Carbon\Carbon::parse($o->orderdate)->format('j M Y') }}</p>
+                                    <div class="d-flex align-items-center mx-5 my-auto">
+                                        @if ($o->status === 'Cancelled')
+                                        <span class="badge bg-light-danger text-danger">{{ $o->status }}</span>
+                                        @elseif ($o->status === 'Waiting for Payment' || $o->status === 'Waiting for Confirmation')
+                                        <span class="badge bg-light-warning text-danger">{{ $o->status }}</span>
+                                        @else
+                                        <span class="badge bg-light-success text-success">{{ $o->status }}</span>
+                                        @endif
+                                    </div>
+                                    <p class="mx-1 mb-0">{{ $o->invoicenum }}</p>
+                                    <div class="mx-auto my-auto justify-content-end">
+                                        <p class="my-1">Total Price</p>
+                                        <p class="my-1">@currency($o->total_price)</p>
+                                    </div>
                                 </div>
-                                <p class="mx-1 mb-0">{{ $o->invoicenum }}</p>
-                                <div class="mx-auto my-auto justify-content-end">
-                                    <p class="my-1">Total Price</p>
-                                    <p class="my-1">@currency($o->total_price)</p>
-                                </div>
-                            </div>
 
-                        </div>
-                        <div class="d-flex align-items-center">
-                            <p class="ms-1">{{ $o->name }}</p>
-                        </div>
-                        <div class="d-flex justify-content-end me-1">
-                            <a data-bs-toggle="modal" href="#modalOrderDetails" onclick="getDetailOrders({{ $o->idorder }})" class="btn btn-flat-success mx-1">
-                                Transaction Details
-                            </a>
-                            @if ($o->status === 'Waiting for Payment')
-                            <a href="{{ route('payment_cancel', $o->idorder) }}" class="btn btn-danger me-1">
-                                Cancel
-                            </a>
-                            <a href="{{ url('/payment', $o->idorder) }}" class="btn btn-info">
-                                Pay
-                            </a>
-                            @elseif ($o->status === 'Finished')
-                            <a href="#" class="btn btn-success">
-                                Reorder
-                            </a>
-                            @endif
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <p class="ms-1">{{ $o->name }}</p>
+                            </div>
+                            <div class="d-flex justify-content-end me-1">
+                                <a data-bs-toggle="modal" href="#modalOrderDetails" onclick="getDetailOrders({{ $o->idorder }})" class="btn btn-flat-success mx-1">
+                                    Transaction Details
+                                </a>
+                                @if ($o->status === 'Waiting for Payment')
+                                <a href="{{ route('payment_cancel', $o->idorder) }}" class="btn btn-danger me-1">
+                                    Cancel
+                                </a>
+                                <a href="{{ url('/payment', $o->idorder) }}" class="btn btn-info">
+                                    Pay
+                                </a>
+                                @elseif ($o->status === 'Finished')
+                                <a href="#" class="btn btn-success">
+                                    Reorder
+                                </a>
+                                @endif
+                            </div>
                         </div>
                     </div>
-                </div>
-                @endforeach
-                @else
-                    <p class="text-center mt-1">It's quite in here, please make some order🙏</p>
-                @endif
+                    @endforeach
+                        @else
+                            <p class="text-center mt-1">It's quite in here, please make some order🙏</p>
+                        @endif
                 </div>
                 <div class="tab-pane fade" id="v-pills-auction" role="tabpanel" aria-labelledby="v-pills-auction-tab">
                     @if (!empty($auctionorder))
@@ -86,7 +86,7 @@
                                 <div class="d-flex flex-column flex-sm-row pt-1 mt-auto mb-1 align-items-center">
                                     <p class="mx-1 mb-0">#{{ $ao->lot_number }}</p>
                                     <div class="d-flex align-items-center mx-1 my-auto">
-                                        @if ($ao->status === 'Waiting for Payment' || $ao->status === 'Waiting for Confirmation')
+                                        @if ($ao->status === 'Waiting for Payment' || $ao->status === 'Waiting for Confirmation' || $ao->status === 'Waiting for Loan Approval')
                                             <span class="badge bg-light-warning text-danger">{{ $ao->status }}</span>
                                         @else
                                             <span class="badge bg-light-success text-success">{{ $ao->status }}</span>
@@ -128,7 +128,9 @@
                                             Pay Down Payment
                                         </a>
                                         @else
-
+                                        <a href="{{ url('/myloan', $ao->idloan) }}" class="btn btn-info">
+                                            My Loan
+                                        </a>
                                         @endif
                                     @endif
                                 @endif
@@ -136,10 +138,9 @@
                         </div>
                     </div>
                     @endforeach
-                </div>
-                @else
-                    <p class="text-center mt-1">It's quite in here, please make some order🙏</p>
-                @endif
+                    @else
+                        <p class="text-center mt-1">It's quite in here, please make some order🙏</p>
+                    @endif
                 </div>
             </div>
         </div>

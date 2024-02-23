@@ -3,32 +3,8 @@
 <div class="col-md-12" style="padding: 3vh;">
 
     <div class="row">
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-body col-md-12" style="position: sticky; top: 0;">
-                    <h4>Auction Statistic</h4>
-                    <div class="row">
-                        <label for="colFormLabelLg" class="col-sm-6 col-form-label-lg">
-                            <p style="font-size: 12px; font-weight: bold">Total Bids</p>
-                        </label>
-                        <div class="col-sm-6">
-                            <p style="font-size: 12px; font-weight: bold" class="mt-1" id="totalPrice">0</p>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <label for="colFormLabelLg" class="col-sm-6 col-form-label-lg">
-                            <p style="font-size: 12px; font-weight: bold">Total Auction Win</p>
-                        </label>
-                        <div class="col-sm-5">
-                            <p style="font-size: 12px; font-weight: bold" class="mt-1" id="totalPrice" >ANNITAMAXWINN</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-
-        <div class="col-md-8">
+        <div class="col-md-12">
             <h3>Auction History</h3>
             <div class="d-flex flex-column flex-sm-row pt-1 mt-auto mb-1 py-auto">
                 <p style="font-size: 14px; font-weight: 900;">Status :</p>
@@ -39,7 +15,7 @@
             </div>
         @if (!empty($list))
             @foreach ($list as $l)
-            <div class="card ecommerce-card mt-1">
+            <div class="card ecommerce-card mt-1 col-md-8 mx-auto">
                 <div class="card-body col-md-12 d-flex flex-column" style="position: sticky; top: 0;">
                     @foreach ($winner as $w)
                         @if ($w->auctions_id === $l->idauction)
@@ -83,15 +59,15 @@
                         <a href="{{ route('vehicle.show', $l->idvehicle) }}" class="btn btn-flat-success">
                             Vehicle Details
                         </a>
-                        @foreach ($winner as $w)
                         @if (empty($order))
+                        @foreach ($winner as $w)
                             @if ($w->auctions_id === $l->idauction)
                             <a href="{{ route('auction.checkout', $l->idvehicle) }}" class="btn btn-info">
                                 Checkout
                             </a>
                             @endif
-                        @endif
                         @endforeach
+                        @endif
                     </div>
                 </div>
             </div>

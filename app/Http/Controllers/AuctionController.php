@@ -46,13 +46,17 @@ class AuctionController extends Controller
             $order = DB::select(
                 DB::raw("SELECT * FROM drivedealio.auction_orders where vehicles_id = $idvehicle;")
             );
+
             $startDateTime = Carbon::parse($list[0]->start_date);
             $endDateTime = Carbon::parse($list[0]->end_date);
             $interval = $startDateTime->diff($endDateTime);
             $list[0]->duration = $this->formatDuration($interval);
+
+            return view('auction.listauction', compact('list', 'winner', 'order'));
         }
 
-        return view('auction.listauction', compact('list', 'winner', 'order'));
+        return view('auction.listauction', compact('list'));
+
     }
 
     public function placeBid(Request $request, $id)
@@ -81,7 +85,8 @@ class AuctionController extends Controller
         $startprice = $auction->start_price;
         $currentprice = $auction->current_price;
 
-        $amount = $request->input('amount');
+        $bidamount = preg_replace('/[^\d]/', '', $request->input('amount'));
+        $amount = (int)$bidamount;
 
         if(!empty($userMember))
         {
@@ -286,6 +291,7 @@ class AuctionController extends Controller
             INNER JOIN drivedealio.auctions as a on a.id = b.auctions_id
             INNER JOIN drivedealio.vehicles as v on a.vehicles_id = v.id where u.id = $iduser AND v.id = $id;")
         );
+        $idauction = $vehicle[0]->idauction;
         $date = DB::select(
             DB::raw("SELECT count(orderdate) from drivedealio.auction_orders where DATE(orderdate) = CURRENT_DATE;")
         );
@@ -295,7 +301,7 @@ class AuctionController extends Controller
         );
         $winner = DB::select(
             DB::raw("SELECT aw.id as idwinner, a.id as idauction, aw.windate, auctions_id, users_id
-            FROM drivedealio.auctions as a INNER JOIN drivedealio.auctionwinners as aw on a.id = aw.auctions_id where aw.users_id = $iduser")
+            FROM drivedealio.auctions as a INNER JOIN drivedealio.auctionwinners as aw on a.id = aw.auctions_id where aw.users_id = $iduser AND a.id = $idauction;")
         );
 
         if(!empty($address))
@@ -306,14 +312,17 @@ class AuctionController extends Controller
             $order = new AuctionOrder;
             $counter = $date[0]->count + 1;
             $idvehicle = $vehicle[0]->idvehicle;
+            $idwinner = $winner[0]->idwinner;
             // dd($idvehicle);
             $order->invoicenum = "INV/AUC/" .date("Y/m/d"). "/$counter". "/$idvehicle";
             $order->status = 'Waiting for Payment';
             $order->orderdate = Carbon::now();
             $order->total_price = $request->input('totalPrice');
             $order->paymentstatus = 'Unpaid';
-            $order->auctionwinners_id = $winner[0]->idwinner;
+            $order->auctionwinners_id = $idwinner;
             $order->vehicles_id = $idvehicle;
+
+            // dd($order);
 
             $towings = new Towing;
             $towings->origin = $origin;
@@ -495,7 +504,7 @@ class AuctionController extends Controller
         );
 
         $date = DB::select(
-            DB::raw("SELECT count(created_at) as count from drivedealio.loan_payments where loans_id = $id;")
+            DB::raw("SELECT count(created_at) as count from drivedealio.loan_payments where DATE(created_at) = CURRENT_DATE;;")
         );
 
         $idloan = $loan[0]->idloan;
@@ -504,11 +513,12 @@ class AuctionController extends Controller
 
         $counter = $date[0]->count + 1;
         $loanpay = new LoanPayment;
-        $loanpay->invoicenum = "INV/DP/" .date("Y/m/d"). "/$counter". "/$idloan";
+        $loanpay->invoicenum = "INV/DP/" .date("Y/m/d"). "/$idloan" ."/$counter";
         $loanpay->loans_id = $idloan;
         $loanpay->total_bill = $downpayment;
         $loanpay->status = "Unpaid";
         $loanpay->type = "Down Payment";
+        $loanpay->paymentcount = 0;
         // dd($loanpay);
         $loanpay->save();
 
@@ -553,18 +563,123 @@ class AuctionController extends Controller
             DB::raw("SELECT snap_token from drivedealio.loan_payments where id = $loanpay->id")
         )[0]->snap_token;
 
-        return view('auction.loanpayment', compact('loan', 'snap_token' , 'idpayloan'));
+        return view('auction.loanpayment', compact('loan', 'snap_token' , 'idloan'));
     }
 
     public function downPaymentPaid($id)
+    {
+        $downpayment = LoanPayment::where('loans_id', $id)->firstOrFail();
+        $downpayment->paymentdatetime = Carbon::now();
+        $downpayment->status = "Paid";
+        $downpayment->save();
+
+        $auctionOrderId = Loan::where('id', $id)->value('auction_orders_id');
+
+        if ($auctionOrderId) {
+            $order = AuctionOrder::find($auctionOrderId);
+            if ($order) {
+                $order->paymentdate = Carbon::now();
+                $order->paymentstatus = "Paid";
+                $order->status = "Waiting for Confirmation";
+                $order->save();
+            } else {
+                return redirect('/orderhistory')->with('error', 'Auction Order not found');
+            }
+        } else {
+            return redirect('/orderhistory')->with('error', 'Auction Order ID not found');
+        }
+        return redirect('/orderhistory')->with('success', 'Payment Success');
+    }
+
+    public function myLoan($id)
+    {
+        $iduser = auth()->id();
+        $loan = DB::select(
+            DB::raw("SELECT CONCAT(v.model, ' ', v.variant, ' ', v.transmission, ' ', v.colour, ', ', v.year) as vehiclename, a.lot_number, aw.id as idwinner, ao.orderdate,
+            ao.invoicenum, ao.total_price, u.firstname, u.lastname, u.email, u.phonenumber, ao.id as idorder, ao.status, v.id as idvehicle, a.current_price, ao.paymentmethod, l.status as loanstatus,
+            (SELECT COALESCE(i.url, 'placeholder_url') FROM drivedealio.images as i WHERE i.vehicles_id = v.id LIMIT 1) as url, b.name as brand, ao.paymentstatus,
+            lp.total_bill, lp.paymentcount, lp.status, lp.invoicenum, l.id as idloan, l.loantenor, l.monthlypayment, l.interest, l.status, l.unitprice as loanprice
+            FROM drivedealio.vehicles as v INNER JOIN drivedealio.auctions as a on v.id = a.vehicles_id
+            INNER JOIN drivedealio.auctionwinners as aw on a.id = aw.auctions_id
+            INNER JOIN drivedealio.auction_orders as ao on aw.id = ao.auctionwinners_id
+            INNER JOIN drivedealio.users as u on aw.users_id = u.id
+            INNER JOIN drivedealio.brands as b on v.brands_id = b.id
+            INNER JOIN drivedealio.loans as l on ao.id = l.auction_orders_id
+            INNER JOIN drivedealio.loan_payments as lp on l.id = lp.loans_id
+            WHERE u.id = $iduser AND ao.id = $id;")
+        );
+
+        $payableloan = DB::select(
+            DB::raw("SELECT lp.id as idloanpay, lp.total_bill, lp.paymentcount, lp.status, lp.invoicenum, l.loantenor, lp.created_at, lp.type
+            FROM drivedealio.loan_payments as lp INNER JOIN drivedealio.loans as l on lp.loans_id = l.id
+            WHERE lp.type = 'Monthly Payment' AND l.users_id = $iduser AND lp.status = 'Unpaid';")
+        );
+
+        $paidloan = DB::select(
+            DB::raw("SELECT lp.id as idloanpay, lp.total_bill, lp.paymentcount, lp.status, lp.invoicenum, l.loantenor, lp.type, lp.created_at, lp.paymentdatetime
+            FROM drivedealio.loan_payments as lp INNER JOIN drivedealio.loans as l on lp.loans_id = l.id
+            WHERE lp.type = 'Monthly Payment' AND l.users_id = $iduser AND lp.status = 'Paid';")
+        );
+
+        return view('auction.myloan', compact('loan', 'payableloan', 'paidloan'));
+    }
+
+    public function monthlyPayment($id)
+    {
+        $iduser = auth()->id();
+        $payableloan = DB::select(
+            DB::raw("SELECT lp.id as idloanpay, lp.total_bill, lp.paymentcount, lp.status, lp.invoicenum, l.loantenor, lp.created_at, lp.type,
+            u.firstname, u.lastname, u.email, u.phonenumber, lp.snap_token
+            FROM drivedealio.loan_payments as lp INNER JOIN drivedealio.loans as l on lp.loans_id = l.id
+            INNER JOIN drivedealio.users as u on l.users_id = u.id
+            WHERE lp.type = 'Monthly Payment' AND l.users_id = $iduser AND lp.status = 'Unpaid' AND lp.id = $id;")
+        );
+        \Midtrans\Config::$serverKey = 'SB-Mid-server-AOdoK40xyUyq11-i9Cc9ysHM';
+        \Midtrans\Config::$isProduction = false;
+        \Midtrans\Config::$isSanitized = true;
+        \Midtrans\Config::$is3ds = true;
+
+        $params = array(
+            'transaction_details' => array(
+                'order_id' => $payableloan[0]->invoicenum,
+                'gross_amount' => $payableloan[0]->total_bill,
+            ),
+            'customer_details' => array(
+                'first_name' => $payableloan[0]->firstname,
+                'last_name' => $payableloan[0]->lastname,
+                'email' => $payableloan[0]->email,
+                'phone' => $payableloan[0]->phonenumber,
+            ),
+            'enabled_payments' => [
+                "permata_va",
+                "bca_va",
+                "bni_va",
+                "bri_va",
+            ]
+        );
+        $snapToken = \Midtrans\Snap::getSnapToken($params);
+        if(empty($payableloan[0]->snap_token)){
+            $loanpay = LoanPayment::findOrFail($id);
+            $loanpay->snap_token = $snapToken;
+            $loanpay->save();
+        }
+
+        $snap_token = DB::select(
+            DB::raw("SELECT snap_token from drivedealio.loan_payments where id = $id")
+        )[0]->snap_token;
+
+        return view('auction.monthlypayment', compact('snap_token', 'payableloan'));
+    }
+
+    public function monthlyPaymentPaid($id)
     {
         $downpayment = LoanPayment::findOrFail($id);
         $downpayment->paymentdatetime = Carbon::now();
         $downpayment->status = "Paid";
         $downpayment->save();
-        return redirect('/orderhistory')->with('success', 'Transaction Success');
-    }
 
+        return redirect('/orderhistory')->with('success', 'Payment Success');
+    }
 
     public function orderDetails(Request $request)
     {

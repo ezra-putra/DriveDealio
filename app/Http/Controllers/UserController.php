@@ -30,12 +30,16 @@ class UserController extends Controller
             DB::raw("SELECT id as idaddress, name, address, district,
             city, province, village, zipcode, is_primaryadd FROM drivedealio.addresses where users_id = $iduser order by is_primaryadd desc")
         );
+        $document = DB::select(
+            DB::raw("SELECT ktp, npwp from drivedealio.users where id = $iduser;")
+        );
+        // dd($document);
 
         $provinces = Province::all();
         $regencies = Regency::all();
         $districts = District::all();
         $villages = Village::all();
-        return view('authentication.profile', compact('profile', 'provinces', 'regencies', 'districts', 'villages', 'address'));
+        return view('authentication.profile', compact('profile', 'provinces', 'regencies', 'districts', 'villages', 'address', 'document'));
     }
 
     public function regency(Request $request)
@@ -99,32 +103,7 @@ class UserController extends Controller
         $address->save();
         return redirect()->back()->with('success', 'Address Added!');
     }
-
-    public function uploadUserInformation(Request $request)
-    {
-        $iduser = auth()->id();
-        if ($request->hasFile('ktp')) {
-            $file = $request->file('ktp');
-            $fileName = "KTP"."-$iduser". "." .$file->getClientOriginalExtension();
-            $file->move(public_path('uploads/id'), $fileName);
-
-            DB::update("UPDATE drivedealio.users SET ktp = :ktp where id = :id",
-            ['ktp'=> $fileName, 'id'=>$iduser]);
-        }
-        if ($request->hasFile('npwp')){
-            $file = $request->file('npwp');
-            $fileName = "NPWP"."-$iduser". "." .$file->getClientOriginalExtension();
-            $file->move(public_path('uploads/id'), $fileName);
-
-            DB::update("UPDATE drivedealio.users SET npwp = :npwp where id = :id",
-            ['npwp'=> $fileName, 'id'=>$iduser]);
-        }
-
-        return redirect()->back()->with('success', 'Upload Success');
-    }
-
-
-
+    
     public function toSellerRegister()
     {
         $provinces = Province::all();

@@ -4,41 +4,26 @@
 <h3>Profile</h3>
 <div class="col-md-12" style="padding: 3vh;">
     <div class="row">
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-body col-md-12" style="position: sticky; top: 0;">
-                    <span class="avatar me-1">
-                        <img src="{{ $profile[0]->profilepicture }}" class="round" alt="avatar" height="40" width="40" style="object-fit: cover">
-                    </span>
-                    <div class="user-nav d-flex d-sm-inline-flex">
-                        <span class="user-name fw-bolder">{{ $profile[0]->firstname }} {{ $profile[0]->lastname }}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-8">
-            <h4>Data</h4>
+        <div class="col-md-12">
             <div class="card">
                 <div class="card-body col-md-12">
                     <nav>
                         <div class="nav nav-tabs" id="nav-tab" role="tablist">
                             <button class="nav-link active" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="true">Profile</button>
                             <button class="nav-link" id="nav-address-tab" data-bs-toggle="tab" data-bs-target="#nav-address" type="button" role="tab" aria-controls="nav-address" aria-selected="false">Address</button>
-                            <button class="nav-link" id="nav-idcard-tab" data-bs-toggle="tab" data-bs-target="#nav-idcard" type="button" role="tab" aria-controls="nav-idcard" aria-selected="false">User Information</button>
                         </div>
                     </nav>
                     <div class="tab-content" id="nav-tabContent">
                         <div class="tab-pane fade show active" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
                             <div class="row">
-                                <div class="col-md-4 border border-3">
+                                <div class="col-md-3 border border-3">
                                     <div class="text-center">
                                         <img src="{{ $profile[0]->profilepicture }}" class="align-items-center mx-auto mt-1" alt="avatar" height="250" width="250" style="object-fit: cover">
                                     </div>
                                     <input class="form-control mt-1" type="file" name="profile" accept=".jpeg, .jpg, .png" required/>
                                     <p style="color: red; margin-left: 5px; size: 10px;">*Only JPEG, JPG, PNG file format is accepted.</p>
                                 </div>
-                                <div class="col-md-8">
+                                <div class="col-md-9">
                                     <h5>Edit Profile</h5>
                                     <div class="row">
                                         <label for="colFormLabelLg" class="col-sm-6 col-form-label-lg">
@@ -76,8 +61,8 @@
                                             <input name="fname" class="form-control" type="text" value="{{ $profile[0]->phonenumber }}"/>
                                         </div>
                                     </div>
-                                    <div class="d-flex justify-content-end mt-3">
-                                        <a href="" class="btn btn-info">Edit</a>
+                                    <div class="d-flex justify-content-end mt-1">
+                                        <a href="#" class="btn btn-info">Edit</a>
                                     </div>
                                 </div>
                             </div>
@@ -114,27 +99,6 @@
                             </div>
                             @endforeach
                             @endif
-                        </div>
-                        <div class="tab-pane fade" id="nav-idcard" role="tabpanel" aria-labelledby="nav-idcard-tab">
-                            <form action="{{ route('userinfo.post') }}" method="POST" enctype="multipart/form-data">
-                                @csrf
-                                <div class="col-md-12">
-                                    <label for="fileKtp" class="form-label">Upload Scan KTP</label>
-                                    <input class="form-control" type="file" id="fileKtp" name="ktp" accept=".pdf" required/>
-                                    <p style="color: red; margin-left: 5px; size: 10px;">*Maximum file size is 2MB, and only
-                                        PDF file format is accepted.</p>
-                                </div>
-                                <div class="col-md-12">
-                                    <label for="fileNpwp" class="form-label">Upload Scan NPWP</label>
-                                    <input class="form-control" type="file" id="fileNpwp" name="npwp" accept=".pdf" required/>
-                                    <p style="color: red; margin-left: 5px; size: 10px;">*Maximum file size is 2MB, and only
-                                        PDF file format is accepted.</p>
-                                </div>
-
-                                <div class="d-flex justify-content-end">
-                                    <input type="submit" class="btn btn-info" value="Submit">
-                                </div>
-                            </form>
                         </div>
                     </div>
                 </div>

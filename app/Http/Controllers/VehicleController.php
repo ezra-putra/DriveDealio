@@ -6,7 +6,10 @@ use App\Models\Appointment;
 use App\Models\Vehicle;
 use App\Models\Auction;
 use App\Models\AuctionWinner;
+use App\Models\Brand;
 use App\Models\District;
+use App\Models\Inspection;
+use App\Models\Inspections;
 use App\Models\Province;
 use App\Models\Regency;
 use App\Models\Village;
@@ -31,6 +34,9 @@ class VehicleController extends Controller
         $type = DB::select(
             DB::raw("SELECT * FROM drivedealio.vehicletypes where vehiclecategories_id = 1;")
         );
+
+        $brand = Brand::all();
+
         if(!empty($vehicle))
         {
             $startDateTime = Carbon::parse($vehicle[0]->start_date);
@@ -38,7 +44,7 @@ class VehicleController extends Controller
             $interval = $startDateTime->diff($endDateTime);
             $vehicle[0]->duration = $this->formatDuration($interval);
         }
-        return view('vehicle.vehicleindex', compact('vehicle', 'type'));
+        return view('vehicle.vehicleindex', compact('vehicle', 'type', 'brand'));
     }
 
 
@@ -56,6 +62,8 @@ class VehicleController extends Controller
         $type = DB::select(
             DB::raw("SELECT * FROM drivedealio.vehicletypes where vehiclecategories_id = 2;")
         );
+        $brand = Brand::all();
+
         if(!empty($vehicle))
         {
             $startDateTime = Carbon::parse($vehicle[0]->start_date);
@@ -63,7 +71,7 @@ class VehicleController extends Controller
             $interval = $startDateTime->diff($endDateTime);
             $vehicle[0]->duration = $this->formatDuration($interval);
         }
-        return view('vehicle.vehicleindex', compact('vehicle', 'type'));
+        return view('vehicle.vehicleindex', compact('vehicle', 'type', 'brand'));
     }
 
     public function myvehicle()
@@ -81,7 +89,7 @@ class VehicleController extends Controller
         if(auth()->user()->roles_id === 3){
             $vehicle = DB::select(
                 DB::raw("SELECT v.id as idvehicle, CONCAT(v.model,' ', v.variant) as name, v.transmission, v.platenumber,
-                v.adstatus, v.inputdate, b.name as brand, u.id, u.firstname, v.appointments_id, a.id as idappointment, a.status
+                v.adstatus, v.inputdate, b.name as brand, u.id, u.firstname, v.appointments_id, a.id as idappointment, a.status, v.address, v.village, v.district, v.regency, v.province, u.phonenumber
                 FROM drivedealio.vehicles as v INNER JOIN drivedealio.brands as b on v.brands_id = b.id
                 INNER JOIN drivedealio.users as u on v.users_id = u.id
                 LEFT JOIN drivedealio.appointments as a on v.appointments_id = a.id
@@ -160,8 +168,6 @@ class VehicleController extends Controller
             INNER JOIN drivedealio.users as u on um.users_id = u.id
             WHERE a.vehicles_id = $id ORDER BY b.bidamount desc limit 3;")
         );
-
-        // dd($winner[0]->current_price);
 
         $inspection = DB::select(
             DB::raw("SELECT exterior, interior, engine, mechanism, inputdate
@@ -316,27 +322,7 @@ class VehicleController extends Controller
         return redirect('/vehicle/inspectionappointment/'. $vehicle->id)->with('status', 'Vehicle Data Saved!');
     }
 
-    public function adminEdit($id)
-    {
-        $vhc = Vehicle::findOrFail($id);
-        $brand = DB::select(
-            DB::raw('SELECT id, name from drivedealio.brands;')
-        );
-        $type = DB::select(
-            DB::raw('SELECT * from drivedealio.vehicletypes; ')
-        );
-        $date = DB::select(
-            DB::raw('SELECT id, appointmentdate, appointmenttime from drivedealio.appointments;')
-        );
-        $vehicle = DB::select(
-            DB::raw("SELECT id, model, enginecapacity, enginecylinders, fueltype, transmission, adstatus,
-            vehicletypes_id, brands_id, platenumber, variant, year, colour
-            from drivedealio.vehicles where id = $id;")
-        );
 
-
-        return view('admin.detailsvehicle', compact('vehicle', 'vhc', 'brand', 'type', 'date'));
-    }
 
     public function approve($id)
     {
@@ -426,19 +412,26 @@ class VehicleController extends Controller
 
     public function inspections(Request $request, $id)
     {
-        DB::update(
-            'UPDATE drivedealio.vehicles SET adstatus = :adstatus, chassis_number = :chassis_number,
-            engine_number = :engine_number WHERE id = :id',
-            ['adstatus' => 'Inspected', 'chassis_number' => $request->input('chassis'), 'engine_number' => $request->input('engine'), 'id' => $id]
-        );
 
-        DB::insert(
-            'INSERT INTO drivedealio.inspections(exterior, interior, engine, mechanism, inputdate, vehicles_id, appointments_id)
-            VALUES (:exterior, :interior, :engine, :mechanism, :inputdate, :vehicles_id, :appointments_id)',
-            ['exterior' => $request->input('ext'), 'interior' => $request->input('int'),
-            'engine' => $request->input('engine'), 'mechanism' => $request->input('mech'), 'inputdate' => 'now()',
-            'vehicles_id' => $id, 'appointments_id' => $request->input('dates')]
-        );
+        $vehicle = Vehicle::findOrFail($id);
+        $vehicle->adstatus = 'Inspected';
+        $vehicle->chassis_number = $request->input('chassis');
+        $vehicle->engine_number = $request->input('engine');
+        $vehicle->save();
+
+        $inspection = new Inspection;
+        $inspection->exterior = $request->input('ext');
+        $inspection->interior = $request->input('int');
+        $inspection->mechanism = $request->input('mech');
+        $inspection->engine = $request->input('engine');
+        $inspection->inputdate = Carbon::now();
+        $inspection->vehicles_id = $id;
+        $inspection->appointments_id = $request->input('dates');
+        $recprice = preg_replace('/[^\d]/', '', $request->input('recprice'));
+        $inspection->recprice = (int)$recprice;
+        // dd($inspection);
+        $inspection->save();
+
         return redirect('/admin/listvehicle')->with('status', 'Your request has been processed!');
     }
 
@@ -455,9 +448,12 @@ class VehicleController extends Controller
     {
         $vehicle = Vehicle::findOrFail($id);
         $vehicle = DB::select(
-            DB::raw("select id as idvehicle from drivedealio.vehicles where id = $id")
+            DB::raw("SELECT id as idvehicle from drivedealio.vehicles where id = $id;")
         );
-        return view('vehicle.auctionsetup', compact('vehicle'));
+        $inspection = DB::select(
+            DB::raw("SELECT recprice from drivedealio.inspections where vehicles_id = $id;")
+        );
+        return view('vehicle.auctionsetup', compact('vehicle', 'inspection'));
     }
 
     public function auctionSetup(Request $request, $id)
@@ -470,11 +466,13 @@ class VehicleController extends Controller
         $lotNumber = 'DDA-' .date('dmy'). $counter;
 
         $auction = new Auction;
-        $auction->start_price = $request->input('price');
+        $start_price = preg_replace('/[^\d]/', '', $request->input('price'));
+        $auction->start_price = (int)$start_price;
         $auction->vehicles_id = $id;
         $auction->lot_number = $lotNumber;
         $auction->start_date = $request->input('startdate');
         $auction->end_date = $request->input('enddate');
+        // dd($auction);
         $auction->save();
 
         $duration = DB::select(

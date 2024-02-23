@@ -32,10 +32,10 @@ class SparepartController extends Controller
         );
         $review = DB::select(
             DB::raw("SELECT r.id as idreview ,r.rating, r.message, r.reviewdate, u.id as iduser, u.firstname, u.lastname
-            INNER JOIN drivedalio.users as u INNER JOIN drivedalio.reviews as r on u.id = r.users_id
+            FROM drivedealio.users as u INNER JOIN drivedealio.reviews as r on u.id = r.users_id
             WHERE r.spareparts_id = $id;")
         );
-        return view('sparepart.details', compact('sparepart', 'review'));
+        return view('sparepart.details', compact('sparepart'));
     }
 
 

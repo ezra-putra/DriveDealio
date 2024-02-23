@@ -14,6 +14,7 @@
                             <th scope="col">Vehicle Name</th>
                             <th scope="col">Plate Number</th>
                             <th scope="col">Owner</th>
+                            <th scope="col">Address</th>
                             <th scope="col">Status</th>
                             <th scope="col">Action</th>
                         </tr>
@@ -24,10 +25,8 @@
                             <td>{{ $v->idvehicle }}</td>
                             <td>{{ $v->brand }} {{ $v->name }} {{ $v->transmission }}</td>
                             <td>{{ $v->platenumber }}</td>
-                            <td>{{ $v->firstname }}</td>
-                            @if (auth()->user()->roles_id === 1)
-                            <td>{{ $v->firstname }}</th>
-                            @endif
+                            <td>{{ $v->firstname }}, {{ $v->phonenumber }}</td>
+                            <td>{{ $v->address }}, {{ $v->village }} {{ $v->regency }}</td>
                             <td>{{ $v->adstatus }}</td>
                             <td>
                                 @if ($v->status === 'Booked' && $v->adstatus === 'Inspection')

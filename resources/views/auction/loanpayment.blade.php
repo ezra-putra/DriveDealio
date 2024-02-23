@@ -7,7 +7,7 @@
         window.snap.embed('{{ $snap_token }}', {
             embedId: 'snap-container',
             onSuccess: function(result){
-                window.location.href = '{{ route('downpayment.post', $idpayloan) }}';
+                window.location.href = '{{ route('downpayment.post', $idloan) }}';
             },
             onPending: function(result){
                 window.location.href = '{{ url('/orderhistory') }}';

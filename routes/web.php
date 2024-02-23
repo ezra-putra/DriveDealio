@@ -67,8 +67,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/membership/bilings', [MembershipController::class, 'myBilings'])->name('membership.myBilings');
     Route::get('/update-membership-statuses', [MembershipController::class, 'expired_post'])->name('expired_post');
     Route::get('/pay-member/{id}', [MembershipController::class, 'paymentPaid'])->name('payment-post');
-
-    Route::get('/admin/reviewvehicle/{id}', [VehicleController::class, 'adminEdit'])->name('vehicle.adminEdit');
     Route::get('/approve/{id}', [VehicleController::class, 'approve'])->name('approve_post');
     Route::get('/vehicle/inspectionappointment/{id}', [VehicleController::class, 'appointment'])->name('vehicle.appointment');
     Route::put('/appointmentDate/{id}', [VehicleController::class, 'appointmentDate'])->name('appointmentDate');
@@ -89,6 +87,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/loan-list', [AdminController::class, 'loanList']);
     Route::get('/approve-loan/{id}', [AdminController::class, 'approveLoan'])->name('loan.approve');
     Route::get('/reject-loan/{id}', [AdminController::class, 'rejectLoan'])->name('loan.reject');
+    Route::get('/admin/reviewvehicle/{id}', [AdminController::class, 'adminEdit'])->name('vehicle.adminEdit');
 
     Route::get('/inspector/dashboard', [InspectorController::class, 'dashboardIndex'], function () {
         return view('inspector.dashboard');
@@ -136,7 +135,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [UserController::class, 'profile']);
     Route::post('/set-primary-address/{id?}', [UserController::class, 'setPrimaryAddress'])
     ->name('primary.address');
-    Route::post('/upload-userinfo', [UserController::class, 'uploadUserInformation'])->name('userinfo.post');
     Route::post('/regency', [UserController::class, 'regency'])->name('regency');
     Route::post('/district', [UserController::class, 'district'])->name('district');
     Route::post('/village', [UserController::class, 'village'])->name('village');
@@ -153,6 +151,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/loan-apply/{id}', [AuctionController::class, 'applyLoan'])->name('loan.post');
     Route::get('/down-payment/{id}', [AuctionController::class, 'payDownPayment']);
     Route::get('/downpayment-paid/{id}', [AuctionController::class, 'downPaymentPaid'])->name('downpayment.post');
+    Route::get('/myloan/{id}', [AuctionController::class, 'myLoan'])->name('downpayment.get');
+    Route::get('/monthly-payment/{id}', [AuctionController::class, 'monthlyPayment']);
+    Route::get('/monthlypayment-paid/{id}', [AuctionController::class, 'monthlyPaymentPaid'])->name('monthlypayment.post');
 
     Route::get('/towing', [ShippingController::class, 'towingList']);
     Route::post('distance-create', [ShippingController::class, 'createTowPackage'])->name('distance.post');

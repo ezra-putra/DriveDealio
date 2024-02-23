@@ -101,15 +101,27 @@ class MembershipController extends Controller
             INNER JOIN drivedealio.memberships as m on m.id = mo.memberships_id where u.id = $iduser AND hm.status = 'Active';")
         );
 
-        $membership = DB::select(
-            DB::raw("select id, membershiptype, price, description FROM drivedealio.memberships;")
-        );
-
         $date = DB::select(
             DB::raw("SELECT count(created_at) from drivedealio.member_orders where DATE(created_at) = CURRENT_DATE;")
         );
         if(empty($member))
         {
+            if ($request->hasFile('ktp')) {
+                $file = $request->file('ktp');
+                $fileName = "KTP"."-$iduser". "." .$file->getClientOriginalExtension();
+                $file->move(public_path("uploads/doc/user-$iduser"), $fileName);
+
+                DB::update("UPDATE drivedealio.users SET ktp = :ktp where id = :id",
+                ['ktp'=> $fileName, 'id'=>$iduser]);
+            }
+            if ($request->hasFile('npwp')){
+                $file = $request->file('npwp');
+                $fileName = "NPWP"."-$iduser". "." .$file->getClientOriginalExtension();
+                $file->move(public_path("uploads/doc/user-$iduser"), $fileName);
+
+                DB::update("UPDATE drivedealio.users SET npwp = :npwp where id = :id",
+                ['npwp'=> $fileName, 'id'=>$iduser]);
+            }
             $usermember = new UserMemberships;
             $usermember->users_id = auth()->id();
             $usermember->status = 'Pending';
@@ -121,9 +133,9 @@ class MembershipController extends Controller
             $memberorder->user_memberships_id = $usermember->id;
             $memberorder->memberships_id = $request->input('member');
             $memberorder->paymentstatus = 'Unpaid';
-            $adminprice = 2000;
-            $memberorder->price = $membership[0]->price + $adminprice;
-            $memberorder->save();
+            $memberorder->price = $request->input('totalprice');
+            dd($memberorder);
+            // $memberorder->save();
 
             \Midtrans\Config::$serverKey = 'SB-Mid-server-AOdoK40xyUyq11-i9Cc9ysHM';
             \Midtrans\Config::$isProduction = false;
@@ -175,8 +187,9 @@ class MembershipController extends Controller
             INNER JOIN drivedealio.member_orders as mo on hm.id = mo.user_memberships_id
             INNER JOIN drivedealio.memberships as m on m.id = mo.memberships_id where mo.id = $id")
         );
+        $idhasmember = $membership[0]->idhasmember;
 
-        $member = UserMemberships::findOrFail($membership[0]->idhasmember);
+        $member = UserMemberships::findOrFail($idhasmember);
         $member->status = "Active";
         $member->start = Carbon::now();
         if ($member->memberships_id == 3 || $member->memberships_id == 4) {
@@ -189,7 +202,7 @@ class MembershipController extends Controller
         $iduser = auth()->id();
         $user = User::find($iduser);
         $title = 'Membership Paid';
-        $message = 'Payment received, wait for confirmation from system.';
+        $message = 'Payment received, your membership is active.';
         $user->notify(new NotificationsMembership($title, $message));
 
         return redirect('/membership/bilings')->with('success', 'Payment Success');

@@ -6,9 +6,9 @@
         <div class="col-md-4">
             <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
                 <div class="carousel-indicators">
-                    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-                    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
-                    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
+                    @foreach($vehicle as $v => $vehi)
+                        <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="{{ $v }}" class="{{ $v == 0 ? 'active' : '' }}" aria-label="Slide {{ $v + 1 }}"></button>
+                    @endforeach
                 </div>
                 <div class="carousel-inner">
                     @foreach($vehicle as $v => $vehi)
@@ -288,7 +288,7 @@
                 <div class="col-8">
                     <label class="form-label visually-hidden" for="modalAddCardNumber">Bid Amount</label>
                     <div class="input-group input-group-merge">
-                        <input name="amount" class="form-control" type="number" placeholder="Enter Bid Amount" />
+                        <input name="amount" class="form-control" id="bid-amount" type="number" placeholder="Enter Bid Amount" />
                     </div>
                 </div>
                 <div class="col-4 text-center">
@@ -559,5 +559,27 @@
             }
 
         }, 1000);
+    </script>
+    <script>
+        var idr = document.getElementById("bid-amount");
+        idr.addEventListener("keyup", function (e) {
+            idr.value = formatRupiah(this.value, "Rp. ");
+        });
+
+        function formatRupiah(angka, prefix) {
+            var number_string = angka.replace(/[^,\d]/g, "").toString(),
+                split = number_string.split(","),
+                sisa = split[0].length % 3,
+                rupiah = split[0].substr(0, sisa),
+                ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
+            if (ribuan) {
+                separator = sisa ? "." : "";
+                rupiah += separator + ribuan.join(".");
+            }
+
+            rupiah = split[1] != undefined ? rupiah + "," + split[1] : rupiah;
+            return prefix == undefined ? rupiah : rupiah ? "Rp. " + rupiah : "";
+        }
     </script>
 @endsection

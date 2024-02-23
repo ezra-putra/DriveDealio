@@ -71,14 +71,14 @@
                         <div class="row">
                             <div class="col-md-6 mb-1">
                                 <label class="form-label" for="Engine-number">Engine Number</label>
-                                <div class="col-md-12 mb-2">
+                                <div class="col-md-12">
                                     <input type="text" class="form-control" id="engine-number"
                                         placeholder="Engine Number" name="engine" />
                                 </div>
                             </div>
                             <div class="col-md-6 mb-1">
                                 <label class="form-label" for="chassis-number">Chassis Number</label>
-                                <div class="col-md-12 mb-2">
+                                <div class="col-md-12">
                                     <input type="text" class="form-control" id="chassis-number"
                                         placeholder="Chassis Number" name="chassis" />
                                 </div>
@@ -88,6 +88,13 @@
                                 <div class="col-md-12 mb-2">
                                     <input type="number" step="any" class="form-control" id="vehicleodo"
                                         placeholder="Vehicle Odometer" name="odo" required/>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label" for="recom-price">Price Recommendation</label>
+                                <div class="col-md-12 mb-2">
+                                    <input type="text" class="form-control" id="recom-price"
+                                        placeholder="Price Recommendation" name="recprice" required/>
                                 </div>
                             </div>
                             <hr style="height:4px;border-width:0;color:gray;background-color:lightgray">
@@ -132,10 +139,8 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="row justify-content-end">
-                            <div class="col-auto">
-                                <input type="submit" class="btn btn-success" value="Submit">
-                            </div>
+                        <div class="d-flex justify-content-end">
+                            <input type="submit" class="btn btn-info" value="Finish Inspection">
                         </div>
                     </div>
                 </div>
@@ -143,4 +148,28 @@
         </div>
     </div>
 </div>
+
+<script>
+    var idr = document.getElementById("recom-price");
+    idr.addEventListener("keyup", function (e) {
+        idr.value = formatRupiah(this.value, "Rp. ");
+    });
+
+    function formatRupiah(angka, prefix) {
+        var number_string = angka.replace(/[^,\d]/g, "").toString(),
+            split = number_string.split(","),
+            sisa = split[0].length % 3,
+            rupiah = split[0].substr(0, sisa),
+            ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
+        if (ribuan) {
+            separator = sisa ? "." : "";
+            rupiah += separator + ribuan.join(".");
+        }
+
+        rupiah = split[1] != undefined ? rupiah + "," + split[1] : rupiah;
+        return prefix == undefined ? rupiah : rupiah ? "Rp. " + rupiah : "";
+    }
+</script>
+
 @endsection

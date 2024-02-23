@@ -109,62 +109,57 @@
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label" for="select-fuel">Vehicle Fuel Type</label>
-                                        <select class="select2 form-select" id="select-fuel" name="fuel" disabled>
-                                            <option value="">--Choose Vehicle Fuel Type--</option>
-                                            <option value="petrol" {{ $v->fueltype == 'petrol' ? 'selected' : '' }}>Petrol
-                                            </option>
-                                            <option value="solar" {{ $v->fueltype == 'solar' ? 'selected' : '' }}>Solar
-                                            </option>
-                                        </select>
+                                        <div class="col-md-12 mb-2">
+                                            <input type="text" class="form-control" id="select-fuel" disabled
+                                                placeholder="fueltype" name="fuel"
+                                                value="{{ $v->fueltype }}" />
+                                        </div>
                                     </div>
+                                </div>
+                                <div class="col-md-12 mb-1">
+                                    @foreach ($vehicle as $v)
+                                        <embed src="{{ asset('uploads/vehicle/'. $v->id.'/'. $v->stnk) }}" height="250" width="500">
+                                    @endforeach
+                                </div>
+
+                                <div class="col-md-12">
+                                    @foreach ($vehicle as $v)
+                                        <embed src="{{ asset('uploads/vehicle/'. $v->id.'/'. $v->bpkb) }}" height="250" width="500">
+                                    @endforeach
                                 </div>
                             </div>
                         </div>
 
                         <div class="col-md-6">
                             <div class="col-md-12 mb-1">
-                                <div class="col-md-12 mb-1">
-                                    <label for="dpz-multiple-files" class="form-label">
-                                        <h4>Upload Vehicle Image</h4>
-                                    </label>
-                                    <form action="#" class="dropzone dropzone-area" id="dpz-multiple-files">
-                                        <div class="dz-message">Drop images here or click to upload.</div>
-                                    </form>
+                                <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
+                                    <div class="carousel-indicators">
+                                        @foreach ($image as $key => $i)
+                                            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="{{ $key }}" class="{{ $key == 0 ? 'active' : '' }}" aria-label="Slide {{ $key + 1 }}"></button>
+                                        @endforeach
+                                    </div>
+                                    <div class="carousel-inner">
+                                        @foreach ($image as $key => $i)
+                                            <div class="carousel-item {{ $key == 0 ? 'active' : '' }}">
+                                                <img src="{{ asset('/images/vehicle/'.$i->vehicles_id.'/' . $i->url) }}" class="d-block w-100" alt="Slide {{ $key + 1 }}">
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                    <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Previous</span>
+                                    </button>
+                                    <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Next</span>
+                                    </button>
                                 </div>
-                            </div>
 
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <label class="form-label" for="select-transmission">Vehicle Transmission</label>
-                                    <select class="select2 form-select" id="select-transmission" name="trans" disabled>
-                                        <option value="">--Choose Vehicle Transmission--</option>
-                                        <option value="AT" {{ $v->transmission == 'AT' ? 'selected' : '' }}>Automatic
-                                        </option>
-                                        <option value="Manual" {{ $v->transmission == 'Manual' ? 'selected' : '' }}>Manual
-                                        </option>
-                                    </select>
+                                <div class="col-md-12 mt-3">
+                                    @foreach ($vehicle as $v)
+                                        <embed src="{{ asset('uploads/vehicle/'. $v->id.'/'. $v->invoice) }}" height="250" width="500">
+                                    @endforeach
                                 </div>
-                            </div>
-
-                            <div class="col-md-12">
-                                <label for="fileStnk" class="form-label">Upload Scan STNK</label>
-                                <input class="form-control" type="file" id="fileStnk" />
-                                <p style="color: red; margin-left: 5px; size: 10px;">*Maximum file size is 2MB, and only
-                                    PDF file format is accepted.</p>
-                            </div>
-
-                            <div class="col-md-12">
-                                <label for="fileInvoice" class="form-label">Upload Scan Invoice</label>
-                                <input class="form-control" type="file" id="fileInvoice" />
-                                <p style="color: red; margin-left: 5px; size: 10px;">*Maximum file size is 2MB, and only
-                                    PDF file format is accepted.</p>
-                            </div>
-
-                            <div class="col-md-12">
-                                <label for="fileBpkb" class="form-label">Upload Scan BPKB</label>
-                                <input class="form-control" type="file" id="fileBpkb" />
-                                <p style="color: red; margin-left: 5px; size: 10px;">*Maximum file size is 2MB, and only
-                                    PDF file format is accepted.</p>
                             </div>
                         </div>
                         <div class="row justify-content-end">

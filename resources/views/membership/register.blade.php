@@ -29,16 +29,26 @@
                                     </div>
                                 </div>
                             </div>
+                                <div class="col-md-12">
+                                    <label for="fileKtp" class="form-label">Upload Scan KTP</label>
+                                    <input class="form-control" type="file" id="fileKtp" name="ktp" accept=".pdf" required/>
+                                    <p style="color: red; margin-left: 5px; size: 10px;">*Maximum file size is 2MB, and only
+                                        PDF file format is accepted.</p>
+                                </div>
+                                <div class="col-md-12">
+                                    <label for="fileNpwp" class="form-label">Upload Scan NPWP</label>
+                                    <input class="form-control" type="file" id="fileNpwp" name="npwp" accept=".pdf" required/>
+                                    <p style="color: red; margin-left: 5px; size: 10px;">*Maximum file size is 2MB, and only
+                                        PDF file format is accepted.</p>
+                                </div>
                             @endforeach
-
                         </div>
-
                         <div class="col-md-6">
                             <div class="card-body">
                                 <div class="row custom-options-checkable g-1">
                                     @foreach ($membership as $m)
-                                    <div class="col-md-6">
-                                        <input class="custom-option-item-check" type="radio" name="member" value="{{ $m->id }}" id="rdomember-{{ $m->id }}" checked/>
+                                    <div class="col-md-6 mb-1">
+                                        <input class="custom-option-item-check" type="radio" name="member" value="{{ $m->id }}" id="rdomember-{{ $m->id }}" onchange="updateMemberPrice({{ $m->price }})" checked/>
                                         <label class="custom-option-item p-1" for="rdomember-{{ $m->id }}">
                                             <span class="d-flex justify-content-between flex-wrap mb-50">
                                                 <span class="fw-bolder">{{ $m->membershiptype }}</span>
@@ -48,21 +58,70 @@
                                         </label>
                                     </div>
                                     @endforeach
+
+                                    <div class="col-md-12 border border-1">
+                                        <h5 class="mt-1">Order Details</h5>
+                                        <div class="row">
+                                            <label for="colFormLabelLg" class="col-sm-8 col-form-label-lg">
+                                                <p style="font-size: 14px;font-weight:500; ">Sub Total</p>
+                                            </label>
+                                            <div class="col-sm-4">
+                                                <p style="font-size: 14px; font-weight:500;" class="mt-1" id="subtotal">@currency(0)</p>
+                                            </div>
+                                            <label for="colFormLabelLg" class="col-sm-8 col-form-label-lg">
+                                                <p style="font-size: 14px;font-weight:500; ">Admin Fee</p>
+                                            </label>
+                                            @php
+                                                $adminfee = 5000;
+                                            @endphp
+                                            <div class="col-sm-4">
+                                                <p style="font-size: 14px; font-weight:500;" class="mt-1" id="adminfee">@currency($adminfee)</p>
+                                            </div>
+                                        </div>
+                                        <hr style="height:5px;border-width:0;color:gray;background-color:lightgray">
+                                        <div class="row">
+                                            <label for="colFormLabelLg" class="col-sm-8 col-form-label-lg">
+                                                <p style="font-size: 14px;font-weight:600; ">Total Price</p>
+                                            </label>
+                                            <div class="col-sm-4">
+                                                <p style="font-size: 14px; font-weight:600;" class="mt-1" id="finalprice">@currency(0)</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                 </div>
                             </div>
+                            <div class="d-flex justify-content-end me-1">
+                                <input type="hidden" name="totalprice" id="totalPrice" value="">
+                                <input type="submit" class="btn btn-info btn-submit" value="Create Order">
+                            </div>
                         </div>
-                        <div class="d-flex justify-content-end">
-                            <input type="submit" class="btn btn-primary btn-submit" value="Submit">
-                        </div>
+                    </div>
                 </form>
             </div>
         </div>
     </div>
     </div>
 </form>
+<script>
+    function formatCurrency(amount) {
+        return new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0,
+            currencyDisplay: 'symbol'
+        }).format(amount);
+    }
+    function updateMemberPrice(price) {
+        var formatedSubTotal = formatCurrency(price);
+        document.getElementById('subtotal').innerText = formatedSubTotal;
 
+        var adminfee = {{ $adminfee }};
+        var finalPrice = price + adminfee;
+        var formatedFinalPrice = formatCurrency(finalPrice);
+        document.getElementById('finalprice').innerText = formatedFinalPrice;
 
-
-
-    <script src="../../../app-assets/vendors/js/ui/jquery.sticky.js"></script>
+        document.getElementById('totalPrice').value = finalPrice;
+    }
+</script>
 @endsection

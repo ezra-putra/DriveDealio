@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Admin;
 use App\Models\Loan;
+use App\Models\Vehicle;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -115,6 +116,31 @@ class AdminController extends Controller
         $loan->status = "Reject";
         $loan->save();
         return redirect()->back()->with('success', 'Loan Status Changed!');
+    }
+
+    public function adminEdit($id)
+    {
+        $vhc = Vehicle::findOrFail($id);
+        $brand = DB::select(
+            DB::raw('SELECT id, name from drivedealio.brands;')
+        );
+        $type = DB::select(
+            DB::raw('SELECT * from drivedealio.vehicletypes; ')
+        );
+        $date = DB::select(
+            DB::raw('SELECT id, appointmentdate, appointmenttime from drivedealio.appointments;')
+        );
+        $vehicle = DB::select(
+            DB::raw("SELECT id, model, enginecapacity, enginecylinders, fueltype, transmission, adstatus,
+            vehicletypes_id, brands_id, platenumber, variant, year, colour, stnk, bpkb, invoice
+            from drivedealio.vehicles where id = $id;")
+        );
+
+        $image = DB::select(
+            DB::raw("SELECT url, vehicles_id from drivedealio.images where vehicles_id = $id;")
+        );
+
+        return view('admin.detailsvehicle', compact('vehicle', 'vhc', 'brand', 'type', 'date', 'image'));
     }
 
     /**

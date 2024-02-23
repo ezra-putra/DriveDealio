@@ -84,7 +84,7 @@
                                         <label class="form-label" for="select-fuel">Vehicle Fuel Type</label>
                                         <select class="select2 form-select" id="select-fuel" name="fuel">
                                             <option value="">--Choose Vehicle Fuel Type--</option>
-                                            <option value="Petrol">Gas</option>
+                                            <option value="Gas">Gas</option>
                                             <option value="Solar">Diesel</option>
                                             <option value="Solar">Electric</option>
                                             <option value="Solar">Hybrid</option>
