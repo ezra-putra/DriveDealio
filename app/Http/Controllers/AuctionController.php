@@ -12,6 +12,7 @@ use App\Models\LoanPayment;
 use App\Models\Province;
 use App\Models\Regency;
 use App\Models\Towing;
+use App\Models\TowingStatus;
 use App\Models\Village;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -421,8 +422,9 @@ class AuctionController extends Controller
     public function onDelivery($id)
     {
         $towing = DB::select(
-            DB::raw("SELECT t.id as idshipping, ao.orderdate  from drivedealio.auction_orders as ao
-            INNER JOIN drivedealio.towings as t on o.towings_id = t.id where ao.id = $id")
+            DB::raw("SELECT t.id as idtowing, ao.orderdate
+            from drivedealio.auction_orders as ao INNER JOIN drivedealio.towings as t on ao.towings_id = t.id
+            where ao.id = $id;")
         );
 
         if (empty($towing)) {
@@ -434,6 +436,11 @@ class AuctionController extends Controller
             $towing = Towing::findOrFail($idtowing);
             $towing->trans_number = "DDA".date("ymd").$idtowing;
             $towing->save();
+
+            $status = new TowingStatus;
+            $status->towings_id = $idtowing;
+            $status->status = "Request to Pickup";
+            $status->save();
 
             $order = AuctionOrder::findOrFail($id);
             $order->status = "On Delivery";
@@ -595,18 +602,11 @@ class AuctionController extends Controller
     {
         $iduser = auth()->id();
         $loan = DB::select(
-            DB::raw("SELECT CONCAT(v.model, ' ', v.variant, ' ', v.transmission, ' ', v.colour, ', ', v.year) as vehiclename, a.lot_number, aw.id as idwinner, ao.orderdate,
-            ao.invoicenum, ao.total_price, u.firstname, u.lastname, u.email, u.phonenumber, ao.id as idorder, ao.status, v.id as idvehicle, a.current_price, ao.paymentmethod, l.status as loanstatus,
-            (SELECT COALESCE(i.url, 'placeholder_url') FROM drivedealio.images as i WHERE i.vehicles_id = v.id LIMIT 1) as url, b.name as brand, ao.paymentstatus,
-            lp.total_bill, lp.paymentcount, lp.status, lp.invoicenum, l.id as idloan, l.loantenor, l.monthlypayment, l.interest, l.status, l.unitprice as loanprice
-            FROM drivedealio.vehicles as v INNER JOIN drivedealio.auctions as a on v.id = a.vehicles_id
-            INNER JOIN drivedealio.auctionwinners as aw on a.id = aw.auctions_id
-            INNER JOIN drivedealio.auction_orders as ao on aw.id = ao.auctionwinners_id
-            INNER JOIN drivedealio.users as u on aw.users_id = u.id
-            INNER JOIN drivedealio.brands as b on v.brands_id = b.id
+            DB::raw("SELECT CONCAT(v.model, ' ', v.variant, ' ', v.transmission, ' ', v.colour, ', ', v.year) as vehiclename,
+            ao.invoicenum, l.loantenor, l.monthlypayment
+            FROM drivedealio.vehicles as v INNER JOIN drivedealio.auction_orders as ao on v.id = ao.vehicles_id
             INNER JOIN drivedealio.loans as l on ao.id = l.auction_orders_id
-            INNER JOIN drivedealio.loan_payments as lp on l.id = lp.loans_id
-            WHERE u.id = $iduser AND ao.id = $id;")
+            WHERE l.id = $id;")
         );
 
         $payableloan = DB::select(
@@ -686,8 +686,42 @@ class AuctionController extends Controller
         $id = ($request->get('id'));
         $data = AuctionOrder::find($id);
         $order = DB::select(
+            DB::raw("SELECT CONCAT(v.model, ' ', v.variant, ' ', v.colour, ', ', v.year) as vehiclename, a.lot_number, aw.id as idwinner, ao.orderdate, b.name,
+            ao.invoicenum, ao.total_price, u.firstname, u.lastname, u.email, u.phonenumber, ao.id as idorder, a.current_price, ao.status,
+            (SELECT COALESCE(i.url, 'placeholder_url') FROM drivedealio.images as i WHERE i.vehicles_id = v.id LIMIT 1) as url,
+            ad.name as addressname, ad.address, ad.province, ad.city, ad.district, ad.village, ad.zipcode
+            FROM drivedealio.vehicles as v INNER JOIN drivedealio.auctions as a on v.id = a.vehicles_id
+            INNER JOIN drivedealio.auctionwinners as aw on a.id = aw.auctions_id
+            INNER JOIN drivedealio.auction_orders as ao on aw.id = ao.auctionwinners_id
+            INNER JOIN drivedealio.users as u on aw.users_id = u.id
+            INNER JOIN drivedealio.brands as b on v.brands_id = b.id
+            INNER JOIN drivedealio.addresses as ad on ao.addresses_id = ad.id
+            WHERE ao.id = $id;")
+        );
+
+        $towing = DB::select(
+            DB::raw("SELECT tp.name, tw.price, tw.trans_number
+            FROM drivedealio.transporters as tp INNER JOIN drivedealio.towings as tw on tp.id = tw.transporters_id
+            INNER JOIN drivedealio.auction_orders as ao on tw.id = ao.towings_id
+            WHERE ao.id = $id;")
+        );
+        $status = DB::select(
+            DB::raw("SELECT ts.status, ts.created_at
+            FROM drivedealio.auction_orders as ao INNER JOIN drivedealio.towings as t on ao.towings_id = t.id
+            INNER JOIN drivedealio.towing_statuses as ts on t.id = ts.towings_id
+            WHERE ao.id = $id ORDER BY ts.created_at asc;")
+        );
+
+        return response()->json(array(
+            'msg'=> view('auction.orderdetails',compact('data', 'order', 'towing', 'status'))->render()
+        ),200);
+    }
+
+    public function invoice($id)
+    {
+        $order = DB::select(
             DB::raw("SELECT CONCAT(v.model, ' ', v.variant, ' ', v.colour, ', ', v.year) as vehiclename, a.lot_number, aw.id as idwinner, ao.orderdate,
-            ao.invoicenum, ao.total_price, u.firstname, u.lastname, u.email, u.phonenumber, ao.id as idorder, a.current_price
+            ao.invoicenum, ao.total_price, u.firstname, u.lastname, u.email, u.phonenumber, ao.id as idorder, a.current_price, ao.paymentmethod
             FROM drivedealio.vehicles as v INNER JOIN drivedealio.auctions as a on v.id = a.vehicles_id
             INNER JOIN drivedealio.auctionwinners as aw on a.id = aw.auctions_id
             INNER JOIN drivedealio.auction_orders as ao on aw.id = ao.auctionwinners_id
@@ -696,13 +730,13 @@ class AuctionController extends Controller
         );
 
         $towing = DB::select(
-            DB::raw("SELECT tp.name, tw.price, tw.trans_number, price
-            FROM drivedealio.transporters as tp INNER JOIN drivedealio.towings as tw on tp.id = tw.transporters_id")
+            DB::raw("SELECT tp.name, tw.price, tw.trans_number
+            FROM drivedealio.transporters as tp INNER JOIN drivedealio.towings as tw on tp.id = tw.transporters_id
+            INNER JOIN drivedealio.auction_orders as ao on tw.id = ao.towings_id
+            WHERE ao.id = $id;")
         );
 
-        return response()->json(array(
-            'msg'=> view('auction.orderdetails',compact('data', 'order', 'towing'))->render()
-        ),200);
+        return view('auction.invoice', compact('order', 'towing'));
     }
 
     protected function formatDuration($interval)

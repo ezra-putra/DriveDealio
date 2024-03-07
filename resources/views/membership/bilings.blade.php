@@ -58,11 +58,12 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h4>Membership History</h4>
+                    <h4>Transaction History</h4>
                 </div>
                 <table class="table table-striped">
                     <thead>
                         <tr>
+                            <th scope="col">Invoice Number</th>
                             <th scope="col">Membership Type</th>
                             <th scope="col">Start Date</th>
                             <th scope="col">End Date</th>
@@ -75,6 +76,9 @@
                     <tbody>
                         @foreach ($member as $m)
                             <tr>
+                                <td>
+                                    <a href="{{ url('/invoice-membership', $m->idorder) }}" class="text-decoration-none mx-1 mb-0">{{ $m->invoicenum }}</a>
+                                </td>
                                 <td>{{ $m->name }}</td>
                                 <td>{{ $m->start }}</td>
                                 <td>{{ $m->end }}</td>

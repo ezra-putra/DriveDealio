@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Admin;
 use App\Models\Loan;
+use App\Models\User;
 use App\Models\Vehicle;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -34,8 +35,23 @@ class AdminController extends Controller
             from drivedealio.users as u INNER JOIN drivedealio.roles as r on u.roles_id = r.id
             WHERE r.name = 'Buyer' order by u.id asc;")
         );
+        $courier = DB::select(
+            DB::raw("SELECT u.id, u.email, u.firstname, u.lastname, u.phonenumber, r.name
+            from drivedealio.users as u INNER JOIN drivedealio.roles as r on u.roles_id = r.id
+            WHERE r.name = 'Courier' order by u.id asc;")
+        );
+
         // dd($user);
-        return view('admin.listuser', compact('user', 'useradmin', 'userinspector', 'userbuyer'));
+        return view('admin.listuser', compact('user', 'useradmin', 'userinspector', 'userbuyer', 'courier'));
+    }
+
+    public function editRoleUser(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+        $user->roles_id = $request->input('role');
+        $user->save();
+
+        return redirect()->back()->with('success', 'Role change succesfully');
     }
 
     public function listSeller()
@@ -64,8 +80,6 @@ class AdminController extends Controller
         ['status' => 'Suspend', 'id' => $id]);
 
         return view('/admin/listseller');
-
-        // buat timestamp kalo misal toko ke suspen maka day+30 toko akan dihapus, jika toko dihapus maka user tidak akan bisa membuat toko lagi
     }
 
     public function dashboard()
@@ -141,71 +155,5 @@ class AdminController extends Controller
         );
 
         return view('admin.detailsvehicle', compact('vehicle', 'vhc', 'brand', 'type', 'date', 'image'));
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\Admin  $admin
-     * @return \Illuminate\Http\Response
-     */
-    public function show(Admin $admin)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Admin  $admin
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Admin $admin)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Admin  $admin
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Admin $admin)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Admin  $admin
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Admin $admin)
-    {
-        //
     }
 }

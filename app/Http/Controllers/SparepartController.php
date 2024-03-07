@@ -31,11 +31,24 @@ class SparepartController extends Controller
             INNER JOIN drivedealio.shops as sh on s.shops_id = sh.id where s.id = $id;")
         );
         $review = DB::select(
-            DB::raw("SELECT r.id as idreview ,r.rating, r.message, r.reviewdate, u.id as iduser, u.firstname, u.lastname
+            DB::raw("SELECT r.id as idreview , r.rating, r.message, r.reviewdate, u.id as iduser, u.firstname, u.lastname
             FROM drivedealio.users as u INNER JOIN drivedealio.reviews as r on u.id = r.users_id
             WHERE r.spareparts_id = $id;")
         );
-        return view('sparepart.details', compact('sparepart'));
+
+        $total_review = DB::select(
+            DB::raw("SELECT count(r.id) as total
+            FROM drivedealio.users as u INNER JOIN drivedealio.reviews as r on u.id = r.users_id
+            WHERE r.spareparts_id = $id;")
+        );
+
+        $average_review = DB::select(
+            DB::raw("SELECT COALESCE(ROUND(AVG(r.rating), 1), 0.0) as average
+            FROM drivedealio.users as u
+            LEFT JOIN drivedealio.reviews as r ON u.id = r.users_id
+            WHERE r.spareparts_id = $id;")
+        );
+        return view('sparepart.details', compact('sparepart', 'review', 'total_review', 'average_review'));
     }
 
 

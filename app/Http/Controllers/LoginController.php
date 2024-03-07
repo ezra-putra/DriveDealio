@@ -37,6 +37,9 @@ class LoginController extends Controller
             if(auth()->user()->roles_id == 3){
                 return redirect()->route('inspectordashboard');
             }
+            if(auth()->user()->roles_id == 4){
+                return redirect()->route('courierdashboard');
+            }
         }
 
         return redirect()->back()->withInput()->withErrors([

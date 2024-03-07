@@ -1,5 +1,96 @@
 @extends('layout.main')
 @section('content')
+<style>
+    .rate {
+        float: left;
+        height: 46px;
+        padding: 0 10px;
+        }
+        .rate:not(:checked) > input {
+        position:absolute;
+        display: none;
+        }
+        .rate:not(:checked) > label {
+        float:right;
+        width:1em;
+        overflow:hidden;
+        white-space:nowrap;
+        cursor:pointer;
+        font-size:30px;
+        color:#ccc;
+        }
+        .rated:not(:checked) > label {
+        float:right;
+        width:1em;
+        overflow:hidden;
+        white-space:nowrap;
+        cursor:pointer;
+        font-size:30px;
+        color:#ccc;
+        }
+        .rate:not(:checked) > label:before {
+        content: '★ ';
+        }
+        .rate > input:checked ~ label {
+        color: #ffc700;
+        }
+        .rate:not(:checked) > label:hover,
+        .rate:not(:checked) > label:hover ~ label {
+        color: #deb217;
+        }
+        .rate > input:checked + label:hover,
+        .rate > input:checked + label:hover ~ label,
+        .rate > input:checked ~ label:hover,
+        .rate > input:checked ~ label:hover ~ label,
+        .rate > label:hover ~ input:checked ~ label {
+        color: #c59b08;
+        }
+        .star-rating-complete{
+           color: #c59b08;
+        }
+        .rating-container .form-control:hover, .rating-container .form-control:focus{
+        background: #fff;
+        border: 1px solid #ced4da;
+        }
+        .rating-container textarea:focus, .rating-container input:focus {
+        color: #000;
+        }
+        .rated {
+        float: left;
+        height: 46px;
+        padding: 0 10px;
+        }
+        .rated:not(:checked) > input {
+        position:absolute;
+        display: none;
+        }
+        .rated:not(:checked) > label {
+        float:right;
+        width:1em;
+        overflow:hidden;
+        white-space:nowrap;
+        cursor:pointer;
+        font-size:30px;
+        color:#ffc700;
+        }
+        .rated:not(:checked) > label:before {
+        content: '★ ';
+        }
+        .rated > input:checked ~ label {
+        color: #ffc700;
+        }
+        .rated:not(:checked) > label:hover,
+        .rated:not(:checked) > label:hover ~ label {
+        color: #deb217;
+        }
+        .rated > input:checked + label:hover,
+        .rated > input:checked + label:hover ~ label,
+        .rated > input:checked ~ label:hover,
+        .rated > input:checked ~ label:hover ~ label,
+        .rated > label:hover ~ input:checked ~ label {
+        color: #c59b08;
+        }
+</style>
 <h3>Details</h3>
 <div class="col-md-12 mx-auto" style="padding: 3vh;">
     <div class="row">
@@ -108,7 +199,7 @@
         <div class="col-md-4">
             <div class="col-md-12">
                 <h4 class="mb-2">User Review</h4>
-                <h1 class="mb-1" style="font-size: 40px">4/5.0</h1>
+                <h1 class="mb-1" style="font-size: 40px">{{ $average_review[0]->average }}/5.0</h1>
             </div>
         </div>
         <div class="col-md-5">
@@ -116,7 +207,7 @@
                 <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center">
                     <div>
                         <h5 class="mb-0">Review</h5>
-                        <p class="mb-0">Displaying 10 of 192 reviews</p>
+                        <p class="mb-0">Displaying {{ $total_review[0]->total }} reviews</p>
                     </div>
                     <div class="dropdown mt-2 mt-sm-0">
                         <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
@@ -129,20 +220,35 @@
                         </ul>
                     </div>
                 </div>
+
                 <div class="row mt-1">
                     <h4>Rating</h4>
-                    <div class="d-flex align-items-center my-1">
-                        <a href="#" aria-expanded="false" class="d-flex align-items-center text-decoration-none">
-                            <span class="avatar me-2">
-                                <img src="" alt="" class="round" alt="avatar" height="40" width="40" style="object-fit: cover">
-                            </span>
-                            <div class="user-nav d-flex d-sm-inline-flex ms-1">
-                                <span class="user-name fw-bolder">Nama Reviewer</span>
+                    @if(!empty($review))
+                        @foreach ($review as $r)
+                        <div class="d-flex align-items-center my-1">
+                            <a href="#" aria-expanded="false" class="d-flex align-items-center text-decoration-none">
+                                <span class="avatar me-2">
+                                    <img src="" alt="" class="round" alt="avatar" height="40" width="40" style="object-fit: cover">
+                                </span>
+                                <div class="user-nav d-flex d-sm-inline-flex ms-1">
+                                    <span class="user-name fw-bolder">{{ $r->firstname }} {{ $r->lastname }}</span>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col mb-1">
+                            <div class="rated">
+                            @for($i=1; $i<=$r->rating; $i++)
+                            {{-- <input type="radio" id="star{{$i}}" class="rate" name="rating" value="5"/> --}}
+                            <label class="star-rating-complete" title="text">{{$i}} stars</label>
+                            @endfor
                             </div>
-                        </a>
-                    </div>
-                    <p>Mantabbb</p>
-                    <hr style="height:1px;border-width:0;color:gray;background-color:lightgray">
+                        </div>
+                        <p>{{ $r->message }}</p>
+                        <hr style="height:1px;border-width:0;color:gray;background-color:lightgray">
+                        @endforeach
+                    @else
+                        <p class="text-center mt-1">No Review on this Product</p>
+                    @endif
                 </div>
             </div>
         </div>

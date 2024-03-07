@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuctionController;
+use App\Http\Controllers\CourierController;
 use App\Http\Controllers\InspectorController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\MainController;
@@ -128,10 +129,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/payment-cancel/{id}', [TransactionController::class, 'paymentCancel'])->name('payment_cancel');
     Route::get('/orderhistory', [TransactionController::class, 'transactionList']);
     Route::post('/order/order-details', [TransactionController::class, 'transactionDetails'])->name('transaction.details');
+    Route::get('/review/{id}', [TransactionController::class, 'review']);
+    Route::post('/add-review/{id}', [TransactionController::class, 'addReview'])->name('review.post');
 
     Route::get('/seller/register', [UserController::class, 'toSellerRegister']);
     Route::post('become-seller', [UserController::class, 'becomeSeller'])->name('seller.register');
-
     Route::get('/profile', [UserController::class, 'profile']);
     Route::post('/set-primary-address/{id?}', [UserController::class, 'setPrimaryAddress'])
     ->name('primary.address');
@@ -154,9 +156,20 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/myloan/{id}', [AuctionController::class, 'myLoan'])->name('downpayment.get');
     Route::get('/monthly-payment/{id}', [AuctionController::class, 'monthlyPayment']);
     Route::get('/monthlypayment-paid/{id}', [AuctionController::class, 'monthlyPaymentPaid'])->name('monthlypayment.post');
+    Route::post('/auction/auction-details', [AuctionController::class, 'orderDetails'])->name('auction.details');
 
-    Route::get('/towing', [ShippingController::class, 'towingList']);
-    Route::post('distance-create', [ShippingController::class, 'createTowPackage'])->name('distance.post');
+    Route::get('/invoice-sparepart/{id}', [TransactionController::class, 'invoice']);
+    Route::get('/invoice-membership/{id}', [MembershipController::class, 'invoice']);
+    Route::get('/invoice-auction/{id}', [AuctionController::class, 'invoice']);
+
+    Route::get('/courier/dashboard', [CourierController::class, 'dashboard'], function(){
+        return view('courier.dashboard');
+    })->name('courierdashboard');
+    Route::get('/shipping-details/{id}', [CourierController::class, 'shippingDetails']);
+    Route::get('/towing-details/{id}', [CourierController::class, 'towingDetails']);
+    Route::post('/add-shipping-status/{id}', [CourierController::class, 'updateShippingStatus'])->name('updateShippingStatus');
+    Route::post('/add-towing-status/{id}', [CourierController::class, 'updateTowingStatus'])->name('updateTowingStatus');
+    Route::get('/arrived-order/{id}', [CourierController::class, 'updateOrderStatus'])->name('update.order');
 });
 
 Route::get('/vehicle/car', [VehicleController::class, 'car']);
@@ -166,6 +179,5 @@ Route::get('/vehicle/myvehicle', [VehicleController::class, 'myvehicle'])->name(
 
 Route::get('/sparepart', [SparepartController::class, 'index']);
 Route::get('/sparepart/details/{id}', [SparepartController::class, 'show'])->name('sparepart.show');
-
 
 Route::get('/seller/profile/{id}', [SellerController::class, 'sellerProfile'])->name('seller.profile');

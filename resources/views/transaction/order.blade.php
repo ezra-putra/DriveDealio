@@ -42,7 +42,7 @@
                                         <span class="badge bg-light-success text-success">{{ $o->status }}</span>
                                         @endif
                                     </div>
-                                    <p class="mx-1 mb-0">{{ $o->invoicenum }}</p>
+                                    <a href="{{ url('/invoice-sparepart', $o->idorder) }}" target="_blank" class="text-decoration-none mx-1 mb-0">{{ $o->invoicenum }}</a>
                                     <div class="mx-auto my-auto justify-content-end">
                                         <p class="my-1">Total Price</p>
                                         <p class="my-1">@currency($o->total_price)</p>
@@ -64,9 +64,9 @@
                                 <a href="{{ url('/payment', $o->idorder) }}" class="btn btn-info">
                                     Pay
                                 </a>
-                                @elseif ($o->status === 'Finished')
-                                <a href="#" class="btn btn-success">
-                                    Reorder
+                                @elseif ($o->status === 'Arrived')
+                                <a href="{{ url('/review', $o->idorder) }}" class="btn btn-info">
+                                    Review
                                 </a>
                                 @endif
                             </div>
@@ -92,7 +92,7 @@
                                             <span class="badge bg-light-success text-success">{{ $ao->status }}</span>
                                         @endif
                                     </div>
-                                    <p class="mx-1 mb-0">#{{ $ao->invoicenum }}</p>
+                                    <a href="{{ url('/invoice-auction', $ao->idorder) }}" target="_blank" class="text-decoration-none mx-1 mb-0">{{ $ao->invoicenum }}</a>
                                     <span class="badge bg-light-success text-success">{{ $ao->paymentmethod }}</span>
                                 </div>
                             </div>
@@ -117,7 +117,7 @@
                                 <a href="{{ route('vehicle.show', $ao->idvehicle) }}" class="btn btn-flat-success me-1">
                                     Vehicle Details
                                 </a>
-                                <a href="#" class="btn btn-flat-success me-1">
+                                <a data-bs-toggle="modal" href="#modalAuctionDetails" onclick="getAuctionDetails({{ $ao->idorder }})" class="btn btn-flat-success mx-1">
                                     Order Details
                                 </a>
 
@@ -159,6 +159,18 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="modalAuctionDetails" tabindex="-1" role="basic" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-wide" style="max-width: 750px">
+        <div class="modal-content">
+            <div class="modal-header bg-transparent">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body px-sm-5 mx-50 pb-5" id="auctionDetails">
+
+            </div>
+        </div>
+    </div>
+</div>
 
 <script>
     function getDetailOrders(id) {
@@ -168,6 +180,19 @@
             data:'_token= <?php echo csrf_token() ?> &id='+id,
             success:function(data) {
                 $("#orderDetails").html(data.msg);
+            }
+        });
+    }
+</script>
+
+<script>
+    function getAuctionDetails(id) {
+        $.ajax({
+            type:'POST',
+            url:'{{route("auction.details")}}',
+            data:'_token= <?php echo csrf_token() ?> &id='+id,
+            success:function(data) {
+                $("#auctionDetails").html(data.msg);
             }
         });
     }

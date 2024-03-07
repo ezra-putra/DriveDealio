@@ -21,9 +21,12 @@
                             </tr>
                         </thead>
                         <tbody>
+                            @php
+                                $counter = 1;
+                            @endphp
                             @foreach ($vehicle as $v)
                                 <tr>
-                                    <td>{{ $v->idvehicle }}</td>
+                                    <td>{{ $counter++ }}</td>
                                     <td>{{ $v->brand }} {{ $v->name }} {{ $v->transmission }}</td>
                                     <td>{{ $v->platenumber }}</td>
                                     <td>{{ $v->inputdate }}</td>

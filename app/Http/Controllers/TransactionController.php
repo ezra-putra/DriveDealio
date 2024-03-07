@@ -9,6 +9,7 @@ use App\Models\Province;
 use App\Models\Regency;
 use App\Models\Review;
 use App\Models\Shipping;
+use App\Models\ShippingStatus;
 use App\Models\Village;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -344,6 +345,13 @@ class TransactionController extends Controller
             INNER JOIN drivedealio.orders as o on sh.id = o.shippings_id where o.id = $id;")
         );
 
+        $status = DB::select(
+            DB::raw("SELECT ss.status, ss.created_at
+            FROM drivedealio.orders as o INNER JOIN drivedealio.shippings as s on o.shippings_id = s.id
+            INNER JOIN drivedealio.shipping_statuses as ss on s.id = ss.shippings_id
+            WHERE o.id = $id ORDER BY ss.created_at asc;")
+        );
+
         $countItems = DB::select(
             DB::raw("SELECT count(quantityordered) as count from drivedealio.orderdetails where orders_id = $id;")
         );
@@ -352,8 +360,36 @@ class TransactionController extends Controller
             DB::raw("SELECT sum(unitprice) as price from drivedealio.orderdetails where orders_id = $id;")
         );
         return response()->json(array(
-            'msg'=> view('transaction.orderdetails',compact('data', 'order', 'orderdetails', 'shippings', 'countItems', 'totalshop'))->render()
+            'msg'=> view('transaction.orderdetails',compact('data', 'order', 'orderdetails', 'shippings', 'countItems', 'totalshop', 'status'))->render()
         ),200);
+    }
+
+    public function invoice($id)
+    {
+        $order = DB::select(
+            DB::raw("SELECT o.id as idorder, u.id as iduser, o.invoicenum, o.orderdate, o.shops_id, o.users_id, o.status, o.paymentstatus, s.name, o.total_price, s.id as idshop,
+            a.name as addressname, a.address, a.province, a.city, a.district, a.village, a.zipcode, s.name as sellername, u.firstname, u.lastname, u.phonenumber
+            from drivedealio.orders as o INNER JOIN drivedealio.users as u on o.users_id = u.id
+            INNER JOIN drivedealio.shops as s on o.shops_id = s.id
+            LEFT JOIN drivedealio.addresses as a on a.id = o.addresses_id
+            where o.id = $id AND o.addresses_id = a.id;")
+        );
+
+        $orderdetails = DB::select(
+            DB::raw("SELECT od.quantityordered, od.unitprice, CONCAT(sp.partnumber, ' ', sp.partname, ' ', sp.vehiclemodel) as item_name,
+            (SELECT p.url FROM drivedealio.pics as p WHERE p.spareparts_id = sp.id LIMIT 1) as url
+            FROM drivedealio.orders as o INNER JOIN drivedealio.orderdetails as od on o.id = od.orders_id
+			INNER JOIN drivedealio.spareparts as sp on od.spareparts_id = sp.id where o.id = $id;")
+        );
+
+        $shippings = DB::select(
+            DB::raw("SELECT shp.packagename, sh.shipping_number, sh.shipping_fee
+            FROM drivedealio.shipments as shp INNER JOIN drivedealio.shippings as sh on shp.id = sh.shipments_id
+            INNER JOIN drivedealio.orders as o on sh.id = o.shippings_id where o.id = $id;")
+        );
+
+        return view('transaction.invoice', compact('order', 'orderdetails', 'shippings'));
+
     }
 
     public function paymentIndex($id)
@@ -465,6 +501,11 @@ class TransactionController extends Controller
             $shipping->shipping_number = "DDA".date("ymd").$idshipping;
             $shipping->save();
 
+            $status = new ShippingStatus;
+            $status->shippings_id = $idshipping;
+            $status->status = "Request to Pickup";
+            $status->save();
+
             $order = Order::findOrFail($id);
             $order->status = "On Delivery";
             $order->shippingdate = Carbon::now();
@@ -475,28 +516,46 @@ class TransactionController extends Controller
         }
     }
 
-    public function finishedOrder($id)
+    public function review($id)
     {
-        $order = Order::findOrFail($id);
-        $order->status = "Finished";
-        $order->receivedate = Carbon::now();
-        $order->save();
+        $productToReview = DB::select(
+            DB::raw("SELECT od.quantityordered, od.unitprice, CONCAT(sp.partnumber, ' ', sp.partname, ' ', sp.vehiclemodel) as item_name, sp.id as idsparepart, o.id as idorder,
+            (SELECT p.url FROM drivedealio.pics as p WHERE p.spareparts_id = sp.id LIMIT 1) as url
+            FROM drivedealio.orders as o INNER JOIN drivedealio.orderdetails as od on o.id = od.orders_id
+			INNER JOIN drivedealio.spareparts as sp on od.spareparts_id = sp.id where o.id = $id AND o.status = 'Arrived';")
+        );
 
-        return redirect()->back()->with('success', 'Order Finished!');
+        return view('transaction.review', compact('productToReview'));
     }
 
-    public function addReview(Request $request)
+    public function addReview(Request $request, $id)
     {
+        $productToReview = DB::select(
+            DB::raw("SELECT od.quantityordered, od.unitprice, CONCAT(sp.partnumber, ' ', sp.partname, ' ', sp.vehiclemodel) as item_name, sp.id as idsparepart, o.id as idorder,
+            (SELECT p.url FROM drivedealio.pics as p WHERE p.spareparts_id = sp.id LIMIT 1) as url
+            FROM drivedealio.orders as o INNER JOIN drivedealio.orderdetails as od on o.id = od.orders_id
+			INNER JOIN drivedealio.spareparts as sp on od.spareparts_id = sp.id where o.id = $id AND o.status = 'Arrived';")
+        );
         $iduser = auth()->id();
-        $review = new Review;
-        $review->rating = $request->input('rating');
-        $review->message = $request->input('message');
-        $review->reviewdate = Carbon::now();
-        $review->spareparts_id = $request->input('id');
-        $review->users_id = $iduser;
-        $review->save();
 
-        return redirect()->back()->with('success', 'Review Submited');
+        foreach($productToReview as $p)
+        {
+            $review = new Review;
+            $review->rating = $request->input('rating_'.$p->idsparepart);
+            $review->message = $request->input('comment_'.$p->idsparepart);
+            $review->reviewdate = Carbon::now();
+            $review->spareparts_id = $p->idsparepart;
+            $review->users_id = $iduser;
+            $review->orders_id = $p->idorder;
+            $review->save();
+            // dd($review);
+        }
+
+        $order = Order::findOrFail($id);
+        $order->status = "Finished";
+        $order->save();
+
+        return redirect('/orderhistory')->with('success', 'Review Submited and Transaction Finished!');
     }
 
     protected function formatDuration($interval)

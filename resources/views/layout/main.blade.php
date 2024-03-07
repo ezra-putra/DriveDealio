@@ -115,6 +115,11 @@
                         <img src="{{ asset('/image/logo-drivedealio.png') }}" alt="Logo" class="img-fluid" width="170" height="120">
                     </a>
                 @endif
+                @if (auth()->user()->roles_id == 4)
+                    <a href="/courier/dashboard" class="navbar-brand h1">
+                        <img src="{{ asset('/image/logo-drivedealio.png') }}" alt="Logo" class="img-fluid" width="170" height="120">
+                    </a>
+                @endif
             @else
                 <a href="/" class="navbar-brand h1">
                     <img src="{{ asset('/image/logo-drivedealio.png') }}" alt="Logo" class="img-fluid" width="170" height="120">

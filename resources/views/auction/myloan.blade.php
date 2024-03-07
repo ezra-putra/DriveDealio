@@ -1,28 +1,41 @@
 @extends('layout.main')
 @section('content')
-
+<h3>My Loan</h3>
 <div class="col-md-12" style="padding: 3vh;">
     <div class="row">
         <div class="col-md-4">
             <div class="card">
                 <div class="card-body col-md-12" style="position: sticky; top: 0;">
                     <h4>Loan Information</h4>
+                    @foreach ($loan as $l)
                     <div class="row">
                         <label for="colFormLabelLg" class="col-sm-6 col-form-label-lg">
-                            <p style="font-size: 12px; font-weight: bold">Total Bids</p>
+                            <p style="font-size: 12px; font-weight: bold">Vehicle Name</p>
                         </label>
                         <div class="col-sm-6">
-                            <p style="font-size: 12px; font-weight: bold" class="mt-1" id="totalPrice">0</p>
+                            <p style="font-size: 12px; font-weight: bold" class="mt-1">{{ $l->vehiclename }}</p>
                         </div>
                     </div>
                     <div class="row">
                         <label for="colFormLabelLg" class="col-sm-6 col-form-label-lg">
-                            <p style="font-size: 12px; font-weight: bold">Total Auction Win</p>
+                            <p style="font-size: 12px; font-weight: bold">Monthly Payment</p>
                         </label>
                         <div class="col-sm-5">
-                            <p style="font-size: 12px; font-weight: bold" class="mt-1" id="totalPrice" >ANNITAMAXWINN</p>
+                            <p style="font-size: 12px; font-weight: bold" class="mt-1">@currency($l->monthlypayment)</p>
                         </div>
                     </div>
+                    <div class="row">
+                        <label for="colFormLabelLg" class="col-sm-6 col-form-label-lg">
+                            <p style="font-size: 12px; font-weight: bold">Loan Tenor</p>
+                        </label>
+                        <div class="col-sm-5">
+                            @php
+                                $month = $l->loantenor * 12;
+                            @endphp
+                            <p style="font-size: 12px; font-weight: bold" class="mt-1">{{ $month }} Month ({{ $l->loantenor }} Year)</p>
+                        </div>
+                    </div>
+                    @endforeach
                 </div>
             </div>
         </div>
@@ -72,6 +85,7 @@
                             @endforeach
                             @else
                                 <p class="text-center mt-1" style="font-weight : bold;">No dues to pay currently.</p>
+                                <p class="text-center mt-1">The bill details will show up here on the 1st.</p>
                             @endif
 
                         </div>

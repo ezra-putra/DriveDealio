@@ -451,7 +451,9 @@ class VehicleController extends Controller
             DB::raw("SELECT id as idvehicle from drivedealio.vehicles where id = $id;")
         );
         $inspection = DB::select(
-            DB::raw("SELECT recprice from drivedealio.inspections where vehicles_id = $id;")
+            DB::raw("SELECT i.exterior, i.interior, i.mechanism, i.engine, i.inputdate, i.recprice, CONCAT(a.appointmentdate, '-', a.appointmenttime) as inspectiondatetime
+            from drivedealio.inspections as i INNER JOIN drivedealio.appointments as a on i.appointments_id = a.id
+            where i.vehicles_id = $id;")
         );
         return view('vehicle.auctionsetup', compact('vehicle', 'inspection'));
     }

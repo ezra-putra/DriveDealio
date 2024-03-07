@@ -10,6 +10,70 @@
                 <div class="card">
                     <div class="card-body">
                         <h5>Inspection Information</h5>
+                        <hr style="height:1px;border-width:0;color:gray;background-color:lightgray">
+                        @foreach ($inspection as $i)
+                        <div class="row">
+                            <label for="colFormLabelLg" class="col-sm-6 col-form-label-lg">
+                                <p style="font-size: 14px;">Inspection Date</p>
+                            </label>
+                            <div class="col-sm-6">
+                                <p style="font-size: 14px; font-weight: bold" class="mt-1" id="countdown">
+                                    {{ $i->inspectiondatetime }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <label for="colFormLabelLg" class="col-sm-6 col-form-label-lg">
+                                <p style="font-size: 14px;">Price Recommendation</p>
+                            </label>
+                            <div class="col-sm-6">
+                                <p style="font-size: 14px; font-weight: bold" class="mt-1" id="countdown">
+                                    @currency($i->recprice)
+                                </p>
+                            </div>
+                        </div>
+                        <h6>Grading</h6>
+                        <div class="row">
+                            <label for="colFormLabelLg" class="col-sm-6 col-form-label-lg">
+                                <p style="font-size: 14px;">Exterior</p>
+                            </label>
+                            <div class="col-sm-6">
+                                <p style="font-size: 14px; font-weight: bold" class="mt-1" id="countdown">
+                                    {{ $i->exterior }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <label for="colFormLabelLg" class="col-sm-6 col-form-label-lg">
+                                <p style="font-size: 14px;">Interior</p>
+                            </label>
+                            <div class="col-sm-6">
+                                <p style="font-size: 14px; font-weight: bold" class="mt-1" id="countdown">
+                                    {{ $i->interior }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <label for="colFormLabelLg" class="col-sm-6 col-form-label-lg">
+                                <p style="font-size: 14px;">Mechanism</p>
+                            </label>
+                            <div class="col-sm-6">
+                                <p style="font-size: 14px; font-weight: bold" class="mt-1" id="countdown">
+                                    {{ $i->mechanism }}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <label for="colFormLabelLg" class="col-sm-6 col-form-label-lg">
+                                <p style="font-size: 14px;">Engine</p>
+                            </label>
+                            <div class="col-sm-6">
+                                <p style="font-size: 14px; font-weight: bold" class="mt-1" id="countdown">
+                                    {{ $i->engine }}
+                                </p>
+                            </div>
+                        </div>
+                        @endforeach
                     </div>
                 </div>
             </div>
@@ -32,7 +96,6 @@
                                                     <input type="text" class="form-control" id="idr-input" placeholder="Set Price"
                                                         name="price" />
                                                 </div>
-                                                <h6 style="color: red">*Inspector Recommendation Price: @currency($inspection[0]->recprice)</h6>
                                             </div>
                                             <div class="col-md-6">
                                                 <label class="form-label" for="dateInput">Auction Start Date</label>

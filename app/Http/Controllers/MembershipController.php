@@ -44,7 +44,7 @@ class MembershipController extends Controller
         if(auth()->user()->roles_id === 1){
             $member = DB::select(
                 DB::raw("SELECT m.id as idmember, m.membershiptype as name, hm.id as idhasmember, hm.status, hm.start, hm.end, u.id as iduser,
-                hm.created_at, hm.updated_at , u.roles_id, mo.paymentstatus, mo.paymentdate, u.firstname, mo.id as idorder
+                hm.created_at, hm.updated_at , u.roles_id, mo.paymentstatus, mo.paymentdate, u.firstname, mo.id as idorder, mo.invoicenum
                 from drivedealio.user_memberships as hm INNER JOIN drivedealio.users as u on hm.users_id = u.id
                 INNER JOIN drivedealio.member_orders as mo on hm.id = mo.user_memberships_id
                 INNER JOIN drivedealio.memberships as m on m.id = mo.memberships_id order by hm.created_at desc;")
@@ -52,7 +52,7 @@ class MembershipController extends Controller
         }else{
             $member = DB::select(
                 DB::raw("SELECT m.id as idmember, m.membershiptype as name, hm.id as idhasmember, hm.status, hm.start, hm.end, u.id as iduser, u.firstname, u.lastname, u.email, u.phonenumber,
-                hm.created_at, hm.updated_at , u.roles_id, mo.paymentstatus, mo.paymentdate, mo.id as idorder, mo.price, mo.snap_token
+                hm.created_at, hm.updated_at , u.roles_id, mo.paymentstatus, mo.paymentdate, mo.id as idorder, mo.price, mo.snap_token, mo.invoicenum
                 from drivedealio.user_memberships as hm INNER JOIN drivedealio.users as u on hm.users_id = u.id
                 INNER JOIN drivedealio.member_orders as mo on hm.id = mo.user_memberships_id
                 INNER JOIN drivedealio.memberships as m on m.id = mo.memberships_id where u.id = $iduser order by hm.created_at desc;")
@@ -206,6 +206,18 @@ class MembershipController extends Controller
         $user->notify(new NotificationsMembership($title, $message));
 
         return redirect('/membership/bilings')->with('success', 'Payment Success');
+    }
+
+    public function invoice($id)
+    {
+        $orderMember = DB::select(
+            DB::raw("SELECT u.firstname, u.phonenumber, mo.invoicenum, mo.price as total_price, mo.created_at, m.membershiptype, m.price
+            FROM drivedealio.users as u INNER JOIN drivedealio.user_memberships as um on u.id = um.users_id
+            INNER JOIN drivedealio.member_orders as mo on um.id = mo.user_memberships_id
+            INNER JOIN drivedealio.memberships as m on m.id = mo.memberships_id
+            WHERE mo.id = $id;")
+        );
+        return view('membership.invoice', compact('orderMember'));
     }
 
     protected function formatDuration($interval)

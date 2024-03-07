@@ -2,10 +2,18 @@
 <h1 class="text-center mb-1" id="addNewCardTitle">Order Details</h1>
 <div class="row align-items-center mx-1">
     <div class="col-md-6 mt-1">
-        <h5>{{ $o->status }}</h5>
+        <h4>{{ $o->status }}</h4>
     </div>
     <div class="col-md-6 d-flex justify-content-end">
-        <a href="#" class="btn btn-outline-secondary">Track</a>
+        <button class="btn btn-outline-secondary" id="track">Track</button>
+    </div>
+</div>
+<div id="myDiv" class="row mx-1" style="display:none;">
+    <div class="col-md-12 mt-1">
+        <h6 class="mb-1">Status Timeline</h6>
+        @foreach ($status as $s)
+            <p class="mb-1">{{ $s->status }} - {{ \Carbon\Carbon::parse($s->created_at)->isoFormat('DD MMMM YYYY, HH:mm') }}</p>
+        @endforeach
     </div>
 </div>
 <hr style="height:1px;border-width:0;color:gray;background-color:lightgray">
@@ -147,4 +155,15 @@
         <h5>@currency($order[0]->total_price)</h5>
     </div>
 </div>
+
+<script>
+    document.getElementById('track').addEventListener('click', function() {
+        var div = document.getElementById('myDiv');
+        if (div.style.display === 'none') {
+            div.style.display = 'block';
+        } else {
+            div.style.display = 'none';
+        }
+    });
+</script>
 
