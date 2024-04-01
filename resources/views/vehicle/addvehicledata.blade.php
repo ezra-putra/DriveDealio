@@ -133,7 +133,7 @@
                                     <label for="myDropzone" class="form-label">
                                         <h4>Upload Vehicle Image</h4>
                                     </label>
-                                    <input type="file" class="form-control"  name="image[]" accept=".jpeg/.png/.jpg" multiple>
+                                    <input type="file" class="form-control"  name="image[]" accept=".jpeg, .png, .jpg" multiple>
                                 </div>
                             </div>
 

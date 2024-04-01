@@ -54,10 +54,6 @@
                                             <div class="row">
                                                 <div class="item-cost">
                                                     <h5 class="item-price">@currency($c->total_price)</h5>
-                                                    <p class="card-text shipping">
-                                                        <span class="badge rounded-pill badge-light-success">Free
-                                                            Shipping</span>
-                                                    </p>
                                                 </div>
                                                 <form action="{{ route('cart.destroy', $c->idcart) }}" method="post">
                                                     @csrf

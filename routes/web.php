@@ -49,6 +49,8 @@ Route::get('/', [WelcomeController::class, 'index'], function () {
 Route::get('/main',  [MainController::class, 'index'], function(){
     return view('layout.main');
 });
+Route::get('/mark-as-read', [MainController::class, 'markAsRead'])->name('mark-as-read');
+Route::get('/search', [MainController::class, 'search'])->name('search.items');
 
 Route::middleware(['auth'])->group(function () {
 
@@ -103,7 +105,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/seller/listsparepart', [SellerController::class, 'listSparepart'])->name('seller.sparepartlist');
     Route::get('/seller/edit-sparepart/{id}', [SellerController::class, 'sparepartEditForm'])->name('sparepart.editform');
     Route::put('sparepart-update/{id}', [SellerController::class, 'sparepartUpdate'])->name('seller.update-sparepart');
-
     Route::get('/seller/add-sparepart', [SparepartController::class, 'sparepartCategories'], function() {
         return view('seller.addsparepart');
     });
@@ -135,6 +136,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/seller/register', [UserController::class, 'toSellerRegister']);
     Route::post('become-seller', [UserController::class, 'becomeSeller'])->name('seller.register');
     Route::get('/profile', [UserController::class, 'profile']);
+    Route::put('profile-edit/{id}', [UserController::class, 'editProfile'])->name('edit.profile');
     Route::post('/set-primary-address/{id?}', [UserController::class, 'setPrimaryAddress'])
     ->name('primary.address');
     Route::post('/regency', [UserController::class, 'regency'])->name('regency');
@@ -170,6 +172,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/add-shipping-status/{id}', [CourierController::class, 'updateShippingStatus'])->name('updateShippingStatus');
     Route::post('/add-towing-status/{id}', [CourierController::class, 'updateTowingStatus'])->name('updateTowingStatus');
     Route::get('/arrived-order/{id}', [CourierController::class, 'updateOrderStatus'])->name('update.order');
+    Route::get('/arrived-towing/{id}', [CourierController::class, 'updateOrderTowing'])->name('towing.order');
+    Route::get('/courier/shipping-list', [CourierController::class, 'shippingList']);
+    Route::get('/courier/towing-list', [CourierController::class, 'towingList']);
 });
 
 Route::get('/vehicle/car', [VehicleController::class, 'car']);

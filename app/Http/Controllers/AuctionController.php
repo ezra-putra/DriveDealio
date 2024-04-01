@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Admin;
 use App\Models\Auction;
 use App\Models\AuctionOrder;
 use App\Models\AuctionWinner;
@@ -13,9 +14,17 @@ use App\Models\Province;
 use App\Models\Regency;
 use App\Models\Towing;
 use App\Models\TowingStatus;
+use App\Models\User;
 use App\Models\Village;
+use App\Notifications\Admin as NotificationsAdmin;
+use App\Notifications\Auction as NotificationsAuction;
+use App\Notifications\Loan as NotificationsLoan;
+use App\Notifications\MonthlyPayment;
+use App\Notifications\Transaction;
+use App\Notifications\VehicleOwner;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 
 class AuctionController extends Controller
@@ -64,9 +73,9 @@ class AuctionController extends Controller
     {
         $iduser = auth()->id();
         $userMember = DB::select(
-            DB::raw("SELECT um.id as idusermember, um.status, m.membership_type from drivedealio.user_memberships as um
+            DB::raw("SELECT um.id as idusermember, um.status, m.membershiptype from drivedealio.user_memberships as um
             INNER JOIN drivedealio.users as u on um.users_id = u.id
-            INNER JOIN drivedealio.member_orders as mo on um.id = mo.user_membership_id
+            INNER JOIN drivedealio.member_orders as mo on um.id = mo.user_memberships_id
             INNER JOIN drivedealio.memberships as m on mo.memberships_id = m.id
             where um.users_id = $iduser AND um.status = 'Active';")
         );
@@ -79,37 +88,42 @@ class AuctionController extends Controller
 
         $auction = DB::table('drivedealio.auctions as a')
         ->join('vehicles as v', 'a.vehicles_id', '=', 'v.id')
-        ->select('a.start_price', 'a.current_price')
-        ->where('a.id', $id)
+        ->select('a.start_price', 'a.current_price', 'a.id as idauction')
+        ->where('v.id', $id)
         ->first();
+        // dd($auction);
 
         $startprice = $auction->start_price;
         $currentprice = $auction->current_price;
+        $idauction = $auction->idauction;
+        // dd($startprice);
 
         $bidamount = preg_replace('/[^\d]/', '', $request->input('amount'));
         $amount = (int)$bidamount;
+
+        // dd($amount);
 
         if(!empty($userMember))
         {
             $allowedBids = 0;
             if ($userMember[0]->status === 'Active') {
-                if ($userMember[0]->membership_type === 'Bronze') {
+                if ($userMember[0]->membershiptype === 'Bronze') {
                     if ($categories[0]->id === 1) {
                         $allowedBids = 2;
                     }
-                } elseif ($userMember[0]->membership_type === 'Silver') {
+                } elseif ($userMember[0]->membershiptype === 'Silver') {
                     if ($categories[0]->id === 2) {
                         $allowedBids = 2;
                     } elseif ($categories[0]->id === 1) {
                         $allowedBids = 1;
                     }
-                } elseif ($userMember[0]->membership_type === 'Gold') {
+                } elseif ($userMember[0]->membershiptype === 'Gold') {
                     if ($categories[0]->id === 2) {
                         $allowedBids = 2;
                     } elseif ($categories[0]->id === 1) {
                         $allowedBids = 2;
                     }
-                } elseif ($userMember[0]->membership_type === 'Platinum') {
+                } elseif ($userMember[0]->membershiptype === 'Platinum') {
                     if ($categories[0]->id === 2) {
                         $allowedBids = 4;
                     } elseif ($categories[0]->id === 2) {
@@ -118,64 +132,74 @@ class AuctionController extends Controller
                 }
             }
 
-            if ($allowedBids > 0 && $amount > $currentprice && $currentprice != 0) {
+            if ($allowedBids > 0) {
+
                 $existingBidsCount = Bid::where('user_memberships_id', $userMember[0]->idusermember)
-                    ->where('auctions_id', $id)
+                    ->where('auctions_id', $idauction)
                     ->count();
 
                 if ($existingBidsCount < $allowedBids) {
-                    // Proses penawaran
                     if ($amount >= $startprice && $currentprice == 0) {
-                        // Bid pertama
                         $bidnew = new Bid;
                         $bidnew->bidamount = $amount;
                         $bidnew->user_memberships_id = $userMember[0]->idusermember;
-                        $bidnew->auctions_id = $id;
+                        $bidnew->auctions_id = $idauction;
                         $bidnew->biddatetime = Carbon::now();
                         $bidnew->save();
 
-                        $auction = Auction::findOrFail($id);
+                        $auction = Auction::findOrFail($idauction);
                         $auction->current_price = $amount;
                         $auction->save();
 
+                        $user = User::find($iduser);
+                        $title = 'Bid Successfully';
+                        $message = 'Your Bid is Leading the Auction!';
+                        $user->notify(new NotificationsAuction($title, $message));
                         return redirect()->back()->with(['success' => 'Bid placed successfully']);
-                    } elseif ($amount > $currentprice && $currentprice != 0) {
+                    }
+                    elseif ($amount >= $currentprice && $currentprice !=0)
+                    {
                         $isBidExist = DB::select("SELECT 1 FROM drivedealio.bids WHERE user_memberships_id = :user_memberships_id AND auctions_id = :id",
-                        ['user_memberships_id' => $userMember[0]->idusermember, 'id' => $id]);
+                            ['user_memberships_id' => $userMember[0]->idusermember, 'id' => $idauction]);
 
-                        if (!empty($isBidExist))
-                        {
+                        if (!empty($isBidExist)) {
                             $bidupdate = Bid::where('user_memberships_id', $userMember[0]->idusermember)
-                                ->where('auctions_id', $id)
+                                ->where('auctions_id', $idauction)
                                 ->firstOrFail();
                             $bidupdate->bidamount = $amount;
                             $bidupdate->biddatetime = Carbon::now();
-                            // dd($bidupdate);
                             $bidupdate->save();
 
-                            $auction = Auction::findOrFail($id);
+                            $auction = Auction::findOrFail($idauction);
                             $auction->current_price = $amount;
                             $auction->save();
 
+                            $user = User::find($iduser);
+                            $title = 'Bid Successfully';
+                            $message = 'Your Bid is Leading the Auction!';
+                            $user->notify(new NotificationsAuction($title, $message));
                             return redirect()->back()->with(['success' => 'Bid amount updated successfully']);
                         }
 
                         $bidnew = new Bid;
                         $bidnew->bidamount = $amount;
                         $bidnew->user_memberships_id = $userMember[0]->idusermember;
-                        $bidnew->auctions_id = $id;
+                        $bidnew->auctions_id = $idauction;
                         $bidnew->biddatetime = Carbon::now();
-                        // dd($bidnew);
                         $bidnew->save();
 
-                        $auction = Auction::findOrFail($id);
+                        $auction = Auction::findOrFail($idauction);
                         $auction->current_price = $amount;
-                        // dd($auction);
                         $auction->save();
+
+                        $user = User::find($iduser);
+                        $title = 'Bid Successfully';
+                        $message = 'Your Bid is Leading the Auction!';
+                        $user->notify(new NotificationsAuction($title, $message));
 
                         return redirect()->back()->with(['success' => 'Bid placed successfully']);
                     }
-                    elseif ($amount <= $currentprice && $currentprice != 0)
+                    elseif($amount <= $currentprice)
                     {
                         return redirect()->back()->with(['error' => 'Bid amount must be greater than the current price']);
                     }
@@ -186,11 +210,10 @@ class AuctionController extends Controller
                 }
                 else
                 {
+
                     return redirect()->back()->with(['error' => 'You have reached the maximum number of bids allowed for your membership type in this category']);
                 }
-            }
-            else
-            {
+            } else {
                 return redirect()->back()->with(['error' => 'Your membership type does not allow bidding in this category']);
             }
         }
@@ -283,7 +306,7 @@ class AuctionController extends Controller
     {
         $iduser = auth()->id();
         $vehicle = DB::select(
-            DB::raw("SELECT u.id as iduser, u.firstname, um.id as idusermember, m.id as idmembership, m.membershiptype, b.id as idbid, b.bidamount,
+            DB::raw("SELECT u.id as iduser, u.firstname, um.id as idusermember, m.id as idmembership, m.membershiptype, b.id as idbid, b.bidamount, v.users_id
             a.id as idauction, a.current_price, a.lot_number, v.id as idvehicle, v.model, v.adstatus, a.start_price, v.province, v.village, v.district, v.regency
             FROM drivedealio.users as u INNER JOIN drivedealio.user_memberships as um on u.id = um.users_id
             INNER JOIN drivedealio.member_orders as mo on um.id = mo.user_memberships_id
@@ -335,6 +358,17 @@ class AuctionController extends Controller
             // $order =  AuctionOrder::findOrFail($order->id);
             $order->towings_id = $towings->id;
             $order->save();
+
+            $user = User::find($iduser);
+            $title = 'Vehicle Transaction';
+            $message = 'Order Has been Created for Invoice Number ' .$order->invoicenum. '!';
+            $user->notify(new Transaction($title, $message));
+
+            $idowner = $vehicle[0]->users_id;
+            $owner = User::find($idowner);
+            $title = 'Vehicle Transaction';
+            $message = 'Order Has been Created for Invoice Number ' .$order->invoicenum. '!';
+            $owner->notify(new VehicleOwner($title, $message));
 
             return redirect()->back()->with('success', 'Order Create');
         }
@@ -408,6 +442,12 @@ class AuctionController extends Controller
         $order->paymentdate = Carbon::now();
         $order->save();
 
+        $iduser = auth()->id();
+        $user = User::find($iduser);
+        $title = 'Auction Payment';
+        $message = 'Your Payment is Received by System!';
+        $user->notify(new NotificationsAuction($title, $message));
+
         return redirect('/orderhistory')->with('success', 'Transaction Success');
     }
 
@@ -416,6 +456,7 @@ class AuctionController extends Controller
         $order = AuctionOrder::findOrFail($id);
         $order->status = "On Process";
         $order->save();
+
         return redirect()->back()->with('success', 'Order Status Changed!');
     }
 
@@ -500,6 +541,20 @@ class AuctionController extends Controller
         $auctionorder->status = "Waiting for Loan Approval";
         $auctionorder->save();
 
+        $user = User::find($iduser);
+        $title = 'Loan Request';
+        $message = 'Loan Applied, waiting for confirmation from system!';
+        $user->notify(new NotificationsLoan($title, $message));
+
+        $adminData = DB::select(
+            DB::raw("SELECT u.id from drivedealio.users as u INNER JOIN drivedealio.roles as r where r.id = 1;")
+        );
+        $idadmin = $adminData[0]->id;
+        $admin = User::find($idadmin);
+        $title = 'Loan Request';
+        $message = 'Loan Applied, waiting for confirmation!';
+        $admin->notify(new NotificationsAdmin($title, $message));
+
         return redirect('/auction')->with('success', 'Loan Applied, waiting for confirmation from system!');
     }
 
@@ -580,6 +635,12 @@ class AuctionController extends Controller
         $downpayment->status = "Paid";
         $downpayment->save();
 
+        $iduser = auth()->id();
+        $user = User::find($iduser);
+        $title = 'Down Payment Paid';
+        $message = 'Down Payment Paid Successfully!';
+        $user->notify(new NotificationsLoan($title, $message));
+
         $auctionOrderId = Loan::where('id', $id)->value('auction_orders_id');
 
         if ($auctionOrderId) {
@@ -589,6 +650,7 @@ class AuctionController extends Controller
                 $order->paymentstatus = "Paid";
                 $order->status = "Waiting for Confirmation";
                 $order->save();
+
             } else {
                 return redirect('/orderhistory')->with('error', 'Auction Order not found');
             }
@@ -677,6 +739,12 @@ class AuctionController extends Controller
         $downpayment->paymentdatetime = Carbon::now();
         $downpayment->status = "Paid";
         $downpayment->save();
+
+        $iduser = auth()->id();
+        $user = User::find($iduser);
+        $title = 'Bill Successfully Paid';
+        $message = 'Payment was made Successfully';
+        $user->notify(new MonthlyPayment($title, $message));
 
         return redirect('/orderhistory')->with('success', 'Payment Success');
     }

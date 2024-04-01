@@ -17,7 +17,7 @@
                                 <p style="font-size: 14px;">Inspection Date</p>
                             </label>
                             <div class="col-sm-6">
-                                <p style="font-size: 14px; font-weight: bold" class="mt-1" id="countdown">
+                                <p style="font-size: 14px; font-weight: bold" class="mt-1" >
                                     {{ $i->inspectiondatetime }}
                                 </p>
                             </div>
@@ -27,7 +27,7 @@
                                 <p style="font-size: 14px;">Price Recommendation</p>
                             </label>
                             <div class="col-sm-6">
-                                <p style="font-size: 14px; font-weight: bold" class="mt-1" id="countdown">
+                                <p style="font-size: 14px; font-weight: bold" class="mt-1" >
                                     @currency($i->recprice)
                                 </p>
                             </div>
@@ -38,7 +38,7 @@
                                 <p style="font-size: 14px;">Exterior</p>
                             </label>
                             <div class="col-sm-6">
-                                <p style="font-size: 14px; font-weight: bold" class="mt-1" id="countdown">
+                                <p style="font-size: 14px; font-weight: bold" class="mt-1" >
                                     {{ $i->exterior }}
                                 </p>
                             </div>
@@ -48,7 +48,7 @@
                                 <p style="font-size: 14px;">Interior</p>
                             </label>
                             <div class="col-sm-6">
-                                <p style="font-size: 14px; font-weight: bold" class="mt-1" id="countdown">
+                                <p style="font-size: 14px; font-weight: bold" class="mt-1" >
                                     {{ $i->interior }}
                                 </p>
                             </div>
@@ -58,7 +58,7 @@
                                 <p style="font-size: 14px;">Mechanism</p>
                             </label>
                             <div class="col-sm-6">
-                                <p style="font-size: 14px; font-weight: bold" class="mt-1" id="countdown">
+                                <p style="font-size: 14px; font-weight: bold" class="mt-1">
                                     {{ $i->mechanism }}
                                 </p>
                             </div>
@@ -68,7 +68,7 @@
                                 <p style="font-size: 14px;">Engine</p>
                             </label>
                             <div class="col-sm-6">
-                                <p style="font-size: 14px; font-weight: bold" class="mt-1" id="countdown">
+                                <p style="font-size: 14px; font-weight: bold" class="mt-1" >
                                     {{ $i->engine }}
                                 </p>
                             </div>

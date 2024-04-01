@@ -99,7 +99,7 @@
                                         @foreach ($type as $t)
                                         <li>
                                             <div class="form-check">
-                                                <input type="radio" id="category1" name="category-filter"
+                                                <input type="radio" id="category-{{ $t->id }}" name="category-filter"
                                                     class="form-check-input" checked />
                                                 <label class="form-check-label" for="category1">{{ $t->name }}</label>
                                             </div>
@@ -117,7 +117,7 @@
                                         @foreach ($brand as $b)
                                         <li>
                                             <div class="form-check">
-                                                <input type="checkbox" class="form-check-input" id="productBrand1" />
+                                                <input type="checkbox" class="form-check-input" id="brand-{{ $b->id }}" />
                                                 <label class="form-check-label" for="productBrand1">{{ $b->name }}</label>
                                             </div>
                                         </li>

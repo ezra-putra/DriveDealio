@@ -11,25 +11,24 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Crypt;
 
 class MembershipController extends Controller
 {
-    public function index()
-    {
-        //
-    }
-
     public function register()
     {
         $iduser = auth()->id();
         $user = DB::select(
-            DB::raw("select id, CONCAT(firstname, ' ', lastname) as name, phonenumber
-            from drivedealio.users where id=$iduser;")
+            DB::raw("SELECT id, CONCAT(firstname, ' ', lastname) as name, phonenumber
+            from drivedealio.users where id = $iduser;")
         );
         $membership = DB::select(
-            DB::raw("select id, membershiptype, price, description FROM drivedealio.memberships;")
+            DB::raw("SELECT id, membershiptype, price, description FROM drivedealio.memberships;")
         );
-        return view('membership.register', compact('membership', 'user'));
+        $document = DB::select(
+            DB::raw("SELECT ktp, npwp from drivedealio.users where id = $iduser;")
+        );
+        return view('membership.register', compact('membership', 'user', 'document'));
     }
 
     public function create()
@@ -57,6 +56,18 @@ class MembershipController extends Controller
                 INNER JOIN drivedealio.member_orders as mo on hm.id = mo.user_memberships_id
                 INNER JOIN drivedealio.memberships as m on m.id = mo.memberships_id where u.id = $iduser order by hm.created_at desc;")
             );
+            if (!empty($member)) {
+                $endDateTime = Carbon::parse($member[0]->end);
+                $now = Carbon::now();
+
+                if ($now >= $endDateTime) {
+                    $membership = UserMemberships::where('users_id', $iduser)->first();
+                    if ($membership) {
+                        $membership->status = "Not Active";
+                        $membership->save();
+                    }
+                }
+            }
         }
         return view('/membership/bilings', compact('member'));
     }
@@ -79,7 +90,6 @@ class MembershipController extends Controller
         $user = User::find($iduser);
         $title = 'Membership rejected';
         $user->notify(new NotificationsMembership($title, $message));
-
 
         return back()->with('status', 'Your request has been process!');
     }
@@ -111,16 +121,19 @@ class MembershipController extends Controller
                 $fileName = "KTP"."-$iduser". "." .$file->getClientOriginalExtension();
                 $file->move(public_path("uploads/doc/user-$iduser"), $fileName);
 
-                DB::update("UPDATE drivedealio.users SET ktp = :ktp where id = :id",
-                ['ktp'=> $fileName, 'id'=>$iduser]);
+                $user = User::findOrFail($iduser);
+                $user->ktp = encrypt($fileName);
+                $user->save();
+
             }
             if ($request->hasFile('npwp')){
                 $file = $request->file('npwp');
                 $fileName = "NPWP"."-$iduser". "." .$file->getClientOriginalExtension();
                 $file->move(public_path("uploads/doc/user-$iduser"), $fileName);
 
-                DB::update("UPDATE drivedealio.users SET npwp = :npwp where id = :id",
-                ['npwp'=> $fileName, 'id'=>$iduser]);
+                $user = User::findOrFail($iduser);
+                $user->npwp = encrypt($fileName);
+                $user->save();
             }
             $usermember = new UserMemberships;
             $usermember->users_id = auth()->id();
@@ -134,8 +147,8 @@ class MembershipController extends Controller
             $memberorder->memberships_id = $request->input('member');
             $memberorder->paymentstatus = 'Unpaid';
             $memberorder->price = $request->input('totalprice');
-            dd($memberorder);
-            // $memberorder->save();
+            // dd($memberorder);
+            $memberorder->save();
 
             \Midtrans\Config::$serverKey = 'SB-Mid-server-AOdoK40xyUyq11-i9Cc9ysHM';
             \Midtrans\Config::$isProduction = false;
@@ -188,15 +201,18 @@ class MembershipController extends Controller
             INNER JOIN drivedealio.memberships as m on m.id = mo.memberships_id where mo.id = $id")
         );
         $idhasmember = $membership[0]->idhasmember;
+        $type = $membership[0]->name;
+        // dd($type);
 
         $member = UserMemberships::findOrFail($idhasmember);
         $member->status = "Active";
         $member->start = Carbon::now();
-        if ($member->memberships_id == 3 || $member->memberships_id == 4) {
+        if ($type == 'Gold' || $type == 'Platinum') {
             $member->end = $member->start->copy()->addMonths(3);
         } else {
             $member->end = $member->start->copy()->addMonth();
         }
+        // dd($member);
         $member->save();
 
         $iduser = auth()->id();

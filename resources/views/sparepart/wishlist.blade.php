@@ -8,7 +8,7 @@
             <div class="card ecommerce-card">
                 <div class="item-img text-center">
                     <a href="#">
-                        <img class="card-img-top" src="{{ asset('/images/' . $w->url) }}" alt="Card image cap" style="height : 300px; width:auto;" alt="img-placeholder" />
+                        <img class="card-img-top" src="{{ asset('images/sparepart/'.$w->idsparepart.'/' .$w->url) }}" alt="Card image cap" style="height : 300px; width:auto;" alt="img-placeholder" />
                     </a>
                 </div>
                 <div class="card-body col-md-12" style="position: sticky; top: 0;">

@@ -42,21 +42,28 @@
                                     <option value="">--Choose Status--</option>
                                     @foreach ($select_status as $s)
                                         @if ($s->status === 'Request to Pickup')
-                                            <option value="Vehicle Picked Up">Package Picked Up</option>
+                                            <option value="Vehicle Picked Up">Vehicle Picked Up</option>
                                         @elseif ($s->status === 'Vehicle Picked Up')
-                                            <option value="Vehicle is on the Way">Package is on the Way</option>
+                                            <option value="Vehicle is on the Way">Vehicle is on the Way</option>
                                         @elseif ($s->status === 'Vehicle is on the Way')
-                                            <option value="Vehicle is Delivered to Receiver Address">Package is Delivered to Receiver Address</option>
+                                            <option value="Vehicle is Delivered to Receiver Address">Vehicle is Delivered to Receiver Address</option>
                                         @elseif ($s->status === 'Vehicle is Delivered to Receiver Address')
-                                            <option value="Vehicle Received by Receiver">Package Received by Receiver</option>
+                                            <option value="Vehicle Received by Receiver">Vehicle Received by Receiver</option>
                                         @endif
                                     @endforeach
                                 </select>
 
                                 <div class="d-flex justify-content-end">
-                                    <button class="btn btn-info" type="submit">Add Status</button>
+                                    <button class="btn btn-info me-1" type="submit">Add Status</button>
+                                    </form>
+                                    @foreach ($select_status as $s)
+                                        @if ($s->status === 'Vehicle Received by Receiver')
+                                            @foreach ($towing as $t)
+                                                <a href="{{ route('towing.order', $t->idorder) }}" class="btn btn-info">Arrived</a>
+                                            @endforeach
+                                        @endif
+                                    @endforeach
                                 </div>
-                            </form>
                         </div>
                     </div>
                 </div>

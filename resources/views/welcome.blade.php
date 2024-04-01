@@ -38,7 +38,7 @@
 
 <div class="card-body">
     <div class="mb-2 text-center">
-        <h2>HOT ITEMS RIGHT NOW</h2>
+        <h2>HOT VEHICLE TO BID RIGHT NOW</h2>
         <p>People also bid this product</p>
     </div>
     <div class="swiper-responsive-breakpoints swiper-container px-4 py-2">
@@ -194,6 +194,38 @@
                     <p class="text-primary mb-0">$59.98</p>
                 </div>
             </div>
+        </div>
+        <div class="swiper-button-next"></div>
+        <div class="swiper-button-prev"></div>
+    </div>
+</div>
+<div class="card-body">
+    <div class="mb-2 text-center">
+        <h2>HOT ITEMS RIGHT NOW</h2>
+        <p>People also find this product</p>
+    </div>
+    <div class="swiper-responsive-breakpoints swiper-container px-4 py-2">
+        <div class="swiper-wrapper">
+            @foreach ($sparepart as $s)
+            <div class="swiper-slide rounded swiper-shadow">
+                <div class="item-heading">
+                    <p class="text-truncate mb-0">
+                        {{ $s->partnumber }} - {{ $s->partname }} {{ $s->vehiclemodel }}
+                    </p>
+                    <p>
+                        <small>{{ $s->name }}</small>, <small>{{ $s->city }}</small>
+                    </p>
+                </div>
+                <div class="img-container w-50 mx-auto my-2 py-75">
+                    <img src="{{ asset('images/sparepart/'.$s->idsparepart.'/' .$s->url) }}" class="img-fluid" alt="image">
+                </div>
+                <div class="item-meta">
+
+                    <p class="mb-1" style="font-weight: 700">@currency($s->unitprice)</p>
+                    <a href="{{ route('sparepart.show', $s->idsparepart) }}" class="btn btn-info w-100">Details</a>
+                </div>
+            </div>
+            @endforeach
         </div>
         <div class="swiper-button-next"></div>
         <div class="swiper-button-prev"></div>

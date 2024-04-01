@@ -12,7 +12,11 @@ use App\Models\Inspection;
 use App\Models\Inspections;
 use App\Models\Province;
 use App\Models\Regency;
+use App\Models\User;
 use App\Models\Village;
+use App\Notifications\AuctionWinner as NotificationsAuctionWinner;
+use App\Notifications\Inspector;
+use App\Notifications\Vehicle as NotificationsVehicle;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -152,21 +156,29 @@ class VehicleController extends Controller
         );
 
         $iduser = auth()->id();
-        $mybid = DB::select(
-            DB::raw("SELECT u.id as iduser, um.id as idusermember, b.id as idbid, a.id as idauction, v.id as idvehicle,
-            CONCAT(u.firstname, ' ', u.lastname) as name, b.bidamount, b.biddatetime
-            FROM drivedealio.users as u INNER JOIN drivedealio.user_memberships as um on u.id = um.users_id
-            INNER JOIN drivedealio.bids as b on um.id = b.user_memberships_id
-            INNER JOIN drivedealio.auctions as a on b.auctions_id = a.id
-            INNER JOIN drivedealio.vehicles as v on a.vehicles_id = v.id
-            WHERE v.id = $id AND um.users_id = $iduser ORDER BY b.bidamount DESC LIMIT 5;")
-        );
+
+        if(!empty($iduser))
+        {
+            $mybid = DB::select(
+                DB::raw("SELECT u.id as iduser, um.id as idusermember, b.id as idbid, a.id as idauction, v.id as idvehicle,
+                CONCAT(u.firstname, ' ', u.lastname) as name, b.bidamount, b.biddatetime
+                FROM drivedealio.users as u INNER JOIN drivedealio.user_memberships as um on u.id = um.users_id
+                INNER JOIN drivedealio.bids as b on um.id = b.user_memberships_id
+                INNER JOIN drivedealio.auctions as a on b.auctions_id = a.id
+                INNER JOIN drivedealio.vehicles as v on a.vehicles_id = v.id
+                WHERE v.id = $id AND um.users_id = $iduser ORDER BY b.bidamount DESC LIMIT 5;")
+            );
+        }
+        else
+        {
+            $mybid = [];
+        }
 
         $winner = DB::select(
             DB::raw("SELECT b.*, a.id as idauction, a.current_price, u.id as iduser from drivedealio.bids as b INNER JOIN drivedealio.auctions as a on b.auctions_id = a.id
             INNER JOIN drivedealio.user_memberships as um on b.user_memberships_id = um.id
             INNER JOIN drivedealio.users as u on um.users_id = u.id
-            WHERE a.vehicles_id = $id ORDER BY b.bidamount desc limit 3;")
+            WHERE a.vehicles_id = $id ORDER BY b.bidamount desc limit 1;")
         );
 
         $inspection = DB::select(
@@ -198,10 +210,13 @@ class VehicleController extends Controller
                         $auctionWinner->auctions_id = $w->idauction;
                         $auctionWinner->users_id = $w->iduser;
 
+                        $user = User::find($w->iduser);
+                        $title = 'Auction Information';
+                        $message = 'You win the auction, please continue the process. Go to Auction Page!';
+                        $user->notify(new NotificationsAuctionWinner($title, $message));
+
                         if ($w->bidamount === $w->current_price) {
                             $auctionWinner->is_winner = true;
-                        } else {
-                            $auctionWinner->is_winner = false;
                         }
                         $auctionWinner->save();
 
@@ -322,8 +337,6 @@ class VehicleController extends Controller
         return redirect('/vehicle/inspectionappointment/'. $vehicle->id)->with('status', 'Vehicle Data Saved!');
     }
 
-
-
     public function approve($id)
     {
         $vehicle = Vehicle::findOrFail($id);
@@ -333,7 +346,6 @@ class VehicleController extends Controller
 
         return redirect('/admin/listvehicle')->with('status', 'Your request has been processed!')->with('approvedVehicleId', $vehicle->id);
     }
-
 
     public function appointment($id)
     {
@@ -350,7 +362,6 @@ class VehicleController extends Controller
         $regencies = Regency::all();
         $districts = District::all();
         $villages = Village::all();
-
 
         return view('vehicle.inspectappointment', compact('appointment', 'vehicle' , 'provinces', 'regencies', 'districts', 'villages'));
     }
@@ -369,16 +380,22 @@ class VehicleController extends Controller
         // dd($vehicle);
         $vehicle->save();
 
-        $appointment = DB::select(
-            DB::raw("SELECT a.id as idappointment, v.id as idvehicle
-            from drivedealio.appointments as a INNER JOIN drivedealio.vehicles as v on a.id = v.appointments_id
-            WHERE v.id = $id;")
-        );
-        $idappointment = $appointment[0]->idappointment;
+        $appointment = Appointment::select('appointments.id as idappointment', 'vehicles.id as idvehicle', 'appointments.inspectors_id')
+        ->join('vehicles', 'appointments.id', '=', 'vehicles.appointments_id')
+        ->where('vehicles.id', $id)
+        ->get();
+
+        $idappointment = $appointment->idappointment;
         $appointment = Appointment::find($idappointment);
         $appointment->status = 'Booked';
         // dd($appointment);
         $appointment->save();
+
+        $idinspector = $appointment->inspectors_id;
+        $inspector = User::find($idinspector);
+        $title = 'Inspection Information';
+        $message ='New Inpsection Request from User!';
+        $inspector->notify(new Inspector($title, $message));
 
         return redirect('/vehicle/myvehicle')->with('status', 'Your request has been processed!');
     }
@@ -437,9 +454,20 @@ class VehicleController extends Controller
 
     public function finishGrading($id)
     {
-        DB::update(
-            'UPDATE drivedealio.vehicles SET adstatus = :adstatus WHERE id = :id', ['adstatus' => 'Setup Auction', 'id' => $id]
-        );
+        $vehicle = Vehicle::findOrFail($id);
+        $vehicle->adstatus = 'Setup Auction';
+        $vehicle->save();
+
+        $ownerVehicle = Vehicle::select('users_id as iduser')
+        ->where('id', $id)
+        ->first();
+
+        $iduser = $ownerVehicle->iduser;
+
+        $user = User::find($iduser);
+        $title = 'Inspection Finish';
+        $message = 'Inspection finish, check the result in MyVehicle Page!';
+        $user->notify(new NotificationsVehicle($title, $message));
 
         return redirect('/admin/listvehicle')->with('status', 'Your request has been processed!');
     }
@@ -477,15 +505,9 @@ class VehicleController extends Controller
         // dd($auction);
         $auction->save();
 
-        $duration = DB::select(
-            DB::raw("SELECT (end_date - start_date) AS time
-            FROM drivedealio.auctions WHERE vehicles_id = $id;")
-        );
-
         $vehicle = Vehicle::findOrFail($id);
         $vehicle->adstatus = "Open to Bid";
         $vehicle->adreleasedate = Carbon::now();
-        $vehicle->auctionduration = $duration[0]->time."D";
         $vehicle->save();
 
         return redirect('/vehicle/myvehicle')->with('status', 'Your request has been processed!');

@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AuctionOrder;
 use App\Models\Order;
 use App\Models\ShippingStatus;
 use App\Models\TowingStatus;
+use App\Models\User;
+use App\Notifications\ArrivedOrder;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -14,20 +17,47 @@ class CourierController extends Controller
     public function dashboard()
     {
         $shipping = DB::select(
-            DB::raw("SELECT o.id as idorder, o.invoicenum, s.destination, s.origin, s.shipping_number, sp.packagename, s.id as idshipping
+            DB::raw("SELECT o.id as idorder, o.invoicenum, o.status, s.destination, s.origin, s.shipping_number, sp.packagename, s.id as idshipping
             FROM drivedealio.orders as o INNER JOIN drivedealio.shippings as s on o.shippings_id = s.id
             INNER JOIN drivedealio.shipments as sp on s.shipments_id = sp.id
-            WHERE s.shipping_number IS NOT NULL ORDER BY s.created_at desc LIMIT 5;")
+            WHERE s.shipping_number IS NOT NULL AND o.status != 'Arrived' ORDER BY s.created_at desc LIMIT 5;")
         );
 
         $towing = DB::select(
-            DB::raw("SELECT ao.id as idorder, ao.invoicenum, tw.destination, tw.origin, tw.trans_number, t.name, tw.id as idtowing
+            DB::raw("SELECT ao.id as idorder, ao.status, ao.invoicenum, tw.destination, tw.origin, tw.trans_number, t.name, tw.id as idtowing
             FROM drivedealio.auction_orders as ao INNER JOIN drivedealio.towings as tw on ao.towings_id = tw.id
             INNER JOIN drivedealio.transporters as t on tw.transporters_id = t.id
-            WHERE tw.trans_number IS NOT NULL ORDER BY tw.created_at desc LIMIT 5;")
+            WHERE tw.trans_number IS NOT NULL AND ao.status != 'Arrived' ORDER BY tw.created_at desc LIMIT 5;")
         );
 
         return view('courier.dashboard', compact('shipping', 'towing'));
+    }
+    public function shippingList()
+    {
+        $shipping = DB::select(
+            DB::raw("SELECT o.id as idorder, o.invoicenum, s.destination, s.origin, s.shipping_number, sp.packagename, s.id as idshipping, s.total_weight, s.shipping_number,
+            sh.name, sh.phonenumber, u.firstname, u.lastname, u.phonenumber as usernumber, u.email, o.status
+            FROM drivedealio.orders as o INNER JOIN drivedealio.shippings as s on o.shippings_id = s.id
+            INNER JOIN drivedealio.shipments as sp on s.shipments_id = sp.id
+            INNER JOIN drivedealio.shops as sh on o.shops_id = sh.id
+            INNER JOIN drivedealio.users as u on o.users_id = u.id WHERE o.status IN ('Arrived', 'On Delivery') ORDER BY s.created_at asc;")
+        );
+
+        return view('courier.listshipping', compact('shipping'));
+    }
+
+    public function towingList()
+    {
+        $towing = DB::select(
+            DB::raw("SELECT ao.id as idorder, ao.invoicenum, tw.destination, tw.origin, tw.trans_number, t.name, tw.id as idtowing,
+            u.firstname, u.lastname, u.phonenumber, u.email, ao.status
+            FROM drivedealio.auction_orders as ao INNER JOIN drivedealio.towings as tw on ao.towings_id = tw.id
+            INNER JOIN drivedealio.transporters as t on tw.transporters_id = t.id
+            INNER JOIN drivedealio.auctionwinners as aw on ao.auctionwinners_id = aw.id
+            INNER JOIN drivedealio.users as u on aw.users_id = u.id
+            WHERE ao.status IN ('Arrived', 'On Delivery') ORDER BY tw.created_at asc;")
+        );
+        return view('courier.listtowing', compact('towing'));
     }
 
     public function shippingDetails($id)
@@ -120,5 +150,26 @@ class CourierController extends Controller
         $status->save();
 
         return redirect()->back()->with('success', 'Status Added!');
+    }
+
+    public function updateOrderTowing($id)
+    {
+        $order = AuctionOrder::findOrFail($id);
+        $order->status = "Arrived";
+        $order->save();
+
+        $userInfo = DB::select(
+            DB::raw("SELECT aw.users_id as iduser
+            from drivedealio.auction_orders as ao INNER JOIN drivedealio.auctionwinners as aw on aw.id = ao.auctionwinners_id
+            where ao.id = $id;")
+        );
+        $iduser = $userInfo[0]->iduser;
+
+        $user = User::find($iduser);
+        $title = 'Order Information';
+        $message = 'Your Vehicle has Been Arrived!';
+        $user->notify(new ArrivedOrder($title, $message));
+
+        return redirect()->back()->with('success', 'Package Arrived!');
     }
 }

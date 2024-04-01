@@ -9,14 +9,14 @@
     <meta name="author" content="PIXINVENT">
     <title>DriveDealio - Your Trusted Vehicle Auctions and Autoparts</title>
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('/app-assets/images/ico/favicon.ico') }}">
-    <link href="../../../app-assets/fonts/monserat.css"
+    <link href="{{ asset('/app-assets/fonts/monserat.css') }}"
         rel="stylesheet">
 
     <!-- BEGIN: Vendor CSS-->
 
 
-    <link rel="stylesheet" type="text/css" href="../../../app-assets/vendors/css/vendors.min.css">
-    <link rel="stylesheet" type="text/css" href="../../../app-assets/vendors/css/extensions/nouislider.min.css">
+    <link rel="stylesheet" type="text/css" href="{{ asset('/app-assets/vendors/css/vendors.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('/app-assets/vendors/css/extensions/nouislider.min.css') }}">
     <link rel="stylesheet" type="text/css" href="../../../app-assets/vendors/css/extensions/toastr.min.css">
 
     <link rel="stylesheet" type="text/css" href="../../../app-assets/vendors/css/forms/select/select2.min.css">
@@ -25,7 +25,7 @@
 
     <link rel="stylesheet" type="text/css"
         href="../../../app-assets/vendors/css/forms/spinner/jquery.bootstrap-touchspin.css">
-    <link rel="stylesheet" type="text/css" href="../../../app-assets/vendors/css/extensions/swiper.min.css">
+    <link rel="stylesheet" type="text/css" href="{{ asset('/app-assets/vendors/css/extensions/swiper.min.css') }}">
 
     <link rel="stylesheet" type="text/css" href="../../../app-assets/css/core/colors/palette-gradient.css">
 
@@ -38,8 +38,8 @@
     <link rel="stylesheet" type="text/css"
         href="../../../app-assets/vendors/css/tables/datatable/rowGroup.bootstrap5.min.css">
 
-    <link rel="stylesheet" type="text/css" href="../../../app-assets/css/core/menu/menu-types/horizontal-menu.css">
-    <link rel="stylesheet" type="text/css" href="../../../app-assets/css/plugins/extensions/ext-component-sliders.css">
+    <link rel="stylesheet" type="text/css" href="{{ asset('/app-assets/css/core/menu/menu-types/horizontal-menu.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('/app-assets/css/plugins/extensions/ext-component-sliders.css') }}">
     <link rel="stylesheet" type="text/css" href="../../../app-assets/css/pages/app-ecommerce.css">
     <link rel="stylesheet" type="text/css" href="../../../app-assets/css/plugins/extensions/ext-component-toastr.css">
 
@@ -129,7 +129,7 @@
         <div class="navbar-container container-fluid">
             <div class="collapse navbar-collapse" id="navbar-static-collapse">
                 <!-- Search Bar -->
-                <form action="#" method="GET" class="">
+                <form action="{{ route('search.items') }}" method="GET">
                     <div class="input-group">
                         <input type="text" name="search" class="form-control" placeholder="Search">
                         <button class="btn btn-outline-primary" type="submit">Search</button>
@@ -168,70 +168,17 @@
 
                     <li class="nav-item dropdown dropdown-notification">
                         @if (auth()->user())
-                        <span class="badge rounded-pill bg-danger badge-up">5</span>
+                        <span class="badge rounded-pill bg-danger badge-up">1</span>
                         @else
                         <span class="badge rounded-pill bg-danger badge-up">0</span>
                         @endif
-                        <a href="#" class="btn btn-icon" data-bs-toggle="dropdown">
+                        <a href="/cart" class="btn btn-icon">
                             <i class="fa fa-shopping-cart"></i>
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-media dropdown-menu-end">
-                            <li class="dropdown-menu-header">
-                                <div class="dropdown-header d-flex">
-                                    <h4 class="notification-title mb-0 me-auto">Notifications</h4>
-                                    <div class="badge rounded-pill badge-light-primary">6 New</div>
-                                </div>
-                            </li>
-                            <li class="scrollable-container media-list"><a class="d-flex" href="#">
-                                    <div class="list-item d-flex align-items-start">
-                                        <div class="me-1">
-                                            <div class="avatar"><img
-                                                    src="../../../app-assets/images/portrait/small/avatar-s-15.jpg"
-                                                    alt="avatar" width="32" height="32"></div>
-                                        </div>
-                                        <div class="list-item-body flex-grow-1">
-                                            <p class="media-heading"><span class="fw-bolder">Congratulation Sam
-                                                    🎉</span>winner!</p><small class="notification-text"> Won the
-                                                monthly best seller badge.</small>
-                                        </div>
-                                    </div>
-                                </a><a class="d-flex" href="#">
-                                    <div class="list-item d-flex align-items-start">
-                                        <div class="me-1">
-                                            <div class="avatar"><img
-                                                    src="../../../app-assets/images/portrait/small/avatar-s-3.jpg"
-                                                    alt="avatar" width="32" height="32"></div>
-                                        </div>
-                                        <div class="list-item-body flex-grow-1">
-                                            <p class="media-heading"><span class="fw-bolder">New
-                                                    message</span>&nbsp;received</p><small class="notification-text">
-                                                You have 10 unread messages</small>
-                                        </div>
-                                    </div>
-                                </a><a class="d-flex" href="#">
-                                    <div class="list-item d-flex align-items-start">
-                                        <div class="me-1">
-                                            <div class="avatar bg-light-danger">
-                                                <div class="avatar-content">MD</div>
-                                            </div>
-                                        </div>
-                                        <div class="list-item-body flex-grow-1">
-                                            <p class="media-heading"><span class="fw-bolder">Revised Order
-                                                    👋</span>&nbsp;checkout</p><small class="notification-text"> MD
-                                                Inc. order updated</small>
-                                        </div>
-                                    </div>
-                                </a>
-                            </li>
-                            <li class="dropdown-menu-footer">
-                                <a class="btn btn-primary w-100" href="/cart">See Cart</a>
-                            </li>
-                        </ul>
-
                     </li>
                     @if (auth()->user())
                     <li class="nav-item dropdown dropdown-notification">
-                        <span class="badge rounded-pill bg-danger badge-up">5</span>
+                        <span class="badge rounded-pill bg-danger badge-up">{{ auth()->user()->unreadNotifications->count() }}</span>
                         <a href="#" class="btn btn-icon" data-bs-toggle="dropdown">
                             <i class="fa fa-bell"></i>
                         </a>
@@ -245,18 +192,13 @@
                                 @forelse ( auth()->user()->unreadNotifications as $n )
                                 <a class="d-flex" href="#">
                                     <div class="list-item d-flex align-items-start">
-                                        <div class="me-1">
-                                            <div class="avatar"><img
-                                                    src="../../../app-assets/images/portrait/small/avatar-s-15.jpg"
-                                                    alt="avatar" width="32" height="32"></div>
-                                        </div>
                                         <div class="list-item-body flex-grow-1">
                                             <p class="media-heading">
                                                 <span class="fw-bolder">
-                                                    {{ $n->data['messages'] }}</span>
+                                                    {{ $n->data['title'] }}</span>
                                             </p>
-                                            <small class="notification-text">
-                                                {{ $n->data['title'] }}
+                                            <small class="notification-text" style="font-weight: 600;">
+                                                {{ $n->data['messages'] }}
                                             </small>
                                         </div>
                                     </div>
@@ -266,7 +208,7 @@
                                 @endforelse
                             </li>
                             <li class="dropdown-menu-footer">
-                                <a class="btn btn-primary w-100" href="#">Read all notifications</a>
+                                <a class="btn btn-primary w-100" href="{{ route('mark-as-read') }}">Read all notifications</a>
                             </li>
                         </ul>
                     </li>

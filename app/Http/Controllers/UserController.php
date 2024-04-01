@@ -9,6 +9,9 @@ use App\Models\Regency;
 use App\Models\Seller;
 use App\Models\User;
 use App\Models\Village;
+use App\Notifications\Admin;
+use App\Notifications\Seller as NotificationsSeller;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -40,6 +43,18 @@ class UserController extends Controller
         $districts = District::all();
         $villages = Village::all();
         return view('authentication.profile', compact('profile', 'provinces', 'regencies', 'districts', 'villages', 'address', 'document'));
+    }
+
+    public function editProfile(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+        $user->firstname =  $request->input('fname');
+        $user->lastname =  $request->input('lname');
+        $user->birthdate =  $request->input('birthdate');
+        $user->email =  $request->input('email');
+        $user->phonenumber =  $request->input('phone');
+        $user->save();
+        return redirect()->back()->with('status', 'Profile Edited!');
     }
 
     public function regency(Request $request)
@@ -103,7 +118,7 @@ class UserController extends Controller
         $address->save();
         return redirect()->back()->with('success', 'Address Added!');
     }
-    
+
     public function toSellerRegister()
     {
         $provinces = Province::all();
@@ -127,12 +142,34 @@ class UserController extends Controller
         $seller->zipcode = $request->input('shopzip');
         $seller->status = 'Pending';
         $seller->users_id = $id;
+        if($request->hasFile('pic')){
+            $image = $request->file('pic');
+            $name = $id.'-'.Carbon::now()->format('ymd').'.'.$image->getClientOriginalExtension();
+            $image->move(public_path("uploads/img/seller/$id"), $name);
+            $seller->pics = $name;
+        }
         $seller->save();
+        // dd($seller);
 
-        DB::update("UPDATE drivedealio.users SET sellerstatus = :sellerstatus WHERE id = :id",
-        ['sellerstatus' => 1, 'id' => $id]);
+        $user = User::findOrfail($id);
+        $user->sellerstatus = 1;
+        $user->save();
 
-        return view('seller.dashboard')->with('success', 'Registration Success!');
+        $userSeller = User::find($id);
+        $title = 'Seller Registration';
+        $message = 'Registration Complete, Please wait for System Approval!';
+        $userSeller->notify(new NotificationsSeller($title, $message));
+
+        $adminData = DB::select(
+            DB::raw("SELECT u.id from drivedealio.users as u INNER JOIN drivedealio.roles as r where r.id = 1;")
+        );
+        $idadmin = $adminData[0]->id;
+        $admin = User::find($idadmin);
+        $title = 'Seller Registration';
+        $message = 'New Seller has been Registered, Waiting for Approval!';
+        $admin->notify(new Admin($title, $message));
+
+        return redirect('/')->with('success', 'Registration Success!');
     }
 
     public function setPrimaryAddress($id)
@@ -163,18 +200,5 @@ class UserController extends Controller
         }
 
         return redirect()->back()->with('success', 'Primary address updated successfully');
-    }
-
-
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\User  $user
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(User $user)
-    {
-        //
     }
 }

@@ -5,27 +5,23 @@
         <div class="card-body col-md-12 d-flex flex-column my-auto">
             <div class="row">
                 <div class="col-md-6 d-flex align-items-center">
+                    @foreach ($profile as $p)
                     <span class="avatar me-1">
-                        <img src="../../../app-assets/images/portrait/small/avatar-s-3.jpg" class="round" height="150" width="150" style="object-fit: cover">
+                        <img src="{{ asset("/uploads/img/seller/$p->iduser/" . $p->pics) }}" class="round" height="150" width="150" style="object-fit: cover">
                     </span>
                     <div class="user-info">
                         <div class="user-nav d-flex d-sm-inline-flex">
-                            <span class="user-name fw-bolder" style="font-size: 22px">{{ $seller[0]->name }}</span>
+                            <span class="user-name fw-bolder" style="font-size: 22px">{{ $p->name }}</span>
                         </div>
                         <div class="user-location">
-                            <span class="user-name" style="font-size: 12px">{{ $seller[0]->province }}, {{ $seller[0]->city }}</span>
+                            <span class="user-name" style="font-size: 12px">{{ $p->province }}, {{ $p->city }}</span>
                         </div>
                     </div>
+                    @endforeach
                 </div>
-                <div class="col-md-6 d-flex align-items-center">
+                <div class="col-md-6 d-flex justify-content-end align-items-center">
                     <div class="col-md-4">
                         <h5>Rating & Review</h5>
-                    </div>
-                    <div class="col-md-4">
-                        <h5>Estimate Procces</h5>
-                    </div>
-                    <div class="col-md-4">
-                        <h5>Operational Hour</h5>
                     </div>
                 </div>
             </div>
@@ -38,7 +34,7 @@
             <div class="card ecommerce-card">
                 <div class="item-img text-center mt-1">
                     <a href="{{ route('sparepart.show', $s->idsparepart) }}">
-                        <img class="card-img-top" src="{{ asset('/images/' . $s->url) }}" alt="Card image cap" style="height : 300px; width:auto;" alt="img-placeholder" />
+                        <img class="card-img-top" src="{{ asset('images/sparepart/'.$s->idsparepart.'/' .$s->url) }}" alt="Card image cap" style="height : 300px; width:auto;" alt="img-placeholder" />
                     </a>
                 </div>
                 <div class="card-body col-md-12" style="position: sticky; top: 0;">

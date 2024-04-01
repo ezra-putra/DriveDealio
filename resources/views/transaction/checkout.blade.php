@@ -9,8 +9,8 @@
                 <div class="card-body col-md-12" style="position: sticky; top: 0;">
                     <h5>Address</h5>
                     <hr style="height:1px;border-width:0;color:gray;background-color:lightgray">
-                    <p style="font-weight: 800">{{ $userinfo->firstname }} {{ $userinfo->lastname }}</p>
-                    <p>{{ $userinfo->phonenumber }}</p>
+                    <p style="font-weight: 800">{{ $userinfo->firstname }} {{ $userinfo->lastname }} ({{ $userinfo->phonenumber }})</p>
+                    <p></p>
                     @foreach ($address as $a)
                     <p style="font-weight: 500;">{{ $a->name }}</p>
                     <p>{{ $a->address }}</p>
@@ -59,7 +59,6 @@
                                         @php
                                             $subTotal = $c->unitprice * $c->quantity;
                                             $totalPrice += $subTotal;
-                                            $finalPrice = $totalPrice + $price;
                                         @endphp
                                         <p style="font-size: 14px;" class="mt-1 mb-0">{{ $c->quantity }} x @currency($c->unitprice) = @currency($subTotal)</p>
                                     </div>

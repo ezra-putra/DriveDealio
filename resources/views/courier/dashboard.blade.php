@@ -75,7 +75,7 @@
                             <div class="card-header d-flex justify-content-between pb-0">
                                 <h4 class="card-title">Sparepart Shipping List</h4>
                                 <div class="justify-items-end">
-                                    <a class="btn btn-flat-primary p-50" href="/inspector/listvehicle">See All</a>
+                                    <a class="btn btn-flat-primary p-50" href="/courier/shipping-list">See All</a>
                                 </div>
                             </div>
                             <div class="table-responsive mb-1">
@@ -118,7 +118,7 @@
                             <div class="card-header d-flex justify-content-between pb-0">
                                 <h4 class="card-title">Vehicle Towing List</h4>
                                 <div class="justify-items-end">
-                                    <a class="btn btn-flat-primary p-50" href="/inspector/listvehicle">See All</a>
+                                    <a class="btn btn-flat-primary p-50" href="/courier/towing-list">See All</a>
                                 </div>
                             </div>
                             <div class="table-responsive mb-1">

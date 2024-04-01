@@ -76,9 +76,6 @@
                                     <div class="mb-1">
                                         <div class="d-flex justify-content-between">
                                             <label class="form-label" for="password">Password</label>
-                                            <a href="auth-forgot-password-basic.html">
-                                                <small>Forgot Password?</small>
-                                            </a>
                                         </div>
                                         <div class="input-group input-group-merge form-password-toggle">
                                             <input type="password" class="form-control form-control-merge"
@@ -87,13 +84,6 @@
                                                 aria-describedby="password" />
                                             <span class="input-group-text cursor-pointer"><i
                                                     data-feather="eye"></i></span>
-                                        </div>
-                                    </div>
-                                    <div class="mb-1">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" id="remember-me"
-                                                tabindex="3" />
-                                            <label class="form-check-label" for="remember-me"> Remember Me </label>
                                         </div>
                                     </div>
                                     <button class="btn btn-info w-100 mb-1" tabindex="4">Sign in</button>

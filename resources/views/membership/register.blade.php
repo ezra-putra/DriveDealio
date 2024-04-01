@@ -29,6 +29,7 @@
                                     </div>
                                 </div>
                             </div>
+                                @if (empty($document))
                                 <div class="col-md-12">
                                     <label for="fileKtp" class="form-label">Upload Scan KTP</label>
                                     <input class="form-control" type="file" id="fileKtp" name="ktp" accept=".pdf" required/>
@@ -41,6 +42,7 @@
                                     <p style="color: red; margin-left: 5px; size: 10px;">*Maximum file size is 2MB, and only
                                         PDF file format is accepted.</p>
                                 </div>
+                                @endif
                             @endforeach
                         </div>
                         <div class="col-md-6">

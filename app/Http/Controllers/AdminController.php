@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Admin;
 use App\Models\Loan;
+use App\Models\Seller;
 use App\Models\User;
 use App\Models\Vehicle;
+use App\Notifications\Loan as NotificationsLoan;
+use App\Notifications\Seller as NotificationsSeller;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -68,18 +71,22 @@ class AdminController extends Controller
 
     public function approveSeller($id)
     {
-        DB::update("UPDATE drivedealio.shops SET status = :status where id = :id" ,
-        ['status' => 'Active', 'id' => $id]);
+        $seller = Seller::findOrFail($id);
+        $seller->status = 'Active';
+        $seller->save();
 
-        return view('/admin/listseller');
-    }
+        $sellerInfo = DB::select(
+            DB::raw("SELECT users_id from drivedealio.shops where id = $id;")
+        );
 
-    public function suspendSeller($id)
-    {
-        DB::update("UPDATE drivedealio.shops SET status = :status WHERE id = :id",
-        ['status' => 'Suspend', 'id' => $id]);
+        $idseller = $sellerInfo[0]->users_id;
+        // dd($idseller);
+        $notif = User::find($idseller);
+        $title = 'Seller Activation Request';
+        $message = 'Your Seller Account Has Been Approved to Operational by Admin!';
+        $notif->notify(new NotificationsSeller($title, $message));
 
-        return view('/admin/listseller');
+        return redirect()->back()->with('success', 'Seller Approved!');
     }
 
     public function dashboard()
@@ -121,6 +128,17 @@ class AdminController extends Controller
         $loan->status = "Approved";
         $loan->verificationdate = Carbon::now();
         $loan->save();
+
+        $loanInfo = DB::select(
+            DB::raw("SELECT users_id from drivedealio.loans where id = $id;")
+        );
+
+        $iduser = $loanInfo[0]->users_id;
+        $user = User::find($iduser);
+        $title = 'Loan Request';
+        $message = 'Loan Approved, Please Continue Your Transaction!';
+        $user->notify(new NotificationsLoan($title, $message));
+
         return redirect()->back()->with('success', 'Loan Status Changed!');
     }
 
@@ -129,6 +147,17 @@ class AdminController extends Controller
         $loan = Loan::findOrFail($id);
         $loan->status = "Reject";
         $loan->save();
+
+        $loanInfo = DB::select(
+            DB::raw("SELECT users_id from drivedealio.loans where id = $id;")
+        );
+
+        $iduser = $loanInfo[0]->users_id;
+        $user = User::find($iduser);
+        $title = 'Loan Request';
+        $message = 'Loan Rejected, Please Select Another PaymentMethod!';
+        $user->notify(new NotificationsLoan($title, $message));
+
         return redirect()->back()->with('success', 'Loan Status Changed!');
     }
 

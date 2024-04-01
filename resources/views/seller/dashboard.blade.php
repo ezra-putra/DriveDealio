@@ -17,21 +17,21 @@
                                     class="congratulations-img-left" alt="card-img-left" />
                                 <img src="../../../app-assets/images/elements/decore-right.png"
                                     class="congratulations-img-right" alt="card-img-right" />
-                                <div class="avatar avatar-xl bg-primary shadow">
-                                    <div class="avatar-content">
-                                        <i data-feather="award" class="font-large-1"></i>
-                                    </div>
+                                @foreach ($shopname as $s)
+                                <div class="item-img text-center mt-1">
+                                    <img class="card-img-top" src="{{ asset("/uploads/img/seller/$s->users_id/" . $s->pics) }}" alt="Card image cap" style="height : 300px; width:auto;" alt="img-placeholder" />
                                 </div>
                                 <div class="text-center">
                                     <h1 class="mb-1 text-white">Welcome
-                                        <a href="{{ route('seller.profile', $shopname[0]->id) }}" aria-expanded="false" class="text-decoration-none text-white">
-                                            <span class="user-name">{{ $shopname[0]->name }}</span>
+                                        <a href="{{ route('seller.profile', $s->id) }}" aria-expanded="false" class="text-decoration-none text-white">
+                                            <span class="user-name">{{ $s->name }}</span>
                                         </a>
                                     </h1>
                                     <p class="card-text m-auto w-75">
                                         You have <strong>{{ $ordercount[0]->totalorder }}</strong> total order today.
                                     </p>
                                 </div>
+                                @endforeach
                             </div>
                         </div>
                     </div>

@@ -19,7 +19,11 @@ class SparepartController extends Controller
                 INNER JOIN drivedealio.shops as sh on s.shops_id = sh.id
                 WHERE s.stock > 0;")
         );
-        return view('sparepart.sparepartindex', compact('sparepart'));
+
+        $categories = DB::select(
+            DB::raw("SELECT id, categoriname from drivedealio.sparepartcategories;")
+        );
+        return view('sparepart.sparepartindex', compact('sparepart', 'categories'));
     }
 
     public function show($id)
@@ -68,7 +72,8 @@ class SparepartController extends Controller
 
         $sparepart = new Sparepart();
         $sparepart->partnumber = $request->input('partnum');
-        $sparepart->unitprice = $request->input('price');
+        $recprice = preg_replace('/[^\d]/', '', $request->input('price'));
+        $sparepart->unitprice = (int)$recprice;
         $sparepart->stock = $request->input('stock');
         $sparepart->description = $request->input('desc');
         $sparepart->partname = $request->input('partname');
@@ -80,6 +85,12 @@ class SparepartController extends Controller
         $sparepart->sparepartcategories_id = $request->input('categories');
         $sparepart->weight = $request->input('weight');
         $sparepart->shops_id = $id;
+        if($request->has('checkbox')){
+            $sparepart->preorder = $request->input('checkbox');
+        }
+        else{
+            $sparepart->preorder = false;
+        }
         $sparepart->save();
 
         $date = DB::select(
@@ -90,7 +101,7 @@ class SparepartController extends Controller
         $counter = $date[0]->count + 1;
         foreach($request->file('image') as $image)
         {
-            $name = $sparepart->created_at->format('ymd'). "-$counter". ".". $image->getClientOriginalExtension();
+            $name = $sparepart->created_at->format('ymd'). "-$counter"."$sparepart->id". ".". $image->getClientOriginalExtension();
             $image->move(public_path("images/sparepart/$sparepart->id"), $name);
             $data[] = [
                 'url' => $name,

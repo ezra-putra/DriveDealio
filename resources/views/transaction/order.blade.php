@@ -18,11 +18,11 @@
         </div>
         <div class="col-md-8">
             <div class="d-flex flex-column flex-sm-row pt-1 mt-auto mb-1 py-auto">
-                <p style="font-size: 14px; font-weight: 900;">Status :</p>
-                <a href="#" class="btn btn-outline-secondary mx-1">All</a>
-                <a href="#" class="btn btn-outline-secondary me-1">Ongoing</a>
-                <a href="#" class="btn btn-outline-secondary me-1">Success</a>
-                <a href="#" class="btn btn-outline-secondary me-1">Failed</a>
+                <span style="font-size: 14px; font-weight: 900;">Status :</span>
+                <a href="#" class="btn btn-outline-primary mx-1">All</a>
+                <a href="#" class="btn btn-outline-info me-1">Ongoing</a>
+                <a href="#" class="btn btn-outline-success me-1">Finished</a>
+                <a href="#" class="btn btn-outline-danger me-1">Cancelled</a>
             </div>
             <div class="tab-content" id="v-pills-tabContent">
                 <div class="tab-pane fade show active" id="v-pills-sparepart" role="tabpanel" aria-labelledby="v-pills-sparepart-tab">
@@ -43,15 +43,27 @@
                                         @endif
                                     </div>
                                     <a href="{{ url('/invoice-sparepart', $o->idorder) }}" target="_blank" class="text-decoration-none mx-1 mb-0">{{ $o->invoicenum }}</a>
-                                    <div class="mx-auto my-auto justify-content-end">
-                                        <p class="my-1">Total Price</p>
-                                        <p class="my-1">@currency($o->total_price)</p>
-                                    </div>
+                                    <p class="mx-1 mb-0">{{ $o->name }}</p>
                                 </div>
+                            </div>
+
+                            <div class="d-flex align-items-center">
 
                             </div>
-                            <div class="d-flex align-items-center">
-                                <p class="ms-1">{{ $o->name }}</p>
+                            <div class="row">
+
+                                <div class="col-md-2">
+                                    <div class="item-img text-center">
+
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+
+                                </div>
+                                <div class="col-md-2">
+                                    <p class="my-1">Total Price</p>
+                                    <p class="my-1">@currency($o->total_price)</p>
+                                </div>
                             </div>
                             <div class="d-flex justify-content-end me-1">
                                 <a data-bs-toggle="modal" href="#modalOrderDetails" onclick="getDetailOrders({{ $o->idorder }})" class="btn btn-flat-success mx-1">

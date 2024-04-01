@@ -104,7 +104,7 @@
                 <div class="carousel-inner">
                     @foreach($sparepart as $s => $image)
                         <div class="carousel-item {{ $s == 0 ? 'active' : '' }}">
-                            <img src="{{ asset('/images/' . $image->url) }}" class="d-block w-100" alt="Slide {{ $s + 1 }}">
+                            <img src="{{ asset('/images/sparepart/'.$image->idsparepart.'/'. $image->url) }}" class="d-block w-100" alt="Slide {{ $s + 1 }}">
                         </div>
                     @endforeach
                 </div>
@@ -148,8 +148,6 @@
                             </div>
                         </a>
                     </div>
-                    <hr style="height:1px;border-width:0;color:gray;background-color:lightgray">
-                    <h4>Shipping</h4>
                 </div>
             </div>
         </div>
@@ -222,18 +220,16 @@
                 </div>
 
                 <div class="row mt-1">
-                    <h4>Rating</h4>
                     @if(!empty($review))
                         @foreach ($review as $r)
                         <div class="d-flex align-items-center my-1">
-                            <a href="#" aria-expanded="false" class="d-flex align-items-center text-decoration-none">
-                                <span class="avatar me-2">
-                                    <img src="" alt="" class="round" alt="avatar" height="40" width="40" style="object-fit: cover">
-                                </span>
-                                <div class="user-nav d-flex d-sm-inline-flex ms-1">
-                                    <span class="user-name fw-bolder">{{ $r->firstname }} {{ $r->lastname }}</span>
-                                </div>
-                            </a>
+                            <span class="avatar me-2">
+                                <img src="" alt="" class="round" alt="avatar" height="40" width="40" style="object-fit: cover">
+                            </span>
+                            <div class="user-nav d-flex d-sm-inline-flex justify-content-between w-100">
+                                <span class="user-name fw-bolder">{{ $r->firstname }} {{ $r->lastname }}</span>
+                                <span class="text-end">{{ \Carbon\Carbon::parse($r->reviewdate)->translatedFormat('d F Y H:i') }}</span>
+                            </div>
                         </div>
                         <div class="col mb-1">
                             <div class="rated">

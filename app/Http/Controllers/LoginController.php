@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -28,6 +29,11 @@ class LoginController extends Controller
 
         if(auth()->attempt($credential)){
 
+            $user = auth()->user();
+            if ($user instanceof \Illuminate\Database\Eloquent\Model) {
+                $user->last_login = now();
+                $user->save();
+            }
             if(auth()->user()->roles_id == 2){
                 return redirect()->route('welcome');
             }

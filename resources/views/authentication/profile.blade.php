@@ -14,59 +14,64 @@
                         </div>
                     </nav>
                     <div class="tab-content" id="nav-tabContent">
+                        @foreach ($profile as $p)
                         <div class="tab-pane fade show active" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
                             <div class="row">
                                 <div class="col-md-3 border border-3">
                                     <div class="text-center">
-                                        <img src="{{ $profile[0]->profilepicture }}" class="align-items-center mx-auto mt-1" alt="avatar" height="250" width="250" style="object-fit: cover">
+                                        <img src="{{ $p->profilepicture }}" class="align-items-center mx-auto mt-1" alt="avatar" height="250" width="250" style="object-fit: cover">
                                     </div>
-                                    <input class="form-control mt-1" type="file" name="profile" accept=".jpeg, .jpg, .png" required/>
-                                    <p style="color: red; margin-left: 5px; size: 10px;">*Only JPEG, JPG, PNG file format is accepted.</p>
                                 </div>
                                 <div class="col-md-9">
                                     <h5>Edit Profile</h5>
-                                    <div class="row">
-                                        <label for="colFormLabelLg" class="col-sm-6 col-form-label-lg">
-                                            <p style="font-size: 14px;">Name</p>
-                                        </label>
-                                        <div class="col-sm-3">
-                                            <input name="fname" class="form-control" type="text" value="{{ $profile[0]->firstname }}"/>
+                                    <form method="POST" action="{{ route('edit.profile', $p->iduser) }}" enctype="multipart/form-data">
+                                        @csrf
+                                        @method('PUT')
+                                        <div class="row">
+                                            <label for="colFormLabelLg" class="col-sm-6 col-form-label-lg">
+                                                <p style="font-size: 14px;">Name</p>
+                                            </label>
+                                            <div class="col-sm-3">
+                                                <input name="fname" class="form-control" type="text" value="{{ $p->firstname }}"/>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <input name="lname" class="form-control" type="text" value="{{ $p->lastname }}"/>
+                                            </div>
                                         </div>
-                                        <div class="col-sm-3">
-                                            <input name="lname" class="form-control" type="text" value="{{ $profile[0]->lastname }}"/>
+                                        <div class="row">
+                                            <label for="colFormLabelLg" class="col-sm-6 col-form-label-lg">
+                                                <p style="font-size: 14px;">Birthdate</p>
+                                            </label>
+                                            <div class="col-sm-6">
+                                                <input type="text" id="dateInput" name="birthdate"
+                                                class="form-control flatpickr-basic" placeholder="YYYY-MM-DD" value="{{ $p->birthdate }}"/>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div class="row">
-                                        <label for="colFormLabelLg" class="col-sm-6 col-form-label-lg">
-                                            <p style="font-size: 14px;">Birthdate</p>
-                                        </label>
-                                        <div class="col-sm-6">
-                                            <input name="fname" class="form-control" type="text" value="{{ $profile[0]->birthdate }}"/>
+                                        <h5>Edit Contact</h5>
+                                        <div class="row">
+                                            <label for="colFormLabelLg" class="col-sm-6 col-form-label-lg">
+                                                <p style="font-size: 14px;">Email</p>
+                                            </label>
+                                            <div class="col-sm-6">
+                                                <input name="email" class="form-control" type="text" value="{{ $p->email }}"/>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <h5>Edit Contact</h5>
-                                    <div class="row">
-                                        <label for="colFormLabelLg" class="col-sm-6 col-form-label-lg">
-                                            <p style="font-size: 14px;">Email</p>
-                                        </label>
-                                        <div class="col-sm-6">
-                                            <input name="fname" class="form-control" type="text" value="{{ $profile[0]->email }}"/>
+                                        <div class="row">
+                                            <label for="colFormLabelLg" class="col-sm-6 col-form-label-lg">
+                                                <p style="font-size: 14px;">Phone Number</p>
+                                            </label>
+                                            <div class="col-sm-6">
+                                                <input name="phone" class="form-control" type="text" value="{{ $p->phonenumber }}"/>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div class="row">
-                                        <label for="colFormLabelLg" class="col-sm-6 col-form-label-lg">
-                                            <p style="font-size: 14px;">Phone Number</p>
-                                        </label>
-                                        <div class="col-sm-6">
-                                            <input name="fname" class="form-control" type="text" value="{{ $profile[0]->phonenumber }}"/>
+                                        <div class="d-flex justify-content-end mt-1">
+                                            <button type="submit" class="btn btn-info">Edit Profile</button>
                                         </div>
-                                    </div>
-                                    <div class="d-flex justify-content-end mt-1">
-                                        <a href="#" class="btn btn-info">Edit</a>
-                                    </div>
+                                    </form>
                                 </div>
                             </div>
                         </div>
+                        @endforeach
                         <div class="tab-pane fade" id="nav-address" role="tabpanel" aria-labelledby="nav-address-tab">
                             <a class="btn btn-outline-secondary" data-bs-toggle="modal" href="#modalAddress">Add New Address</a>
                             @if(!empty($address))
@@ -182,6 +187,19 @@
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script type="text/javascript">
+
+    var today = new Date();
+    var minDate = new Date(today);
+    minDate.setDate(today.getDate() + 1)
+    // Initialize Flatpickr with minDate option
+    flatpickr("#dateInput", {
+        minDate: minDate,
+        dateFormat: "Y-m-d"
+    });
+</script>
 
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script>

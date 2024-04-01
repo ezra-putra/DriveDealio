@@ -7,7 +7,7 @@
         <div class="col-md-12">
             <h3>Auction History</h3>
             <div class="d-flex flex-column flex-sm-row pt-1 mt-auto mb-1 py-auto">
-                <p style="font-size: 14px; font-weight: 900;">Status :</p>
+                <span style="font-size: 14px; font-weight: 900;">Status :</span>
                 <a href="#" class="btn btn-outline-secondary mx-1">All</a>
                 <a href="#" class="btn btn-outline-secondary me-1">Ongoing</a>
                 <a href="#" class="btn btn-outline-secondary me-1">Success</a>
@@ -59,7 +59,7 @@
                         <a href="{{ route('vehicle.show', $l->idvehicle) }}" class="btn btn-flat-success">
                             Vehicle Details
                         </a>
-                        @if (empty($order))
+                        {{-- @if (empty($order)) --}}
                         @foreach ($winner as $w)
                             @if ($w->auctions_id === $l->idauction)
                             <a href="{{ route('auction.checkout', $l->idvehicle) }}" class="btn btn-info">
@@ -67,7 +67,7 @@
                             </a>
                             @endif
                         @endforeach
-                        @endif
+                        {{-- @endif --}}
                     </div>
                 </div>
             </div>

@@ -60,7 +60,7 @@
                                 <div class="col-md-6">
                                     <label class="form-label" for="part-price">Sparepart Price</label>
                                     <div class="col-md-12 mb-2">
-                                        <input type="number" class="form-control" id="part-price"
+                                        <input type="text" class="form-control" id="part-price"
                                             placeholder="Sparepart Price" name="price" required/>
                                     </div>
                                 </div>
@@ -125,7 +125,15 @@
                                     <label for="myDropzone" class="form-label">
                                         <h4>Upload Sparepart Image</h4>
                                     </label>
-                                    <input type="file" class="form-control" name="image[]" multiple>
+                                    <input type="file" class="form-control" name="image[]" accept=".jpeg, .png, .jpg" multiple>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="checkbox" name="checkbox" value="true">
+                                        <label class="form-check-label" for="checkbox">Pre-Order</label>
+                                    </div>
                                 </div>
                             </div>
                             <div class="d-flex justify-content-end">
@@ -189,4 +197,27 @@
             </div>
         </div>
     </div>
+
+    <script>
+        var idr = document.getElementById("part-price");
+        idr.addEventListener("keyup", function (e) {
+            idr.value = formatRupiah(this.value, "Rp. ");
+        });
+
+        function formatRupiah(angka, prefix) {
+            var number_string = angka.replace(/[^,\d]/g, "").toString(),
+                split = number_string.split(","),
+                sisa = split[0].length % 3,
+                rupiah = split[0].substr(0, sisa),
+                ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+
+            if (ribuan) {
+                separator = sisa ? "." : "";
+                rupiah += separator + ribuan.join(".");
+            }
+
+            rupiah = split[1] != undefined ? rupiah + "," + split[1] : rupiah;
+            return prefix == undefined ? rupiah : rupiah ? "Rp. " + rupiah : "";
+        }
+    </script>
 @endsection

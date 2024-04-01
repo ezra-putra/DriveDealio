@@ -12,20 +12,24 @@ class SellerController extends Controller
 {
     public function sellerProfile($id)
     {
-        $seller = DB::select(
-            DB::raw("SELECT u.id as iduser, s.id as idseller, s.pics, s.name, s.province, s.city, sp.id as idsparepart, sp.partnumber, sp.unitprice, sp.partname,
-            sp.vehiclemodel, sp.buildyear, sp.colour, sp.brand, (SELECT p.url FROM drivedealio.pics as p WHERE p.spareparts_id = sp.id LIMIT 1) as url
-            FROM drivedealio.users as u INNER JOIN drivedealio.shops as s on u.id = s.users_id
-            INNER JOIN drivedealio.spareparts as sp on s.id = sp.shops_id where sp.shops_id = $id;")
+        $profile = DB::select(
+            DB::raw("SELECT u.id as iduser, s.id as idseller, s.pics, s.name, s.province, s.city
+            FROM drivedealio.users as u INNER JOIN drivedealio.shops as s on u.id = s.users_id where s.id = $id")
         );
-        return view('seller.profileseller', compact('seller'));
+        $seller = DB::select(
+            DB::raw("SELECT sp.id as idsparepart, sp.partnumber, sp.unitprice, sp.partname,
+            sp.vehiclemodel, sp.buildyear, sp.colour, sp.brand,
+            (SELECT p.url FROM drivedealio.pics as p WHERE p.spareparts_id = sp.id LIMIT 1) as url
+            FROM drivedealio.spareparts as sp where sp.shops_id = $id;")
+        );
+        return view('seller.profileseller', compact('seller', 'profile'));
     }
 
     public function dashboard()
     {
         $iduser = auth()->id();
         $shopname = DB::select(
-            DB::raw("SELECT id, name from drivedealio.shops where users_id = $iduser;")
+            DB::raw("SELECT id, name, pics, users_id from drivedealio.shops where users_id = $iduser;")
         );
         $sparepart = DB::select(
             DB::raw("SELECT id, partnumber, partname, unitprice, stock, description, vehiclemodel, buildyear, colour, condition, shops_id

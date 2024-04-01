@@ -4,6 +4,8 @@ namespace App\Console\Commands;
 
 use App\Models\Loan;
 use App\Models\LoanPayment;
+use App\Models\User;
+use App\Notifications\MonthlyPayment;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -41,6 +43,7 @@ class LoanMonthlyPaymentCron extends Command
 
         foreach ($loans as $loan) {
             $idloan = $loan->id;
+            $iduser = $loan->users_id;
             $monthlypayment = $loan->monthlypayment;
             $loantenor = $loan->loantenor * 12;
 
@@ -56,7 +59,6 @@ class LoanMonthlyPaymentCron extends Command
                 $loan->update(['status' => 'Finished']);
                 continue; // Move to next loan
             }
-
             // Create loan payment record
             $loanPayment = new LoanPayment;
             $loanPayment->invoicenum = "INV/MP/" . now()->format('Y/m/d') . "/$idloan/$counter";
@@ -66,6 +68,11 @@ class LoanMonthlyPaymentCron extends Command
             $loanPayment->status = "Unpaid";
             $loanPayment->paymentcount = $counter;
             $loanPayment->save();
+
+            $user = User::find($iduser);
+            $title = 'Bill Payment';
+            $message = 'Installment Bill is Payable now, Pay Now!';
+            $user->notify(new MonthlyPayment($title, $message));
 
             $this->info("Loan payment recorded successfully for loan ID $idloan.");
         }

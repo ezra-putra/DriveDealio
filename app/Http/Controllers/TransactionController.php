@@ -2,15 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AuctionOrder;
 use App\Models\District;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\Province;
 use App\Models\Regency;
 use App\Models\Review;
+use App\Models\Seller;
 use App\Models\Shipping;
 use App\Models\ShippingStatus;
+use App\Models\User;
 use App\Models\Village;
+use App\Notifications\Seller as SellerNotifications;
+use App\Notifications\Transaction;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -182,34 +187,8 @@ class TransactionController extends Controller
 
             $distanceValue = (float)preg_replace('/[^0-9.]/', '', $distance);
 
-            foreach($shipping as $s)
-            {
-                if ($distanceValue > 100.0)
-                {
-                    if ($s->id === 1)
-                    {
-                        $price = ($distanceValue * 50) + ($weight * 4000);
-                    }
-                    elseif ($s->id === 2)
-                    {
-                        $price = ($distanceValue * 20) + ($weight * 4000);
-                    }
-                }
-                else
-                {
-                    if ($s->id === 1)
-                    {
-                        $price = ($distanceValue * 800) + ($weight * 4000);
-                    }
-                    elseif ($s->id === 2)
-                    {
-                        $price = ($distanceValue * 500) + ($weight * 4000);
-                    }
-                }
-            }
-
         }
-        return view('transaction.checkout', compact('checkout', 'userinfo', 'address', 'profile', 'provinces', 'regencies', 'districts', 'villages', 'price', 'shipping', 'weight', 'distanceValue'));
+        return view('transaction.checkout', compact('checkout', 'userinfo', 'address', 'profile', 'provinces', 'regencies', 'districts', 'villages', 'shipping', 'weight', 'distanceValue'));
     }
 
 
@@ -283,6 +262,18 @@ class TransactionController extends Controller
             $order->shippings_id = $shipping->id;
             $order->save();
 
+            $user = User::find($iduser);
+            $title = 'Sparepart Transaction';
+            $message = 'Order Has been Created for '.$order->invoicenum. '!';
+            $user->notify(new Transaction($title, $message));
+
+            $idseller = $checkout[0]->idseller;
+
+            $seller = Seller::find($idseller);
+            $title = 'Order Information';
+            $message = 'New Order Has Been Made. Invoice Number ' .$order->invoicenum. '!';
+            $seller->notify(new SellerNotifications($title, $message));
+
             return redirect('/payment/'. $order->id)->with('success', 'Order Create');
         }
         else{
@@ -290,30 +281,39 @@ class TransactionController extends Controller
         }
     }
 
+    public function filterTransaction(Request $request)
+    {
+        
+    }
+
     public function transactionList()
     {
         $iduser = auth()->id();
-        $order = DB::select(
-            DB::raw("SELECT o.id as idorder, u.id as iduser, o.invoicenum, o.orderdate, o.shops_id, o.users_id, o.status, o.paymentstatus, s.name, o.total_price, s.id as idshop
-            from drivedealio.orders as o INNER JOIN drivedealio.users as u on o.users_id = u.id
-            INNER JOIN drivedealio.shops as s on o.shops_id = s.id
-            where u.id = $iduser order by o.orderdate desc;")
-        );
+        $order = Order::select('orders.id as idorder', 'users.id as iduser', 'orders.invoicenum', 'orders.orderdate', 'orders.shops_id', 'orders.users_id', 'orders.status', 'orders.paymentstatus', 'shops.name', 'orders.total_price', 'shops.id as idshop')
+            ->join('users', 'orders.users_id', '=', 'users.id')
+            ->join('shops', 'orders.shops_id', '=', 'shops.id')
+            ->where('users.id', $iduser)
+            ->orderBy('orders.orderdate', 'desc')
+            ->get();
 
-        $auctionorder = DB::select(
-            DB::raw("SELECT CONCAT(v.model, ' ', v.variant, ' ', v.transmission, ' ', v.colour, ', ', v.year) as vehiclename, a.lot_number, aw.id as idwinner, ao.orderdate,
-            ao.invoicenum, ao.total_price, u.firstname, u.lastname, u.email, u.phonenumber, ao.id as idorder, ao.status, v.id as idvehicle, a.current_price, ao.paymentmethod, l.status as loanstatus,
-            (SELECT COALESCE(i.url, 'placeholder_url') FROM drivedealio.images as i WHERE i.vehicles_id = v.id LIMIT 1) as url, b.name as brand, ao.paymentstatus, l.id as idloan
-            FROM drivedealio.vehicles as v INNER JOIN drivedealio.auctions as a on v.id = a.vehicles_id
-            INNER JOIN drivedealio.auctionwinners as aw on a.id = aw.auctions_id
-            INNER JOIN drivedealio.auction_orders as ao on aw.id = ao.auctionwinners_id
-            INNER JOIN drivedealio.users as u on aw.users_id = u.id
-            INNER JOIN drivedealio.brands as b on v.brands_id = b.id
-            LEFT JOIN drivedealio.loans as l on ao.id = l.auction_orders_id
-            WHERE u.id = $iduser order by ao.orderdate desc;")
-        );
+        $auctionorder = AuctionOrder::select(
+                    DB::raw("CONCAT(vehicles.model, ' ', vehicles.variant, ' ', vehicles.transmission, ' ', vehicles.colour, ', ', vehicles.year) as vehiclename"),
+                    'auctions.lot_number', 'auctionwinners.id as idwinner', 'auction_orders.orderdate',
+                    'auction_orders.invoicenum', 'auction_orders.total_price', 'users.firstname', 'users.lastname',
+                    'users.email', 'users.phonenumber', 'auction_orders.id as idorder', 'auction_orders.status',
+                    'vehicles.id as idvehicle', 'auctions.current_price', 'auction_orders.paymentmethod', 'loans.status as loanstatus',
+                    DB::raw("(SELECT COALESCE(images.url, 'placeholder_url') FROM images WHERE images.vehicles_id = vehicles.id LIMIT 1) as url"),
+                    'brands.name as brand', 'auction_orders.paymentstatus', 'loans.id as idloan')
+                ->join('auctionwinners', 'auction_orders.auctionwinners_id', '=', 'auctionwinners.id')
+                ->join('auctions', 'auctionwinners.auctions_id', '=', 'auctions.id')
+                ->join('users', 'auctionwinners.users_id', '=', 'users.id')
+                ->join('vehicles', 'auctions.vehicles_id', '=', 'vehicles.id')
+                ->join('brands', 'vehicles.brands_id', '=', 'brands.id')
+                ->leftJoin('loans', 'auction_orders.id', '=', 'loans.auction_orders_id')
+                ->where('users.id', $iduser)
+                ->orderBy('auction_orders.orderdate', 'desc')
+                ->get();
 
-        // dd($auctionorder);
 
         return view('transaction.order', compact('order', 'auctionorder'));
     }
@@ -389,7 +389,6 @@ class TransactionController extends Controller
         );
 
         return view('transaction.invoice', compact('order', 'orderdetails', 'shippings'));
-
     }
 
     public function paymentIndex($id)

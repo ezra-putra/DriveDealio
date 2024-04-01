@@ -250,13 +250,13 @@
             @if (auth()->user())
                 @if ($vehicle[0]->users_id != auth()->user()->id)
                     @if ($vehicle[0]->adstatus === 'Open to Bid')
-                    <form action="{{ route('place_bid', $vehicle[0]->idauction) }}" method="POST" enctype="multipart/form-data"
+                    <form action="{{ route('place_bid', $vehicle[0]->idvehicle) }}" method="POST" enctype="multipart/form-data"
                         class="row gy-1 gx-2 mt-75 mb-1" id="bidForm">
                         @csrf
                         <div class="col-8">
-                            <label class="form-label visually-hidden" for="modalAddCardNumber">Bid Amount</label>
+                            <label class="form-label visually-hidden" for="bid-amount">Bid Amount</label>
                             <div class="input-group input-group-merge">
-                                <input name="amount" class="form-control" type="number" placeholder="Enter Bid Amount" />
+                                <input name="amount" class="form-control" type="text" id="bid-amount" placeholder="Enter Bid Amount" />
                             </div>
                         </div>
                         <div class="col-4 text-center">
@@ -265,13 +265,13 @@
                     </form>
                     <h6 style="color: red">*Current Price: @currency($vehicle[0]->current_price)</h6>
                     @else
-                    <form action="{{ route('place_bid', $vehicle[0]->idauction) }}" method="POST" enctype="multipart/form-data"
+                    <form action="{{ route('place_bid', $vehicle[0]->idvehicle) }}" method="POST" enctype="multipart/form-data"
                         class="row gy-1 gx-2 mt-75 mb-1" id="bidForm" style="display: none;">
                         @csrf
                         <div class="col-8">
-                            <label class="form-label visually-hidden" for="modalAddCardNumber">Bid Amount</label>
+                            <label class="form-label visually-hidden" for="bid-amount">Bid Amount</label>
                             <div class="input-group input-group-merge">
-                                <input name="amount" class="form-control" type="number" placeholder="Enter Bid Amount" />
+                                <input name="amount" class="form-control" type="text" id="bid-amount" placeholder="Enter Bid Amount" />
                             </div>
                         </div>
                         <div class="col-4 text-center">
@@ -282,13 +282,13 @@
                     @endif
                 @endif
             @else
-            <form action="{{ route('place_bid', $vehicle[0]->idauction) }}" method="POST" enctype="multipart/form-data"
+            <form action="{{ route('place_bid', $vehicle[0]->idvehicle) }}" method="POST" enctype="multipart/form-data"
                 class="row gy-1 gx-2 mt-75 mb-1" id="bidForm">
                 @csrf
                 <div class="col-8">
-                    <label class="form-label visually-hidden" for="modalAddCardNumber">Bid Amount</label>
+                    <label class="form-label visually-hidden" for="bid-amount">Bid Amount</label>
                     <div class="input-group input-group-merge">
-                        <input name="amount" class="form-control" id="bid-amount" type="number" placeholder="Enter Bid Amount" />
+                        <input name="amount" class="form-control" id="bid-amount" type="text" placeholder="Enter Bid Amount" />
                     </div>
                 </div>
                 <div class="col-4 text-center">
@@ -560,26 +560,27 @@
 
         }, 1000);
     </script>
-    <script>
-        var idr = document.getElementById("bid-amount");
-        idr.addEventListener("keyup", function (e) {
-            idr.value = formatRupiah(this.value, "Rp. ");
-        });
 
-        function formatRupiah(angka, prefix) {
-            var number_string = angka.replace(/[^,\d]/g, "").toString(),
-                split = number_string.split(","),
-                sisa = split[0].length % 3,
-                rupiah = split[0].substr(0, sisa),
-                ribuan = split[0].substr(sisa).match(/\d{3}/gi);
+<script>
+    var idr = document.getElementById("bid-amount");
+    idr.addEventListener("keyup", function (e) {
+        idr.value = formatRupiah(this.value, "Rp. ");
+    });
 
-            if (ribuan) {
-                separator = sisa ? "." : "";
-                rupiah += separator + ribuan.join(".");
-            }
+    function formatRupiah(angka, prefix) {
+        var number_string = angka.replace(/[^,\d]/g, "").toString(),
+            split = number_string.split(","),
+            sisa = split[0].length % 3,
+            rupiah = split[0].substr(0, sisa),
+            ribuan = split[0].substr(sisa).match(/\d{3}/gi);
 
-            rupiah = split[1] != undefined ? rupiah + "," + split[1] : rupiah;
-            return prefix == undefined ? rupiah : rupiah ? "Rp. " + rupiah : "";
+        if (ribuan) {
+            separator = sisa ? "." : "";
+            rupiah += separator + ribuan.join(".");
         }
-    </script>
+
+        rupiah = split[1] != undefined ? rupiah + "," + split[1] : rupiah;
+        return prefix == undefined ? rupiah : rupiah ? "Rp. " + rupiah : "";
+    }
+</script>
 @endsection
