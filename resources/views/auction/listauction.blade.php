@@ -8,10 +8,11 @@
             <h3>Auction History</h3>
             <div class="d-flex flex-column flex-sm-row pt-1 mt-auto mb-1 py-auto">
                 <span style="font-size: 14px; font-weight: 900;">Status :</span>
-                <a href="#" class="btn btn-outline-secondary mx-1">All</a>
-                <a href="#" class="btn btn-outline-secondary me-1">Ongoing</a>
-                <a href="#" class="btn btn-outline-secondary me-1">Success</a>
-                <a href="#" class="btn btn-outline-secondary me-1">Failed</a>
+                <form action="{{ route('auction.list') }}" method="GET">
+                    <button name="btn-status" class="btn btn-outline-primary mx-1">All</button>
+                    <button name="btn-status" value="Open to Bid" class="btn btn-outline-success me-1">Open To bid</button>
+                    <button name="btn-status" value="Auction Ended" class="btn btn-outline-danger me-1">Auction Ended</button>
+                </form>
             </div>
         @if (!empty($list))
             @foreach ($list as $l)

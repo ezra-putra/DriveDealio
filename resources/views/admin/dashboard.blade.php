@@ -180,11 +180,19 @@
                                         @php
                                             $counter = 1
                                         @endphp
-                                        @foreach ($user as $u)
+                                        @foreach ($sparepartOrder as $s)
                                         <tr>
                                             <td>{{ $counter++ }}</td>
-                                            <td>{{ $u->firstname }} {{ $u->lastname }}</td>
-                                            <td></td>
+                                            <td>{{ $s->invoicenum }}</td>
+                                            <td>{{ $s->status }}</td>
+                                        </tr>
+                                        @endforeach
+
+                                        @foreach ($auctionOrder as $a)
+                                        <tr>
+                                            <td>{{ $counter++ }}</td>
+                                            <td>{{ $a->invoicenum }}</td>
+                                            <td>{{ $s->status }}</td>
                                         </tr>
                                         @endforeach
                                 </table>
@@ -195,7 +203,7 @@
                     <div class="col-lg-6 col-12">
                         <div class="card">
                             <div class="card-header d-flex justify-content-between pb-0">
-                                <h4 class="card-title">seller List</h4>
+                                <h4 class="card-title">Seller List</h4>
                                 <div class="justify-items-end">
                                     <a class="btn btn-flat-primary p-50" href="/admin/listseller">See All</a>
                                 </div>

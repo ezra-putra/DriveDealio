@@ -29,44 +29,57 @@ use Illuminate\Support\Facades\DB;
 
 class AuctionController extends Controller
 {
-    public function auctionlist()
+    public function auctionlist(Request $request)
     {
         $iduser = auth()->id();
-        $list = DB::select(
-            DB::raw("SELECT u.id as iduser, u.firstname, um.id as idusermember, m.id as idmembership, m.membershiptype, b.id as idbid, b.bidamount,
-            a.id as idauction, a.current_price, a.lot_number, v.id as idvehicle, v.model, v.adstatus, a.start_price, a.start_date, a.end_date, v.transmission, br.name as brand, v.colour, v.year, v.variant,
-            (SELECT COALESCE(i.url, 'placeholder_url') FROM drivedealio.images as i WHERE i.vehicles_id = v.id LIMIT 1) as url
-            FROM drivedealio.users as u INNER JOIN drivedealio.user_memberships as um on u.id = um.users_id
-            INNER JOIN drivedealio.member_orders as mo on um.id = mo.user_memberships_id
-            INNER JOIN drivedealio.memberships as m on m.id = mo.memberships_id
-            INNER JOIN drivedealio.bids as b on um.id = b.user_memberships_id
-            INNER JOIN drivedealio.auctions as a on a.id = b.auctions_id
-            INNER JOIN drivedealio.vehicles as v on a.vehicles_id = v.id
-            INNER JOIN drivedealio.brands as br on v.brands_id = br.id
-            where u.id = $iduser;")
-        );
+        $list = User::select('users.id as iduser', 'users.firstname', 'user_memberships.id as idusermember', 'memberships.id as idmembership', 'memberships.membershiptype', 'bids.id as idbid', 'bids.bidamount',
+            'auctions.id as idauction', 'auctions.current_price', 'auctions.lot_number', 'vehicles.id as idvehicle', 'vehicles.model', 'vehicles.adstatus', 'auctions.start_price', 'auctions.start_date', 'auctions.end_date', 'vehicles.transmission', 'brands.name as brand', 'vehicles.colour', 'vehicles.year', 'vehicles.variant',
+            DB::raw("(SELECT COALESCE(images.url, 'placeholder_url') FROM images WHERE images.vehicles_id = vehicles.id LIMIT 1) as url"))
+            ->join('user_memberships', 'users.id', '=', 'user_memberships.users_id')
+            ->join('member_orders', 'user_memberships.id', '=', 'member_orders.user_memberships_id')
+            ->join('memberships', 'memberships.id', '=', 'member_orders.memberships_id')
+            ->join('bids', 'user_memberships.id', '=', 'bids.user_memberships_id')
+            ->join('auctions', 'auctions.id', '=', 'bids.auctions_id')
+            ->join('vehicles', 'auctions.vehicles_id', '=', 'vehicles.id')
+            ->join('brands', 'vehicles.brands_id', '=', 'brands.id')
+            ->where('users.id', $iduser)
+            ->get();
+
+            $status = $request->query('btn-status');
+            if($status){
+                if($status === 'Open to Bid'){
+                    $list = $list->whereIn('adstatus', ['Open To Bid']);
+                }
+                else{
+                    $list = $list->where('adstatus', $status);
+                }
+
+            }
+
         if(!empty($list)){
-            $idvehicle = $list[0]->idvehicle;
-            $idauction = $list[0]->idauction;
-            $winner = DB::select(
-                DB::raw("SELECT id as idwinner, auctions_id FROM drivedealio.auctionwinners where users_id = $iduser AND is_winner = true;")
-            );
-            // dd($winner);
+            foreach($list as $l){
+                $idvehicle = $l->idvehicle;
+                $idauction = $l->idauction;
 
-            $order = DB::select(
-                DB::raw("SELECT * FROM drivedealio.auction_orders where vehicles_id = $idvehicle;")
-            );
 
-            $startDateTime = Carbon::parse($list[0]->start_date);
-            $endDateTime = Carbon::parse($list[0]->end_date);
-            $interval = $startDateTime->diff($endDateTime);
-            $list[0]->duration = $this->formatDuration($interval);
+                $winner = AuctionWinner::select('id as idwinner', 'auctions_id')
+                ->where('users_id', $iduser)
+                ->where('is_winner', true)
+                ->get();
+
+                $order = AuctionOrder::where('vehicles_id', $idvehicle)->get();
+
+
+                $startDateTime = Carbon::parse($l->start_date);
+                $endDateTime = Carbon::parse($l->end_date);
+                $interval = $startDateTime->diff($endDateTime);
+                $l->duration = $this->formatDuration($interval);
+
 
             return view('auction.listauction', compact('list', 'winner', 'order'));
+            }
         }
-
         return view('auction.listauction', compact('list'));
-
     }
 
     public function placeBid(Request $request, $id)
@@ -210,7 +223,6 @@ class AuctionController extends Controller
                 }
                 else
                 {
-
                     return redirect()->back()->with(['error' => 'You have reached the maximum number of bids allowed for your membership type in this category']);
                 }
             } else {

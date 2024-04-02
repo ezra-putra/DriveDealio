@@ -69,6 +69,28 @@ class AdminController extends Controller
         return view('admin.listseller', compact('seller'));
     }
 
+    public function listTransaction()
+    {
+        $sparepartOrder = DB::select(
+            DB::raw("SELECT o.id as idorder, u.id as iduser, o.invoicenum, o.orderdate, o.shops_id, o.users_id, o.status, o.paymentstatus, s.name, u.firstname, o.total_price
+            from drivedealio.orders as o INNER JOIN drivedealio.users as u on o.users_id = u.id
+            INNER JOIN drivedealio.shops as s on o.shops_id = s.id
+            order by o.orderdate desc;")
+        );
+
+        $auctionOrder = DB::select(
+            DB::raw("SELECT CONCAT(v.model, ' ', v.variant, ' ', v.colour, ', ', v.year) as vehiclename, a.lot_number, aw.id as idwinner, ao.orderdate, v.transmission,
+            ao.invoicenum, ao.total_price, u.firstname, u.lastname, u.email, u.phonenumber, ao.id as idorder, ao.paymentstatus, ao.status, v.id as idvehicle, b.name as brand
+            FROM drivedealio.vehicles as v INNER JOIN drivedealio.auctions as a on v.id = a.vehicles_id
+            INNER JOIN drivedealio.auctionwinners as aw on a.id = aw.auctions_id
+            INNER JOIN drivedealio.auction_orders as ao on aw.id = ao.auctionwinners_id
+            INNER JOIN drivedealio.users as u on aw.users_id = u.id
+            INNER JOIN drivedealio.brands as b on v.brands_id = b.id;")
+        );
+
+        return view('admin.listtransaction', compact('sparepartOrder', 'auctionOrder'));
+    }
+
     public function approveSeller($id)
     {
         $seller = Seller::findOrFail($id);
@@ -109,7 +131,25 @@ class AdminController extends Controller
             FROM drivedealio.shops as s INNER JOIN drivedealio.users as u
             ON s.users_id = u.id WHERE u.sellerstatus IS true")
         );
-        return view('/admin/dashboard' , compact('vehicle', 'user', 'seller'));
+
+        $sparepartOrder = DB::select(
+            DB::raw("SELECT o.id as idorder, u.id as iduser, o.invoicenum, o.orderdate, o.shops_id, o.users_id, o.status, o.paymentstatus, s.name, u.firstname, o.total_price
+            from drivedealio.orders as o INNER JOIN drivedealio.users as u on o.users_id = u.id
+            INNER JOIN drivedealio.shops as s on o.shops_id = s.id
+            order by o.orderdate asc LIMIT 3;")
+        );
+
+        $auctionOrder = DB::select(
+            DB::raw("SELECT CONCAT(v.model, ' ', v.variant, ' ', v.colour, ', ', v.year) as vehiclename, a.lot_number, aw.id as idwinner, ao.orderdate, v.transmission,
+            ao.invoicenum, ao.total_price, u.firstname, u.lastname, u.email, u.phonenumber, ao.id as idorder, ao.paymentstatus, ao.status, v.id as idvehicle, b.name as brand
+            FROM drivedealio.vehicles as v INNER JOIN drivedealio.auctions as a on v.id = a.vehicles_id
+            INNER JOIN drivedealio.auctionwinners as aw on a.id = aw.auctions_id
+            INNER JOIN drivedealio.auction_orders as ao on aw.id = ao.auctionwinners_id
+            INNER JOIN drivedealio.users as u on aw.users_id = u.id
+            INNER JOIN drivedealio.brands as b on v.brands_id = b.id
+            ORDER BY ao.orderdate asc LIMIT 2;")
+        );
+        return view('/admin/dashboard' , compact('vehicle', 'user', 'seller', 'sparepartOrder', 'auctionOrder'));
     }
 
     public function loanList()

@@ -128,7 +128,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/delivery-order/{id}', [TransactionController::class, 'onDelivery'])->name('delivery_post');
     Route::get('/payment-paid/{id}', [TransactionController::class, 'paymentPaid'])->name('payment_post');
     Route::get('/payment-cancel/{id}', [TransactionController::class, 'paymentCancel'])->name('payment_cancel');
-    Route::get('/orderhistory', [TransactionController::class, 'transactionList']);
+    Route::get('/orderhistory', [TransactionController::class, 'transactionList'])->name('transaction-list');
     Route::post('/order/order-details', [TransactionController::class, 'transactionDetails'])->name('transaction.details');
     Route::get('/review/{id}', [TransactionController::class, 'review']);
     Route::post('/add-review/{id}', [TransactionController::class, 'addReview'])->name('review.post');
@@ -144,7 +144,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/village', [UserController::class, 'village'])->name('village');
 
     Route::post('/auction/add-bid/{id}', [AuctionController::class, 'placeBid'])->name('place_bid');
-    Route::get('/auction', [AuctionController::class, 'auctionlist']);
+    Route::get('/auction', [AuctionController::class, 'auctionlist'])->name('auction.list');
     Route::get('/auctioncheckout/{id}', [AuctionController::class, 'auctionCheckout'])->name('auction.checkout');
     Route::post('/createauctionorder/{id}', [AuctionController::class, 'auctionOrders'])->name('auctionorder.post');
     Route::get('/paymentauction/{id}', [AuctionController::class, 'paymentIndex']);

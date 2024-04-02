@@ -281,12 +281,7 @@ class TransactionController extends Controller
         }
     }
 
-    public function filterTransaction(Request $request)
-    {
-        
-    }
-
-    public function transactionList()
+    public function transactionList(Request $request)
     {
         $iduser = auth()->id();
         $order = Order::select('orders.id as idorder', 'users.id as iduser', 'orders.invoicenum', 'orders.orderdate', 'orders.shops_id', 'orders.users_id', 'orders.status', 'orders.paymentstatus', 'shops.name', 'orders.total_price', 'shops.id as idshop')
@@ -314,6 +309,18 @@ class TransactionController extends Controller
                 ->orderBy('auction_orders.orderdate', 'desc')
                 ->get();
 
+        $status = $request->query('btn-status');
+        if($status)
+        {
+            if($status === 'Ongoing'){
+                $order = $order->whereIn('status', ['On Process', 'On Delivery', 'Arrived']);
+                $auctionorder = $auctionorder->whereIn('status', ['On Process', 'On Delivery', 'Arrived']);
+            }
+            else{
+                $order = $order->where('status', $status);
+                $auctionorder = $auctionorder->where('status', $status);
+            }
+        }
 
         return view('transaction.order', compact('order', 'auctionorder'));
     }

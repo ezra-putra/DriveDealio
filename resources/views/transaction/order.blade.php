@@ -19,10 +19,12 @@
         <div class="col-md-8">
             <div class="d-flex flex-column flex-sm-row pt-1 mt-auto mb-1 py-auto">
                 <span style="font-size: 14px; font-weight: 900;">Status :</span>
-                <a href="#" class="btn btn-outline-primary mx-1">All</a>
-                <a href="#" class="btn btn-outline-info me-1">Ongoing</a>
-                <a href="#" class="btn btn-outline-success me-1">Finished</a>
-                <a href="#" class="btn btn-outline-danger me-1">Cancelled</a>
+                <form action="{{ route('transaction-list') }}" method="GET">
+                    <button name="btn-status" id="filter-status" class="btn btn-outline-primary mx-1">All</button>
+                    <button name="btn-status" id="filter-status" value="Ongoing" class="btn btn-outline-info me-1">Ongoing</button>
+                    <button name="btn-status" id="filter-status" value="Finished" class="btn btn-outline-success me-1">Finished</button>
+                    <button name="btn-status" id="filter-status" value="Cancelled" class="btn btn-outline-danger me-1">Cancelled</button>
+                </form>
             </div>
             <div class="tab-content" id="v-pills-tabContent">
                 <div class="tab-pane fade show active" id="v-pills-sparepart" role="tabpanel" aria-labelledby="v-pills-sparepart-tab">
@@ -209,4 +211,6 @@
         });
     }
 </script>
+
+
 @endsection
