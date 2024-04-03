@@ -7,7 +7,7 @@
             <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
                 <div class="carousel-indicators">
                     @foreach($vehicle as $v => $vehi)
-                        <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="{{ $v }}" class="{{ $v == 0 ? 'active' : '' }}" aria-label="Slide {{ $v + 1 }}"></button>
+                        <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="{{ intval($v) }}" class="{{ $v == 0 ? 'active' : '' }}" aria-label="Slide {{ intval($v) + 1 }}"></button>
                     @endforeach
                 </div>
                 <div class="carousel-inner">

@@ -313,8 +313,8 @@ class TransactionController extends Controller
         if($status)
         {
             if($status === 'Ongoing'){
-                $order = $order->whereIn('status', ['On Process', 'On Delivery', 'Arrived']);
-                $auctionorder = $auctionorder->whereIn('status', ['On Process', 'On Delivery', 'Arrived']);
+                $order = $order->whereIn('status', ['On Process', 'On Delivery', 'Arrived', 'Waiting for Confirmation']);
+                $auctionorder = $auctionorder->whereIn('status', ['On Process', 'On Delivery', 'Arrived', 'Waiting for Confirmation']);
             }
             else{
                 $order = $order->where('status', $status);
@@ -562,6 +562,15 @@ class TransactionController extends Controller
         $order->save();
 
         return redirect('/orderhistory')->with('success', 'Review Submited and Transaction Finished!');
+    }
+
+    public function finishAuctionOrder($id)
+    {
+        $order = AuctionOrder::findOrFail($id);
+        $order->status = 'Finished';
+        $order->save();
+
+        return redirect()->back()->with('success', 'Order finish, see you on the next transaction!');
     }
 
     protected function formatDuration($interval)

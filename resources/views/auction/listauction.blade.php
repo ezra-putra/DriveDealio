@@ -57,7 +57,7 @@
                          </div>
                     </div>
                     <div class="d-flex justify-content-end me-1">
-                        <a href="{{ route('vehicle.show', $l->idvehicle) }}" class="btn btn-flat-success">
+                        <a href="{{ route('vehicle.show', $l->idvehicle) }}" class="btn btn-flat-success mx-1">
                             Vehicle Details
                         </a>
                         {{-- @if (empty($order)) --}}

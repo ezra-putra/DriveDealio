@@ -32,18 +32,22 @@ class AuctionController extends Controller
     public function auctionlist(Request $request)
     {
         $iduser = auth()->id();
-        $list = User::select('users.id as iduser', 'users.firstname', 'user_memberships.id as idusermember', 'memberships.id as idmembership', 'memberships.membershiptype', 'bids.id as idbid', 'bids.bidamount',
-            'auctions.id as idauction', 'auctions.current_price', 'auctions.lot_number', 'vehicles.id as idvehicle', 'vehicles.model', 'vehicles.adstatus', 'auctions.start_price', 'auctions.start_date', 'auctions.end_date', 'vehicles.transmission', 'brands.name as brand', 'vehicles.colour', 'vehicles.year', 'vehicles.variant',
-            DB::raw("(SELECT COALESCE(images.url, 'placeholder_url') FROM images WHERE images.vehicles_id = vehicles.id LIMIT 1) as url"))
-            ->join('user_memberships', 'users.id', '=', 'user_memberships.users_id')
-            ->join('member_orders', 'user_memberships.id', '=', 'member_orders.user_memberships_id')
-            ->join('memberships', 'memberships.id', '=', 'member_orders.memberships_id')
-            ->join('bids', 'user_memberships.id', '=', 'bids.user_memberships_id')
-            ->join('auctions', 'auctions.id', '=', 'bids.auctions_id')
-            ->join('vehicles', 'auctions.vehicles_id', '=', 'vehicles.id')
-            ->join('brands', 'vehicles.brands_id', '=', 'brands.id')
-            ->where('users.id', $iduser)
-            ->get();
+        $list = Bid::select(
+            'users.id as iduser', 'users.firstname', 'user_memberships.id as idusermember', 'memberships.id as idmembership',
+            'memberships.membershiptype', 'bids.id as idbid', 'bids.bidamount', 'auctions.id as idauction', 'auctions.current_price',
+            'auctions.lot_number', 'vehicles.id as idvehicle', 'vehicles.model', 'vehicles.adstatus', 'auctions.start_price',
+            'auctions.start_date', 'auctions.end_date', 'vehicles.transmission', 'brands.name as brand', 'vehicles.colour', 'vehicles.year', 'vehicles.variant',
+            DB::raw("(SELECT COALESCE(images.url, 'placeholder_url') FROM images WHERE images.vehicles_id = vehicles.id LIMIT 1) as url")
+        )
+        ->join('user_memberships', 'bids.user_memberships_id', '=', 'user_memberships.id')
+        ->join('member_orders', 'user_memberships.id', '=', 'member_orders.user_memberships_id')
+        ->join('memberships', 'memberships.id', '=', 'member_orders.memberships_id')
+        ->join('auctions', 'auctions.id', '=', 'bids.auctions_id')
+        ->join('vehicles', 'auctions.vehicles_id', '=', 'vehicles.id')
+        ->join('brands', 'vehicles.brands_id', '=', 'brands.id')
+        ->join('users', 'user_memberships.users_id', '=', 'users.id')
+        ->where('users.id', $iduser)
+        ->get();
 
             $status = $request->query('btn-status');
             if($status){
@@ -104,17 +108,13 @@ class AuctionController extends Controller
         ->select('a.start_price', 'a.current_price', 'a.id as idauction')
         ->where('v.id', $id)
         ->first();
-        // dd($auction);
 
         $startprice = $auction->start_price;
         $currentprice = $auction->current_price;
         $idauction = $auction->idauction;
-        // dd($startprice);
 
         $bidamount = preg_replace('/[^\d]/', '', $request->input('amount'));
         $amount = (int)$bidamount;
-
-        // dd($amount);
 
         if(!empty($userMember))
         {
@@ -144,7 +144,6 @@ class AuctionController extends Controller
                     }
                 }
             }
-
             if ($allowedBids > 0) {
 
                 $existingBidsCount = Bid::where('user_memberships_id', $userMember[0]->idusermember)
@@ -155,10 +154,11 @@ class AuctionController extends Controller
                     if ($amount >= $startprice && $currentprice == 0) {
                         $bidnew = new Bid;
                         $bidnew->bidamount = $amount;
-                        $bidnew->user_memberships_id = $userMember[0]->idusermember;
+                        $bidnew->user_memberships_id =  $userMember[0]->idusermember;
                         $bidnew->auctions_id = $idauction;
                         $bidnew->biddatetime = Carbon::now();
                         $bidnew->save();
+                        // dd($bidnew);
 
                         $auction = Auction::findOrFail($idauction);
                         $auction->current_price = $amount;
@@ -840,6 +840,4 @@ class AuctionController extends Controller
         }
         return trim($formattedDuration);
     }
-
-
 }

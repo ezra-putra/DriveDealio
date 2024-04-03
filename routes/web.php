@@ -132,6 +132,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/order/order-details', [TransactionController::class, 'transactionDetails'])->name('transaction.details');
     Route::get('/review/{id}', [TransactionController::class, 'review']);
     Route::post('/add-review/{id}', [TransactionController::class, 'addReview'])->name('review.post');
+    Route::get('/finish-order/{id}', [TransactionController::class, 'finishAuctionOrder'])->name('finish.order');
 
     Route::get('/seller/register', [UserController::class, 'toSellerRegister']);
     Route::post('become-seller', [UserController::class, 'becomeSeller'])->name('seller.register');

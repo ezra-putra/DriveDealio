@@ -6,6 +6,7 @@ use App\Models\Appointment;
 use App\Models\Vehicle;
 use App\Models\Auction;
 use App\Models\AuctionWinner;
+use App\Models\Bid;
 use App\Models\Brand;
 use App\Models\District;
 use App\Models\Inspection;
@@ -20,6 +21,7 @@ use App\Notifications\Vehicle as NotificationsVehicle;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Crypt;
 
 class VehicleController extends Controller
 {
@@ -145,29 +147,33 @@ class VehicleController extends Controller
             where v.id = $id;")
         );
 
-        $bid = DB::select(
-            DB::raw("SELECT u.id as iduser, um.id as idusermember, b.id as idbid, a.id as idauction, v.id as idvehicle,
-            CONCAT(u.firstname, ' ', u.lastname) as name, b.bidamount, b.biddatetime
-            FROM drivedealio.users as u INNER JOIN drivedealio.user_memberships as um on u.id = um.users_id
-            INNER JOIN drivedealio.bids as b on um.id = b.user_memberships_id
-            INNER JOIN drivedealio.auctions as a on b.auctions_id = a.id
-            INNER JOIN drivedealio.vehicles as v on a.vehicles_id = v.id
-            WHERE v.id = $id ORDER BY b.bidamount DESC LIMIT 5;")
-        );
+        // $bid = DB::select(
+        //     DB::raw("SELECT u.id as iduser, um.id as idusermember, b.id as idbid, a.id as idauction, v.id as idvehicle,
+        //     CONCAT(u.firstname, ' ', u.lastname) as name, b.bidamount, b.biddatetime
+        //     FROM drivedealio.users as u INNER JOIN drivedealio.user_memberships as um on u.id = um.users_id
+        //     INNER JOIN drivedealio.bids as b on um.id = b.user_memberships_id
+        //     INNER JOIN drivedealio.auctions as a on b.auctions_id = a.id
+        //     INNER JOIN drivedealio.vehicles as v on a.vehicles_id = v.id
+        //     WHERE v.id = $id ORDER BY b.bidamount DESC LIMIT 5;")
+        // );
 
         $iduser = auth()->id();
-
+        $bid = Bid::select('bids.*')
+        ->join('auctions', 'bids.auctions_id', '=', 'auctions.id')
+        ->where('auctions.vehicles_id', $id)
+        ->orderByDesc('bids.bidamount')
+        ->take(5)
+        ->get();
         if(!empty($iduser))
         {
-            $mybid = DB::select(
-                DB::raw("SELECT u.id as iduser, um.id as idusermember, b.id as idbid, a.id as idauction, v.id as idvehicle,
-                CONCAT(u.firstname, ' ', u.lastname) as name, b.bidamount, b.biddatetime
-                FROM drivedealio.users as u INNER JOIN drivedealio.user_memberships as um on u.id = um.users_id
-                INNER JOIN drivedealio.bids as b on um.id = b.user_memberships_id
-                INNER JOIN drivedealio.auctions as a on b.auctions_id = a.id
-                INNER JOIN drivedealio.vehicles as v on a.vehicles_id = v.id
-                WHERE v.id = $id AND um.users_id = $iduser ORDER BY b.bidamount DESC LIMIT 5;")
-            );
+            $mybid = Bid::select('bids.*')
+            ->join('auctions', 'bids.auctions_id', '=', 'auctions.id')
+            ->join('user_memberships', 'bids.user_memberships_id', '=', 'user_memberships.id')
+            ->where('auctions.vehicles_id', $id)
+            ->where('user_memberships.users_id', $iduser)
+            ->orderByDesc('bids.bidamount')
+            ->take(5)
+            ->get();
         }
         else
         {
@@ -229,6 +235,7 @@ class VehicleController extends Controller
             ->where('id', $id)
             ->update(['adstatus' => $auctionStatus]);
         }
+        // dd($decryptBidAmount);
         return view('vehicle.vehicledetails', compact('vehicle', 'bid', 'winner', 'inspection', 'mybid'));
     }
 

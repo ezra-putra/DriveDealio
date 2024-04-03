@@ -148,6 +148,11 @@
                                         @endif
                                     @endif
                                 @endif
+                                @if ($ao->status === 'Arrived')
+                                <a href="{{ route('finish.order', $ao->idorder) }}" class="btn btn-info">
+                                    Finish
+                                </a>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -211,6 +216,4 @@
         });
     }
 </script>
-
-
 @endsection
