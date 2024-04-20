@@ -16,11 +16,14 @@ class Kernel extends ConsoleKernel
 
     protected $commands = [
         Commands\LoanMonthlyPaymentCron::class,
+        Commands\AuctionSaleStatusCron::class,
+
     ];
 
     protected function schedule(Schedule $schedule)
     {
         $schedule->command('loan:cron')->monthlyOn(1);
+        // $schedule->command('auctionsale:cron')->everyMinute();
     }
 
     /**

@@ -184,7 +184,7 @@ class VehicleController extends Controller
             DB::raw("SELECT b.*, a.id as idauction, a.current_price, u.id as iduser from drivedealio.bids as b INNER JOIN drivedealio.auctions as a on b.auctions_id = a.id
             INNER JOIN drivedealio.user_memberships as um on b.user_memberships_id = um.id
             INNER JOIN drivedealio.users as u on um.users_id = u.id
-            WHERE a.vehicles_id = $id ORDER BY b.bidamount desc limit 1;")
+            WHERE a.vehicles_id = $id ORDER BY b.bidamount desc limit 3;")
         );
 
         $inspection = DB::select(
@@ -215,6 +215,7 @@ class VehicleController extends Controller
                         $auctionWinner->windate = $endDateTime;
                         $auctionWinner->auctions_id = $w->idauction;
                         $auctionWinner->users_id = $w->iduser;
+                        $auctionWinner->is_checkout = false;
 
                         $user = User::find($w->iduser);
                         $title = 'Auction Information';

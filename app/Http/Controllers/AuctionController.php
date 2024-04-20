@@ -15,6 +15,7 @@ use App\Models\Regency;
 use App\Models\Towing;
 use App\Models\TowingStatus;
 use App\Models\User;
+use App\Models\Vehicle;
 use App\Models\Village;
 use App\Notifications\Admin as NotificationsAdmin;
 use App\Notifications\Auction as NotificationsAuction;
@@ -59,28 +60,26 @@ class AuctionController extends Controller
                 }
 
             }
-
+            
         if(!empty($list)){
             foreach($list as $l){
                 $idvehicle = $l->idvehicle;
                 $idauction = $l->idauction;
-
-
-                $winner = AuctionWinner::select('id as idwinner', 'auctions_id')
-                ->where('users_id', $iduser)
-                ->where('is_winner', true)
-                ->get();
-
-                $order = AuctionOrder::where('vehicles_id', $idvehicle)->get();
-
 
                 $startDateTime = Carbon::parse($l->start_date);
                 $endDateTime = Carbon::parse($l->end_date);
                 $interval = $startDateTime->diff($endDateTime);
                 $l->duration = $this->formatDuration($interval);
 
+                $order = AuctionOrder::where('vehicles_id', $idvehicle)->get();
 
-            return view('auction.listauction', compact('list', 'winner', 'order'));
+                $winner = AuctionWinner::select('id as idwinner', 'auctions_id')
+                    ->where('users_id', $iduser)
+                    ->where('is_winner', true)
+                    ->get();
+                if(!empty($winner)){
+                    return view('auction.listauction', compact('list', 'winner', 'order'));
+                }
             }
         }
         return view('auction.listauction', compact('list'));
@@ -132,20 +131,19 @@ class AuctionController extends Controller
                     }
                 } elseif ($userMember[0]->membershiptype === 'Gold') {
                     if ($categories[0]->id === 2) {
-                        $allowedBids = 2;
+                        $allowedBids = 3;
                     } elseif ($categories[0]->id === 1) {
                         $allowedBids = 2;
                     }
                 } elseif ($userMember[0]->membershiptype === 'Platinum') {
                     if ($categories[0]->id === 2) {
                         $allowedBids = 4;
-                    } elseif ($categories[0]->id === 2) {
+                    } elseif ($categories[0]->id === 1) {
                         $allowedBids = 3;
                     }
                 }
             }
             if ($allowedBids > 0) {
-
                 $existingBidsCount = Bid::where('user_memberships_id', $userMember[0]->idusermember)
                     ->where('auctions_id', $idauction)
                     ->count();
@@ -225,7 +223,9 @@ class AuctionController extends Controller
                 {
                     return redirect()->back()->with(['error' => 'You have reached the maximum number of bids allowed for your membership type in this category']);
                 }
-            } else {
+            }
+            else
+            {
                 return redirect()->back()->with(['error' => 'Your membership type does not allow bidding in this category']);
             }
         }
@@ -381,6 +381,10 @@ class AuctionController extends Controller
             $title = 'Vehicle Transaction';
             $message = 'Order Has been Created for Invoice Number ' .$order->invoicenum. '!';
             $owner->notify(new VehicleOwner($title, $message));
+
+            $checkoutStatus = AuctionWinner::findOrFail($idwinner);
+            $checkoutStatus->is_checkout = true;
+            $checkoutStatus->save();
 
             return redirect()->back()->with('success', 'Order Create');
         }
