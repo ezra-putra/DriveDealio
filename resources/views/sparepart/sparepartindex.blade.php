@@ -75,29 +75,6 @@
                     </section>
                     <!-- E-commerce Products Ends -->
 
-                    <!-- E-commerce Pagination Starts -->
-                    <section id="ecommerce-pagination">
-                        <div class="row">
-                            <div class="col-sm-12">
-                                <nav aria-label="Page navigation example">
-                                    <ul class="pagination justify-content-center mt-2">
-                                        <li class="page-item prev-item"><a class="page-link" href="#"></a></li>
-                                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                                        <li class="page-item" aria-current="page"><a class="page-link"
-                                                href="#">4</a></li>
-                                        <li class="page-item"><a class="page-link" href="#">5</a></li>
-                                        <li class="page-item"><a class="page-link" href="#">6</a></li>
-                                        <li class="page-item"><a class="page-link" href="#">7</a></li>
-                                        <li class="page-item next-item"><a class="page-link" href="#"></a></li>
-                                    </ul>
-                                </nav>
-                            </div>
-                        </div>
-                    </section>
-                    <!-- E-commerce Pagination Ends -->
-
                 </div>
             </div>
             <div class="sidebar-detached sidebar-left">
@@ -118,8 +95,11 @@
                                         @foreach ($categories as $c)
                                         <li>
                                             <div class="form-check">
-                                                <input type="checkbox" class="form-check-input" id="productBrand-{{ $c->id }}" />
-                                                <label class="form-check-label" for="productBrand1">{{ $c->categoriname }}</label>
+                                                <input type="checkbox" class="form-check-input" id="cateSpare-{{ $c->id }}" name="categories" value="{{ $c->id }}" onchange="filterByCategories(this)"
+                                                @if (in_array($c->id, explode(',', $selectedCategories)))
+                                                    checked="checked"
+                                                @endif/>
+                                                <label class="form-check-label" for="cateSpare-{{ $c->id }}">{{ $c->categoriname }}</label>
                                             </div>
                                         </li>
                                         @endforeach
@@ -129,7 +109,7 @@
 
                                 <!-- Clear Filters Starts -->
                                 <div id="clear-filters">
-                                    <button type="button" class="btn w-100 btn-primary">Clear All Filters</button>
+                                    <input type="button" onclick="uncheckAll()" value="Clear All Filters" class="btn btn-primary w-100">
                                 </div>
                                 <!-- Clear Filters Ends -->
                             </div>
@@ -141,4 +121,35 @@
             </div>
         </div>
     </div>
+
+    <form id="filter" method="GET">
+        <input type="hidden" name="categories" id="cat" value="{{ $selectedCategories }}">
+    </form>
+
+    <script>
+        function filterByCategories(cat){
+            var categories = "";
+            $("input[name='categories']:checked").each(function(){
+                if(categories == ""){
+                    categories += this.value;
+                }
+                else{
+                    categories += "," + this.value;
+                }
+                $("#cat").val(categories);
+                $("#filter").submit();
+            });
+        }
+    </script>
+
+    <script>
+        function uncheckAll() {
+            let inputs = document.querySelectorAll('.form-check-input');
+            for(let i = 0; i < inputs.length; i++){
+                inputs[i].checked = false;
+            }
+            document.getElementById('cat').value = '';
+            document.getElementById('filter').submit();
+        }
+    </script>
 @endsection

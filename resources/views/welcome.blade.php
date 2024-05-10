@@ -10,15 +10,15 @@
             </ol>
             <div class="carousel-inner" role="listbox">
                 <div class="carousel-item active">
-                    <img class="img-fluid" src="../../../app-assets/images/slider/01.jpg" alt="First slide"
+                    <img class="img-fluid" src="{{ asset('images/vehicle/welcome/1.png') }}" alt="First slide"
                         style="object-fit: cover; width:100%; height:55vh" />
                 </div>
                 <div class="carousel-item">
-                    <img class="img-fluid" src="../../../app-assets/images/slider/03.jpg" alt="Second slide"
+                    <img class="img-fluid" src="{{ asset('images/vehicle/welcome/2.png') }}" alt="Second slide"
                         style="object-fit: cover; width:100%; height:55vh" />
                 </div>
                 <div class="carousel-item">
-                    <img class="img-fluid" src="../../../app-assets/images/slider/02.jpg" alt="Third slide"
+                    <img class="img-fluid" src="{{ asset('images/vehicle/welcome/3.png') }}" alt="Third slide"
                         style="object-fit: cover; width:100%; height:55vh" />
                 </div>
             </div>
@@ -43,157 +43,31 @@
     </div>
     <div class="swiper-responsive-breakpoints swiper-container px-4 py-2">
         <div class="swiper-wrapper">
-            {{-- @foreach ( as ) --}}
-            <div class="swiper-slide rounded swiper-shadow">
-                <div class="item-heading">
-                    <p class="text-truncate mb-0">
-                        Bowers Wilkins - CM10 S2 Triple 6-1/2" 3-Way Floorstanding Speaker (Each) - Gloss Black
-                    </p>
-                    <p>
-                        <small>by</small>
-                        <small>Bowers & Wilkins</small>
-                    </p>
-                </div>
-                <div class="img-container w-50 mx-auto my-2 py-75">
-                    <img src="../../../app-assets/images/elements/apple-watch.png" class="img-fluid" alt="image">
-                </div>
-                <div class="item-meta">
-                    <div class="product-rating">
-                        <i class="feather icon-star text-warning"></i>
-                        <i class="feather icon-star text-warning"></i>
-                        <i class="feather icon-star text-warning"></i>
-                        <i class="feather icon-star text-warning"></i>
-                        <i class="feather icon-star text-secondary"></i>
+            @if(!empty($vehicle))
+                @foreach ($vehicle as $v)
+                    <div class="swiper-slide rounded swiper-shadow">
+                        <div class="item-heading">
+                            <p class="text-truncate mb-0">
+                                {{ $v->brand }} - {{ $v->model }} {{ $v->variant }} {{ $v->transmission }}
+                            </p>
+                            <p>
+                                <small id="countdown_{{ $v->idauction }}">{{ $v->duration }}</small>
+                            </p>
+                        </div>
+                        <div class="img-container w-50 mx-auto my-2 py-75">
+                            <img src="{{ asset('/images/vehicle/'.$v->idvehicle.'/'.$v->url) }}" style="height: 750px; width: 400px;" class="img-fluid" alt="image">
+                        </div>
+                        <div class="item-meta">
+                            <p class="mb-1" style="font-weight: 700">Start price: @currency($v->price)</p>
+                            <a href="{{ route('vehicle.show', $v->idvehicle) }}" class="btn btn-info w-100">Details</a>
+                        </div>
                     </div>
-                    <p class="text-primary mb-0">$19.98</p>
+                @endforeach
+            @else
+                <div class="swiper-slide rounded swiper-shadow">
+                    <p class="text-center">There is No Auction at this Moment!</p>
                 </div>
-            </div>
-            {{-- @endforeach --}}
-
-            <div class="swiper-slide rounded swiper-shadow">
-                <div class="item-heading">
-                    <p class="text-truncate mb-0">
-                        Alienware - 17.3" Laptop - Intel Core i7 - 16GB Memory - NVIDIA GeForce GTX 1070 - 1TB Hard
-                        Drive +
-                        128GB Solid State Drive - Silver
-                    </p>
-                    <p>
-                        <small>by</small>
-                        <small>Alienware</small>
-                    </p>
-                </div>
-                <div class="img-container w-50 mx-auto my-2 py-75">
-                    <img src="../../../app-assets/images/elements/beats-headphones.png" class="img-fluid"
-                        alt="image">
-                </div>
-                <div class="item-meta">
-                    <div class="product-rating">
-                        <i class="feather icon-star text-warning"></i>
-                        <i class="feather icon-star text-warning"></i>
-                        <i class="feather icon-star text-warning"></i>
-                        <i class="feather icon-star text-warning"></i>
-                        <i class="feather icon-star text-secondary"></i>
-                    </div>
-                    <p class="text-primary mb-0">$35.98</p>
-                </div>
-            </div>
-            <div class="swiper-slide rounded swiper-shadow">
-                <div class="item-heading">
-                    <p class="text-truncate mb-0">
-                        Canon - EOS 5D Mark IV DSLR Camera with 24-70mm f/4L IS USM Lens
-                    </p>
-                    <p>
-                        <small>by</small>
-                        <small>Canon</small>
-                    </p>
-                </div>
-                <div class="img-container w-50 mx-auto my-3 py-50">
-                    <img src="../../../app-assets/images/elements/macbook-pro.png" class="img-fluid" alt="image">
-                </div>
-                <div class="item-meta">
-                    <div class="product-rating">
-                        <i class="feather icon-star text-warning"></i>
-                        <i class="feather icon-star text-warning"></i>
-                        <i class="feather icon-star text-warning"></i>
-                        <i class="feather icon-star text-warning"></i>
-                        <i class="feather icon-star text-secondary"></i>
-                    </div>
-                    <p class="text-primary mb-0">$49.98</p>
-                </div>
-            </div>
-            <div class="swiper-slide rounded swiper-shadow">
-                <div class="item-heading">
-                    <p class="text-truncate mb-0">
-                        Apple - 27" iMac with Retina 5K display - Intel Core i7 - 32GB Memory - 2TB Fusion Drive -
-                        Silver
-                    </p>
-                    <p>
-                        <small>by</small>
-                        <small>Apple</small>
-                    </p>
-                </div>
-                <div class="img-container w-50 mx-auto my-2 py-75">
-                    <img src="../../../app-assets/images/elements/homepod.png" class="img-fluid" alt="image">
-                </div>
-                <div class="item-meta">
-                    <div class="product-rating">
-                        <i class="feather icon-star text-warning"></i>
-                        <i class="feather icon-star text-warning"></i>
-                        <i class="feather icon-star text-warning"></i>
-                        <i class="feather icon-star text-warning"></i>
-                        <i class="feather icon-star text-secondary"></i>
-                    </div>
-                    <p class="text-primary mb-0">$29.98</p>
-                </div>
-            </div>
-            <div class="swiper-slide rounded swiper-shadow">
-                <div class="item-heading">
-                    <p class="text-truncate mb-0">
-                        Bowers Wilkins - CM10 S2 Triple 6-1/2" 3-Way Floorstanding Speaker (Each) - Gloss Black
-                    </p>
-                    <p>
-                        <small>by</small>
-                        <small>Bowers & Wilkins</small>
-                    </p>
-                </div>
-                <div class="img-container w-50 mx-auto my-2 py-75">
-                    <img src="../../../app-assets/images/elements/magic-mouse.png" class="img-fluid" alt="image">
-                </div>
-                <div class="item-meta">
-                    <div class="product-rating">
-                        <i class="feather icon-star text-warning"></i>
-                        <i class="feather icon-star text-warning"></i>
-                        <i class="feather icon-star text-warning"></i>
-                        <i class="feather icon-star text-warning"></i>
-                        <i class="feather icon-star text-secondary"></i>
-                    </div>
-                    <p class="text-primary mb-0">$99.98</p>
-                </div>
-            </div>
-            <div class="swiper-slide rounded swiper-shadow">
-                <div class="item-heading">
-                    <p class="text-truncate mb-0">
-                        Garmin - fenix 3 Sapphire GPS Watch - Silver
-                    </p>
-                    <p>
-                        <small>by</small>
-                        <small>Garmin</small>
-                    </p>
-                </div>
-                <div class="img-container w-50 mx-auto my-2 py-75">
-                    <img src="../../../app-assets/images/elements/iphone-x.png" class="img-fluid" alt="image">
-                </div>
-                <div class="item-meta">
-                    <div class="product-rating">
-                        <i class="feather icon-star text-warning"></i>
-                        <i class="feather icon-star text-warning"></i>
-                        <i class="feather icon-star text-warning"></i>
-                        <i class="feather icon-star text-warning"></i>
-                        <i class="feather icon-star text-secondary"></i>
-                    </div>
-                    <p class="text-primary mb-0">$59.98</p>
-                </div>
-            </div>
+            @endif
         </div>
         <div class="swiper-button-next"></div>
         <div class="swiper-button-prev"></div>
@@ -206,26 +80,29 @@
     </div>
     <div class="swiper-responsive-breakpoints swiper-container px-4 py-2">
         <div class="swiper-wrapper">
-            @foreach ($sparepart as $s)
-            <div class="swiper-slide rounded swiper-shadow">
-                <div class="item-heading">
-                    <p class="text-truncate mb-0">
-                        {{ $s->partnumber }} - {{ $s->partname }} {{ $s->vehiclemodel }}
-                    </p>
-                    <p>
-                        <small>{{ $s->name }}</small>, <small>{{ $s->city }}</small>
-                    </p>
+            @if (!empty($sparepart))
+                @foreach ($sparepart as $s)
+                <div class="swiper-slide rounded swiper-shadow">
+                    <div class="item-heading">
+                        <p class="text-truncate mb-0">
+                            {{ $s->partnumber }} - {{ $s->partname }} {{ $s->vehiclemodel }}
+                        </p>
+                        <p>
+                            <small>{{ $s->name }}</small>, <small>{{ $s->city }}</small>
+                        </p>
+                    </div>
+                    <div class="img-container w-50 mx-auto my-2 py-75">
+                        <img src="{{ asset('images/sparepart/'.$s->idsparepart.'/' .$s->url) }}" class="img-fluid" alt="image">
+                    </div>
+                    <div class="item-meta">
+                        <p class="mb-1" style="font-weight: 700">@currency($s->unitprice)</p>
+                        <a href="{{ route('sparepart.show', $s->idsparepart) }}" class="btn btn-info w-100">Details</a>
+                    </div>
                 </div>
-                <div class="img-container w-50 mx-auto my-2 py-75">
-                    <img src="{{ asset('images/sparepart/'.$s->idsparepart.'/' .$s->url) }}" class="img-fluid" alt="image">
-                </div>
-                <div class="item-meta">
-
-                    <p class="mb-1" style="font-weight: 700">@currency($s->unitprice)</p>
-                    <a href="{{ route('sparepart.show', $s->idsparepart) }}" class="btn btn-info w-100">Details</a>
-                </div>
-            </div>
-            @endforeach
+                @endforeach
+            @else
+                <p class="text-center">There is No Sparepart Available Right Now!</p>
+            @endif
         </div>
         <div class="swiper-button-next"></div>
         <div class="swiper-button-prev"></div>
@@ -251,13 +128,11 @@
                         <div class="col-12 col-md-6">
                             <div class="card basic-pricing text-center">
                                 <div class="card-body">
-                                    <img src="../../../app-assets/images/illustration/Pot1.svg" class="mb-2 mt-5" alt="svg img" />
                                     <h3>{{ $m->membershiptype }}</h3>
                                     <p class="card-text">{{ $m->description }}</p>
                                     <div class="annual-plan">
                                         <div class="plan-price mt-2">
                                             <span class="pricing-basic-value fw-bolder text-primary">@currency($m->price)</span>
-                                            <sub class="pricing-duration text-body font-medium-1 fw-bold">/month</sub>
                                         </div>
                                         <small class="annual-pricing d-none text-muted"></small>
                                     </div>
@@ -277,4 +152,29 @@
         </section>
     </div>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        @foreach($vehicle as $item)
+            var startDate_{{ $item->idauction }} = new Date("{{ $item->start_date }}").getTime();
+            var endDate_{{ $item->idauction }} = new Date("{{ $item->end_date }}").getTime();
+        @endforeach
+
+        var x = setInterval(function() {
+            @foreach($vehicle as $item)
+                var now_{{ $item->idauction }} = new Date().getTime();
+                var distance_{{ $item->idauction }} = endDate_{{ $item->idauction }} - now_{{ $item->idauction }};
+                var days_{{ $item->idauction }} = Math.floor(distance_{{ $item->idauction }} / (1000 * 60 * 60 * 24));
+                var hours_{{ $item->idauction }} = Math.floor((distance_{{ $item->idauction }} % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                var minutes_{{ $item->idauction }} = Math.floor((distance_{{ $item->idauction }} % (1000 * 60 * 60)) / (1000 * 60));
+                var seconds_{{ $item->idauction }} = Math.floor((distance_{{ $item->idauction }} % (1000 * 60)) / 1000);
+                document.getElementById("countdown_{{ $item->idauction }}").innerHTML = "Time Remaining: "+ days_{{ $item->idauction }} + "d " + hours_{{ $item->idauction }} + "h "
+                + minutes_{{ $item->idauction }} + "m " + seconds_{{ $item->idauction }} + "s ";
+                if (distance_{{ $item->idauction }} < 0) {
+                    clearInterval(x);
+                    document.getElementById("countdown_{{ $item->idauction }}").innerHTML = "Auction Ended";
+                }
+            @endforeach
+        }, 1000);
+    </script>
 @endsection

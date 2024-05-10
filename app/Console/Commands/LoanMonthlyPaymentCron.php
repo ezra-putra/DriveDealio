@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\AuctionOrder;
 use App\Models\Loan;
 use App\Models\LoanPayment;
 use App\Models\User;
@@ -47,38 +48,42 @@ class LoanMonthlyPaymentCron extends Command
             $monthlypayment = $loan->monthlypayment;
             $loantenor = $loan->loantenor * 12;
 
-            // Fetch existing payments for the loan
-            $existingPayments = LoanPayment::where('loans_id', $idloan)
-                ->max('paymentcount');
+            // Check if the vehicle associated with the loan has been delivered to the buyer
+            $auctionOrder = AuctionOrder::where('loans_id', $idloan)->first();
 
-            // If there are no existing payments, set the counter to 1, otherwise increment it
-            $counter = ($existingPayments !== null) ? $existingPayments + 1 : 1;
+            if ($auctionOrder && $auctionOrder->status === 'Finished') {
+                // Fetch existing payments for the loan
+                $existingPayments = LoanPayment::where('loans_id', $idloan)
+                    ->max('paymentcount');
 
-            if ($counter > $loantenor) {
-                $this->info("Loan payment for loan ID $idloan completed.");
-                $loan->update(['status' => 'Finished']);
-                continue; // Move to next loan
+                // If there are no existing payments, set the counter to 1, otherwise increment it
+                $counter = ($existingPayments !== null) ? $existingPayments + 1 : 1;
+
+                if ($counter > $loantenor) {
+                    $this->info("Loan payment for loan ID $idloan completed.");
+                    $loan->update(['status' => 'Finished']);
+                    continue; // Move to next loan
+                }
+                // Create loan payment record
+                $loanPayment = new LoanPayment;
+                $loanPayment->invoicenum = "INV/MP/" . now()->format('Y/m/d') . "/$idloan/$counter";
+                $loanPayment->loans_id = $idloan;
+                $loanPayment->total_bill = $monthlypayment;
+                $loanPayment->type = "Monthly Payment";
+                $loanPayment->status = "Unpaid";
+                $loanPayment->paymentcount = $counter;
+                $loanPayment->save();
+
+                $user = User::find($iduser);
+                $title = 'Bill Payment';
+                $message = 'Installment Bill is Payable now, Pay Now!';
+                $user->notify(new MonthlyPayment($title, $message));
+
+                $this->info("Loan payment recorded successfully for loan ID $idloan.");
+            } else {
+                $this->info("Loan payment for loan ID $idloan not recorded as the vehicle has not been delivered to the buyer yet.");
             }
-            // Create loan payment record
-            $loanPayment = new LoanPayment;
-            $loanPayment->invoicenum = "INV/MP/" . now()->format('Y/m/d') . "/$idloan/$counter";
-            $loanPayment->loans_id = $idloan;
-            $loanPayment->total_bill = $monthlypayment;
-            $loanPayment->type = "Monthly Payment";
-            $loanPayment->status = "Unpaid";
-            $loanPayment->paymentcount = $counter;
-            $loanPayment->save();
-
-            $user = User::find($iduser);
-            $title = 'Bill Payment';
-            $message = 'Installment Bill is Payable now, Pay Now!';
-            $user->notify(new MonthlyPayment($title, $message));
-
-            $this->info("Loan payment recorded successfully for loan ID $idloan.");
         }
-
         return 0; // Return success code
     }
-
-
 }

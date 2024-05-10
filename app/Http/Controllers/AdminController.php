@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Admin;
+use App\Models\AuctionOrder;
 use App\Models\Loan;
 use App\Models\Seller;
 use App\Models\User;
@@ -44,9 +45,15 @@ class AdminController extends Controller
             WHERE r.name = 'Courier' order by u.id asc;")
         );
 
+        $role = DB::select(
+            DB::raw("SELECT * from drivedealio.roles;")
+        );
+
         // dd($user);
-        return view('admin.listuser', compact('user', 'useradmin', 'userinspector', 'userbuyer', 'courier'));
+        return view('admin.listuser', compact('user', 'useradmin', 'userinspector', 'userbuyer', 'courier', 'role'));
     }
+
+
 
     public function editRoleUser(Request $request, $id)
     {
@@ -169,13 +176,22 @@ class AdminController extends Controller
         $loan->verificationdate = Carbon::now();
         $loan->save();
 
+        $auctionOrder = AuctionOrder::join('loans', 'auction_orders.id', '=', 'loans.auction_orders_id')
+        ->where('loans.id', $id)
+        ->select('auction_orders.*')
+        ->first();
+        // dd($auctionOrder);
+        $auctionOrder->status = "Waiting for Confirmation";
+        // dd($auctionOrder);
+        $auctionOrder->save();
+
         $loanInfo = DB::select(
             DB::raw("SELECT users_id from drivedealio.loans where id = $id;")
         );
 
         $iduser = $loanInfo[0]->users_id;
         $user = User::find($iduser);
-        $title = 'Loan Request';
+        $title = 'Loan Approved';
         $message = 'Loan Approved, Please Continue Your Transaction!';
         $user->notify(new NotificationsLoan($title, $message));
 

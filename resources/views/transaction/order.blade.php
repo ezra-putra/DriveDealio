@@ -128,7 +128,7 @@
                                 </div>
                             </div>
                             <div class="d-flex justify-content-end me-1">
-                                <a href="{{ route('vehicle.show', $ao->idvehicle) }}" class="btn btn-flat-success me-1">
+                                <a href="{{ route('vehicle.show', $ao->idvehicle) }}" class="btn btn-flat-success">
                                     Vehicle Details
                                 </a>
                                 <a data-bs-toggle="modal" href="#modalAuctionDetails" onclick="getAuctionDetails({{ $ao->idorder }})" class="btn btn-flat-success mx-1">

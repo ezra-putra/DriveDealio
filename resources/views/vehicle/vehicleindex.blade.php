@@ -56,29 +56,6 @@
                     </section>
                     <!-- E-commerce Products Ends -->
 
-                    <!-- E-commerce Pagination Starts -->
-                    <section id="ecommerce-pagination">
-                        <div class="row">
-                            <div class="col-sm-12">
-                                <nav aria-label="Page navigation example">
-                                    <ul class="pagination justify-content-center mt-2">
-                                        <li class="page-item prev-item"><a class="page-link" href="#"></a></li>
-                                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                                        <li class="page-item" aria-current="page"><a class="page-link"
-                                                href="#">4</a></li>
-                                        <li class="page-item"><a class="page-link" href="#">5</a></li>
-                                        <li class="page-item"><a class="page-link" href="#">6</a></li>
-                                        <li class="page-item"><a class="page-link" href="#">7</a></li>
-                                        <li class="page-item next-item"><a class="page-link" href="#"></a></li>
-                                    </ul>
-                                </nav>
-                            </div>
-                        </div>
-                    </section>
-                    <!-- E-commerce Pagination Ends -->
-
                 </div>
             </div>
             <div class="sidebar-detached sidebar-left">
@@ -99,9 +76,12 @@
                                         @foreach ($type as $t)
                                         <li>
                                             <div class="form-check">
-                                                <input type="radio" id="category-{{ $t->id }}" name="category-filter"
-                                                    class="form-check-input" checked />
-                                                <label class="form-check-label" for="category1">{{ $t->name }}</label>
+                                                <input type="checkbox" id="type-{{ $t->id }}" name="type" value="{{ $t->id }}"
+                                                    class="form-check-input" onchange="filterByType(this)"
+                                                    @if (in_array($t->id, explode(',', $selectedType)))
+                                                        checked="checked"
+                                                    @endif/>
+                                                <label class="form-check-label" for="type-{{ $t->id }}">{{ $t->name }}</label>
                                             </div>
                                         </li>
                                         @endforeach
@@ -117,8 +97,11 @@
                                         @foreach ($brand as $b)
                                         <li>
                                             <div class="form-check">
-                                                <input type="checkbox" class="form-check-input" id="brand-{{ $b->id }}" />
-                                                <label class="form-check-label" for="productBrand1">{{ $b->name }}</label>
+                                                <input type="checkbox" class="form-check-input" id="brand-{{ $b->id }}" name="brand" onchange="filterByBrand(this)"
+                                                @if (in_array($t->id, explode(',', $selectedBrand)))
+                                                    checked="checked"
+                                                @endif/>
+                                                <label class="form-check-label" for="brand-{{ $b->id }}">{{ $b->name }}</label>
                                             </div>
                                         </li>
                                         @endforeach
@@ -128,7 +111,7 @@
 
                                 <!-- Clear Filters Starts -->
                                 <div id="clear-filters">
-                                    <button type="button" class="btn w-100 btn-primary">Clear All Filters</button>
+                                    <input type="reset" value="Clear All Filters" class="btn btn-primary w-100">
                                 </div>
                                 <!-- Clear Filters Ends -->
                             </div>
@@ -140,30 +123,62 @@
             </div>
         </div>
     </div>
+    <form id="filter" method="GET">
+        <input type="hidden" name="type" id="t" value="{{ $selectedType }}">
+        <input type="hidden" name="brand" id="b" value="{{ $selectedBrand }}">
+    </form>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script>
-    @foreach($vehicle as $item)
-        var startDate_{{ $item->idauction }} = new Date("{{ $item->start_date }}").getTime();
-        var endDate_{{ $item->idauction }} = new Date("{{ $item->end_date }}").getTime();
-    @endforeach
+    <script>
+        function filterByType(t){
+            var type = "";
+            $("input[name='type']:checked").each(function(){
+                if(type == ""){
+                    type += this.value;
+                }
+                else{
+                    type += "," + this.value;
+                }
+                $("#t").val(type);
+                $("#filter").submit();
+            });
+        }
+        function filterByBrand(b){
+            var brand = "";
+            $("input[name='brand']:checked").each(function(){
+                if(brand == ""){
+                    brand += this.value;
+                }
+                else{
+                    brand += "," + this.value;
+                }
+                $("#b").val(brand);
+                $("#filter").submit();
+            });
+        }
+    </script>
 
-    var x = setInterval(function() {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
         @foreach($vehicle as $item)
-            var now_{{ $item->idauction }} = new Date().getTime();
-            var distance_{{ $item->idauction }} = endDate_{{ $item->idauction }} - now_{{ $item->idauction }};
-            var days_{{ $item->idauction }} = Math.floor(distance_{{ $item->idauction }} / (1000 * 60 * 60 * 24));
-            var hours_{{ $item->idauction }} = Math.floor((distance_{{ $item->idauction }} % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            var minutes_{{ $item->idauction }} = Math.floor((distance_{{ $item->idauction }} % (1000 * 60 * 60)) / (1000 * 60));
-            var seconds_{{ $item->idauction }} = Math.floor((distance_{{ $item->idauction }} % (1000 * 60)) / 1000);
-            document.getElementById("countdown_{{ $item->idauction }}").innerHTML = "Time Remaining: "+ days_{{ $item->idauction }} + "d " + hours_{{ $item->idauction }} + "h "
-            + minutes_{{ $item->idauction }} + "m " + seconds_{{ $item->idauction }} + "s ";
-            if (distance_{{ $item->idauction }} < 0) {
-                clearInterval(x);
-                document.getElementById("countdown_{{ $item->idauction }}").innerHTML = "Auction Ended";
-            }
+            var startDate_{{ $item->idauction }} = new Date("{{ $item->start_date }}").getTime();
+            var endDate_{{ $item->idauction }} = new Date("{{ $item->end_date }}").getTime();
         @endforeach
-    }, 1000);
 
-</script>
+        var x = setInterval(function() {
+            @foreach($vehicle as $item)
+                var now_{{ $item->idauction }} = new Date().getTime();
+                var distance_{{ $item->idauction }} = endDate_{{ $item->idauction }} - now_{{ $item->idauction }};
+                var days_{{ $item->idauction }} = Math.floor(distance_{{ $item->idauction }} / (1000 * 60 * 60 * 24));
+                var hours_{{ $item->idauction }} = Math.floor((distance_{{ $item->idauction }} % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                var minutes_{{ $item->idauction }} = Math.floor((distance_{{ $item->idauction }} % (1000 * 60 * 60)) / (1000 * 60));
+                var seconds_{{ $item->idauction }} = Math.floor((distance_{{ $item->idauction }} % (1000 * 60)) / 1000);
+                document.getElementById("countdown_{{ $item->idauction }}").innerHTML = "Time Remaining: "+ days_{{ $item->idauction }} + "d " + hours_{{ $item->idauction }} + "h "
+                + minutes_{{ $item->idauction }} + "m " + seconds_{{ $item->idauction }} + "s ";
+                if (distance_{{ $item->idauction }} < 0) {
+                    clearInterval(x);
+                    document.getElementById("countdown_{{ $item->idauction }}").innerHTML = "Auction Ended";
+                }
+            @endforeach
+        }, 1000);
+    </script>
 @endsection

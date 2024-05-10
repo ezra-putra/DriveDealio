@@ -67,9 +67,10 @@ class SellerController extends Controller
             DB::raw("SELECT o.id as idorder, u.id as iduser, o.invoicenum, o.orderdate, o.shops_id, o.users_id, o.status, o.paymentstatus, s.name, u.firstname, o.total_price
             from drivedealio.orders as o INNER JOIN drivedealio.users as u on o.users_id = u.id
             INNER JOIN drivedealio.shops as s on o.shops_id = s.id
-            WHERE o.shops_id = (select s.id as idshop from drivedealio.shops as s
-            INNER JOIN drivedealio.users as u on s.users_id = u.id where s.users_id = $iduser) order by o.orderdate desc;")
+            WHERE s.users_id = $iduser order by o.orderdate desc;")
         );
+
+        // dd($orderlist);
 
 
         return view('/seller/orderlist', compact('orderlist'));

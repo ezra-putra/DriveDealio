@@ -25,7 +25,7 @@ class InspectorController extends Controller
             FROM drivedealio.vehicles as v INNER JOIN drivedealio.brands as b on v.brands_id = b.id
             INNER JOIN drivedealio.users as u on v.users_id = u.id
             LEFT JOIN drivedealio.appointments as a on v.appointments_id = a.id
-            where v.adstatus IN ('Inspection', 'Grading', 'Graded') order by v.inputdate asc;")
+            where v.adstatus IN ('Waiting for Approval', 'Inspection', 'Grading', 'Graded') order by v.inputdate asc;")
         );
         if ($appointment[0]->status == 'Available')
         {

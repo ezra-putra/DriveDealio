@@ -63,9 +63,11 @@
                         {{-- @if (empty($order)) --}}
                         @foreach ($winner as $w)
                             @if ($w->auctions_id === $l->idauction)
-                            <a href="{{ route('auction.checkout', $l->idvehicle) }}" class="btn btn-info">
-                                Checkout
-                            </a>
+                                @if ($w->is_checkout === false)
+                                <a href="{{ route('auction.checkout', $l->idvehicle) }}" class="btn btn-info">
+                                    Checkout
+                                </a>
+                                @endif
                             @endif
                         @endforeach
                         {{-- @endif --}}

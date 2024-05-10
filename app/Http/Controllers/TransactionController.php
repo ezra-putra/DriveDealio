@@ -130,7 +130,7 @@ class TransactionController extends Controller
             (SELECT p.url FROM drivedealio.pics as p WHERE p.spareparts_id = sp.id LIMIT 1) as url
             FROM drivedealio.spareparts as sp INNER JOIN drivedealio.carts as c on sp.id = c.spareparts_id
             INNER JOIN drivedealio.users as u on c.users_id = u.id
-            INNER JOIN drivedealio.shops as s on sp.shops_id = s.id WHERE u.id =  $iduser ;")
+            INNER JOIN drivedealio.shops as s on sp.shops_id = s.id WHERE u.id =  $iduser;")
         );
 
         $address = DB::select(
@@ -197,7 +197,7 @@ class TransactionController extends Controller
         $iduser = auth()->id();
         $checkout = DB::select(
             DB::raw("SELECT sp.id as idsparepart, sp.partnumber, sp.partname, sp.vehiclemodel, sp.stock, sp.unitprice, c.id as idcart, c.quantity, (sp.stock - c.quantity) as temp_stock, (sp.unitprice * c.quantity) as total_price, c.spareparts_id, c.users_id,
-            u.id as iduser, u.firstname, s.id as idseller, s.name as sellername, s.city as sellercity, s.district, s.province
+            u.id as iduser, u.firstname, s.id as idseller, s.name as sellername, s.city as sellercity, s.district, s.province, s.users_id as owner
             FROM drivedealio.spareparts as sp INNER JOIN drivedealio.carts as c on sp.id = c.spareparts_id
             INNER JOIN drivedealio.users as u on c.users_id = u.id
             INNER JOIN drivedealio.shops as s on sp.shops_id = s.id WHERE u.id = $iduser; ")
@@ -214,10 +214,12 @@ class TransactionController extends Controller
             DB::raw("SELECT u.id as iduser, a.id as idaddress, a.name, a.address, a.district, a.city, a.zipcode, a.province, a.village
             from drivedealio.users as u INNER JOIN drivedealio.addresses as a on u.id = a.users_id where u.id = $iduser AND a.is_primaryadd = true;")
         );
+        $sellerId = $checkout[0]->owner;
+        //dd($sellerId);
         $shopaddress = DB::select(
-            DB::raw("SELECT s.city as sellercity, s.district, s.province
+            DB::raw("SELECT s.city as sellercity, s.district, s.province, s.id as idseller, s.users_id
             FROM drivedealio.shops as s INNER JOIN drivedealio.spareparts as sp on s.id = sp.shops_id
-            WHERE s.id = sp.shops_id;")
+            WHERE s.users_id = $sellerId;")
         );
 
         if(!empty($address))
@@ -225,13 +227,16 @@ class TransactionController extends Controller
             $origin = $shopaddress[0]->district. ", " .$shopaddress[0]->sellercity. ", ". $shopaddress[0]->province;
             $destination = $addresses[0]->district. ", " .$addresses[0]->city. ", " .$addresses[0]->province;
 
+            $idseller = $shopaddress[0]->idseller;
+            $idshopOwner = $shopaddress[0]->users_id;
+            // dd($idseller);
             $order = new Order;
             $counter = $date[0]->count + 1;
             $order->invoicenum = "INV/SP/" .date("Y/m/d"). "/$counter";
             $order->status = "Waiting for Payment";
             $order->paymentstatus = "Unpaid";
             $order->users_id = $iduser;
-            $order->shops_id = $checkout[0]->idseller;
+            $order->shops_id = $idseller;
             $order->addresses_id = $addresses[0]->idaddress;
             // dd($shipping);
             $order->save();
@@ -267,9 +272,9 @@ class TransactionController extends Controller
             $message = 'Order Has been Created for '.$order->invoicenum. '!';
             $user->notify(new Transaction($title, $message));
 
-            $idseller = $checkout[0]->idseller;
+            //dd($idshopOwner);
 
-            $seller = Seller::find($idseller);
+            $seller = User::find($idshopOwner);
             $title = 'Order Information';
             $message = 'New Order Has Been Made. Invoice Number ' .$order->invoicenum. '!';
             $seller->notify(new SellerNotifications($title, $message));
@@ -340,7 +345,7 @@ class TransactionController extends Controller
         );
 
         $orderdetails = DB::select(
-            DB::raw("SELECT od.quantityordered, od.unitprice, CONCAT(sp.partnumber, ' ', sp.partname, ' ', sp.vehiclemodel) as item_name,
+            DB::raw("SELECT od.quantityordered, od.unitprice, CONCAT(sp.partnumber, ' ', sp.partname, ' ', sp.vehiclemodel) as item_name, sp.id as idsparepart,
             (SELECT p.url FROM drivedealio.pics as p WHERE p.spareparts_id = sp.id LIMIT 1) as url
             FROM drivedealio.orders as o INNER JOIN drivedealio.orderdetails as od on o.id = od.orders_id
 			INNER JOIN drivedealio.spareparts as sp on od.spareparts_id = sp.id where o.id = $id;")
@@ -466,28 +471,37 @@ class TransactionController extends Controller
 
     public function approveOrder($id)
     {
-        $order = Order::findOrFail($id);
-        $order->status = "On Process";
-        $order->save();
-
-        $product = DB::select(
-            DB::raw("SELECT o.id as idorder, o.invoicenum, o.orderdate, u.id as iduser, o.status, o.paymentstatus, od.quantityordered, s.stock, s.id as idsparepart,
-            (SELECT sum(od.unitprice) from drivedealio.orderdetails as od where od.orders_id = o.id ) as total_price
-            from drivedealio.orders as o INNER JOIN drivedealio.users as u on o.users_id = u.id
-            INNER JOIN drivedealio.orderdetails as od on o.id = od.orders_id
-            INNER JOIN drivedealio.spareparts as s on od.spareparts_id = s.id
-            WHERE o.id = $id;")
+        $payment = DB::select(
+            DB::raw("SELECT o.paymentstatus from drivedealio.orders as o where o.id = $id")
         );
-        // dd($product);
-
-        foreach($product as $p)
+        if($payment[0]->paymentstatus === 'Paid')
         {
-            $quantityordered = $p->stock - $p->quantityordered;
-            DB::update("UPDATE drivedealio.spareparts SET stock = :stock, updated_at = :updated_at WHERE id = :id",
-            ['stock' => $quantityordered, 'updated_at' => now(), 'id' => $p->idsparepart]);
-        }
+            $order = Order::findOrFail($id);
+            $order->status = "On Process";
+            $order->save();
 
-        return redirect()->back()->with('success', 'Status Changed');
+            $product = DB::select(
+                DB::raw("SELECT o.id as idorder, o.invoicenum, o.orderdate, u.id as iduser, o.status, o.paymentstatus, od.quantityordered, s.stock, s.id as idsparepart,
+                (SELECT sum(od.unitprice) from drivedealio.orderdetails as od where od.orders_id = o.id ) as total_price
+                from drivedealio.orders as o INNER JOIN drivedealio.users as u on o.users_id = u.id
+                INNER JOIN drivedealio.orderdetails as od on o.id = od.orders_id
+                INNER JOIN drivedealio.spareparts as s on od.spareparts_id = s.id
+                WHERE o.id = $id;")
+            );
+            // dd($product);
+
+            foreach($product as $p)
+            {
+                $quantityordered = $p->stock - $p->quantityordered;
+                DB::update("UPDATE drivedealio.spareparts SET stock = :stock, updated_at = :updated_at WHERE id = :id",
+                ['stock' => $quantityordered, 'updated_at' => now(), 'id' => $p->idsparepart]);
+            }
+
+            return redirect()->back()->with('success', 'Status Changed');
+        }
+        else{
+            return redirect()->back()->with('error', 'The buyer has not made the payment.');
+        }
     }
 
     public function onDelivery($id)

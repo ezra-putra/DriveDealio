@@ -248,7 +248,7 @@
         <div class="col-md-4">
             <h3>Place Bid</h3>
             @if (auth()->user())
-                @if ($vehicle[0]->users_id != auth()->user()->id)
+                @if ($vehicle[0]->users_id != auth()->user()->id && auth()->user()->roles_id != 1)
                     @if ($vehicle[0]->adstatus === 'Open to Bid')
                     <form action="{{ route('place_bid', $vehicle[0]->idvehicle) }}" method="POST" enctype="multipart/form-data"
                         class="row gy-1 gx-2 mt-75 mb-1" id="bidForm">

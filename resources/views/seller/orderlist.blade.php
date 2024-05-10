@@ -27,7 +27,7 @@
                                 <tr>
                                     <td>{{ $counter++ }}</td>
                                     <td>
-                                        <a href="{{ route('transaction.details', $o->idorder) }}" aria-expanded="false" class="text-decoration-none">
+                                        <a href="{{ url('/invoice-sparepart', $o->idorder) }}" aria-expanded="false" class="text-decoration-none" target="_blank">
                                             <span class="user-name" style="font-size: 14px">{{ $o->invoicenum }}</span>
                                         </a>
                                     </td>

@@ -27,9 +27,6 @@
                                             <span class="user-name">{{ $s->name }}</span>
                                         </a>
                                     </h1>
-                                    <p class="card-text m-auto w-75">
-                                        You have <strong>{{ $ordercount[0]->totalorder }}</strong> total order today.
-                                    </p>
                                 </div>
                                 @endforeach
                             </div>

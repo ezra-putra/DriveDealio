@@ -97,9 +97,9 @@
         <div class="col-md-4">
             <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
                 <div class="carousel-indicators">
-                    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-                    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
-                    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
+                    @foreach($sparepart as $s => $image)
+                        <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="{{ intval($s) }}" class="{{ $s == 0 ? 'active' : '' }}" aria-label="Slide {{ intval($s) + 1 }}"></button>
+                    @endforeach
                 </div>
                 <div class="carousel-inner">
                     @foreach($sparepart as $s => $image)
@@ -132,11 +132,14 @@
                     <p>
                         {{ $sparepart[0]->description }}
                     </p>
+                    <p>Categories : <strong>{{ $sparepart[0]->category }}</strong></p>
+                    <p>Condition : <strong>{{ $sparepart[0]->condition }}</strong></p>
+                    <p>Weight : <strong>{{ $sparepart[0]->weight }} Kg</strong></p>
                     <hr style="height:1px;border-width:0;color:gray;background-color:lightgray">
                     <div class="d-flex align-items-center">
                         <a href="{{ route('seller.profile', $sparepart[0]->idshop) }}" aria-expanded="false" class="d-flex align-items-center text-decoration-none">
                             <span class="avatar me-1">
-                                <img src="../../../app-assets/images/portrait/small/avatar-s-3.jpg" class="round" height="40" width="40" style="object-fit: cover">
+                                <img src="{{ asset("/uploads/img/seller/". $sparepart[0]->users_id . "/" . $sparepart[0]->pics) }}" class="round" height="40" width="40" style="object-fit: cover">
                             </span>
                             <div class="user-info">
                                 <div class="user-nav d-flex d-sm-inline-flex">
@@ -257,141 +260,23 @@
         </div>
         <div class="swiper-responsive-breakpoints swiper-container px-4 py-2">
             <div class="swiper-wrapper">
+                @foreach ($sparepartRec as $sr)
                 <div class="swiper-slide">
-                    <a href="#">
+                    <a href="{{ route('sparepart.show', $sr->idsparepart) }}">
                         <div class="item-heading">
-                            <h5 class="text-truncate mb-0">Apple Watch Series 6</h5>
-                            <small class="text-body">by Apple</small>
+                            <h5 class="text-truncate mb-0">{{ $sr->partnumber }} - {{ $sr->partname }} {{ $sr->vehiclemodel }}</h5>
+                            <small class="text-body">{{ $sr->city }}</small>
                         </div>
                         <div class="img-container w-50 mx-auto py-75">
-                            <img src="../../../app-assets/images/elements/apple-watch.png"
+                            <img src="{{ asset('images/sparepart/'.$sr->idsparepart.'/' .$sr->url) }}"
                                 class="img-fluid" alt="image" />
                         </div>
                         <div class="item-meta">
-                            <ul class="unstyled-list list-inline mb-25">
-                                <li class="ratings-list-item"><i data-feather="star"
-                                        class="filled-star"></i></li>
-                                <li class="ratings-list-item"><i data-feather="star"
-                                        class="filled-star"></i></li>
-                                <li class="ratings-list-item"><i data-feather="star"
-                                        class="filled-star"></i></li>
-                                <li class="ratings-list-item"><i data-feather="star"
-                                        class="filled-star"></i></li>
-                                <li class="ratings-list-item"><i data-feather="star"
-                                        class="unfilled-star"></i></li>
-                            </ul>
-                            <p class="card-text text-primary mb-0">$399.98</p>
+                            <p class="card-text text-primary mb-0">@currency($sr->unitprice)</p>
                         </div>
                     </a>
                 </div>
-                <div class="swiper-slide">
-                    <a href="#">
-                        <div class="item-heading">
-                            <h5 class="text-truncate mb-0">Apple MacBook Pro - Silver</h5>
-                            <small class="text-body">by Apple</small>
-                        </div>
-                        <div class="img-container w-50 mx-auto py-50">
-                            <img src="../../../app-assets/images/elements/macbook-pro.png"
-                                class="img-fluid" alt="image" />
-                        </div>
-                        <div class="item-meta">
-                            <ul class="unstyled-list list-inline mb-25">
-                                <li class="ratings-list-item"><i data-feather="star"
-                                        class="filled-star"></i></li>
-                                <li class="ratings-list-item"><i data-feather="star"
-                                        class="filled-star"></i></li>
-                                <li class="ratings-list-item"><i data-feather="star"
-                                        class="unfilled-star"></i></li>
-                                <li class="ratings-list-item"><i data-feather="star"
-                                        class="unfilled-star"></i></li>
-                                <li class="ratings-list-item"><i data-feather="star"
-                                        class="unfilled-star"></i></li>
-                            </ul>
-                            <p class="card-text text-primary mb-0">$2449.49</p>
-                        </div>
-                    </a>
-                </div>
-                <div class="swiper-slide">
-                    <a href="#">
-                        <div class="item-heading">
-                            <h5 class="text-truncate mb-0">Apple HomePod (Space Grey)</h5>
-                            <small class="text-body">by Apple</small>
-                        </div>
-                        <div class="img-container w-50 mx-auto py-75">
-                            <img src="../../../app-assets/images/elements/homepod.png"
-                                class="img-fluid" alt="image" />
-                        </div>
-                        <div class="item-meta">
-                            <ul class="unstyled-list list-inline mb-25">
-                                <li class="ratings-list-item"><i data-feather="star"
-                                        class="filled-star"></i></li>
-                                <li class="ratings-list-item"><i data-feather="star"
-                                        class="filled-star"></i></li>
-                                <li class="ratings-list-item"><i data-feather="star"
-                                        class="filled-star"></i></li>
-                                <li class="ratings-list-item"><i data-feather="star"
-                                        class="unfilled-star"></i></li>
-                                <li class="ratings-list-item"><i data-feather="star"
-                                        class="unfilled-star"></i></li>
-                            </ul>
-                            <p class="card-text text-primary mb-0">$229.29</p>
-                        </div>
-                    </a>
-                </div>
-                <div class="swiper-slide">
-                    <a href="#">
-                        <div class="item-heading">
-                            <h5 class="text-truncate mb-0">Magic Mouse 2 - Black</h5>
-                            <small class="text-body">by Apple</small>
-                        </div>
-                        <div class="img-container w-50 mx-auto py-75">
-                            <img src="../../../app-assets/images/elements/magic-mouse.png"
-                                class="img-fluid" alt="image" />
-                        </div>
-                        <div class="item-meta">
-                            <ul class="unstyled-list list-inline mb-25">
-                                <li class="ratings-list-item"><i data-feather="star"
-                                        class="filled-star"></i></li>
-                                <li class="ratings-list-item"><i data-feather="star"
-                                        class="filled-star"></i></li>
-                                <li class="ratings-list-item"><i data-feather="star"
-                                        class="filled-star"></i></li>
-                                <li class="ratings-list-item"><i data-feather="star"
-                                        class="filled-star"></i></li>
-                                <li class="ratings-list-item"><i data-feather="star"
-                                        class="filled-star"></i></li>
-                            </ul>
-                            <p class="card-text text-primary mb-0">$90.98</p>
-                        </div>
-                    </a>
-                </div>
-                <div class="swiper-slide">
-                    <a href="#">
-                        <div class="item-heading">
-                            <h5 class="text-truncate mb-0">iPhone 12 Pro</h5>
-                            <small class="text-body">by Apple</small>
-                        </div>
-                        <div class="img-container w-50 mx-auto py-75">
-                            <img src="../../../app-assets/images/elements/iphone-x.png"
-                                class="img-fluid" alt="image" />
-                        </div>
-                        <div class="item-meta">
-                            <ul class="unstyled-list list-inline mb-25">
-                                <li class="ratings-list-item"><i data-feather="star"
-                                        class="filled-star"></i></li>
-                                <li class="ratings-list-item"><i data-feather="star"
-                                        class="filled-star"></i></li>
-                                <li class="ratings-list-item"><i data-feather="star"
-                                        class="filled-star"></i></li>
-                                <li class="ratings-list-item"><i data-feather="star"
-                                        class="filled-star"></i></li>
-                                <li class="ratings-list-item"><i data-feather="star"
-                                        class="unfilled-star"></i></li>
-                            </ul>
-                            <p class="card-text text-primary mb-0">$1559.99</p>
-                        </div>
-                    </a>
-                </div>
+                @endforeach
             </div>
             <!-- Add Arrows -->
             <div class="swiper-button-next"></div>

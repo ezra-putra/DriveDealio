@@ -85,11 +85,12 @@
                             @endforeach
                             @else
                                 <p class="text-center mt-1" style="font-weight : bold;">No dues to pay currently.</p>
-                                <p class="text-center mt-1">The bill details will show up here on the 1st.</p>
+                                <p class="text-center mt-1">The bill details will appear here on the 1st of every month.</p>
                             @endif
 
                         </div>
                         <div class="tab-pane fade" id="nav-paid" role="tabpanel" aria-labelledby="nav-paid-tab">
+                            @if (!empty($paidloan))
                             @foreach ($paidloan as $pd)
                             <div class="col-md-12 mt-1">
                                 <div class="card border border-3">
@@ -118,6 +119,9 @@
                                 </div>
                             </div>
                             @endforeach
+                            @else
+                                <p class="text-center mt-1" style="font-weight : bold;">No Installment has been paid.</p>
+                            @endif
                         </div>
                     </div>
 

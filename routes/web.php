@@ -183,7 +183,7 @@ Route::get('/vehicle/motorcycle', [VehicleController::class, 'motorcycle']);
 Route::get('/vehicle/details/{id}', [VehicleController::class, 'show'])->name('vehicle.show');
 Route::get('/vehicle/myvehicle', [VehicleController::class, 'myvehicle'])->name('vehicle.myvehicle');
 
-Route::get('/sparepart', [SparepartController::class, 'index']);
+Route::get('/sparepart', [SparepartController::class, 'index'])->name('spareparts.index');
 Route::get('/sparepart/details/{id}', [SparepartController::class, 'show'])->name('sparepart.show');
 
 Route::get('/seller/profile/{id}', [SellerController::class, 'sellerProfile'])->name('seller.profile');

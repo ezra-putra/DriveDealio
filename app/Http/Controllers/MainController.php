@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Cart;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,10 +15,8 @@ class MainController extends Controller
     public function index()
     {
         $iduser = auth()->id();
-        $cartCount = DB::select(
-            DB::raw("SELECT count(id) as total_items from drivedealio.carts where users_id = $iduser;")
-        )[0]->total_items;
-        return view('layout.main', compact('cartCount'));
+
+        return view('layout.main');
     }
 
     public function search(Request $request)

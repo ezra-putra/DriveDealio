@@ -47,7 +47,7 @@
                         <div class="col-md-2">
                             <div class="item-img">
                                 <a href="#">
-                                    <img src="{{ asset('/images/' . $c->url) }}" alt="img-placeholder" style="width: 150px; height: auto;"/>
+                                    <img src="{{ asset('images/sparepart/'.$c->idsparepart.'/' .$c->url) }}" alt="img-placeholder" style="width: 150px; height: auto;"/>
                                 </a>
                             </div>
                         </div>

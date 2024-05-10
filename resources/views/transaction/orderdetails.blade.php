@@ -54,7 +54,7 @@
             <div class="col-md-3">
                 <div class="item-img text-center">
                     <a href="#">
-                        <img src="{{ asset('/images/' . $od->url) }}" class="img-fluid" alt="img-placeholder" width="150" height="150"/>
+                        <img src="{{ asset('images/sparepart/'.$od->idsparepart.'/' .$od->url) }}" class="img-fluid" alt="img-placeholder" width="150" height="150"/>
                     </a>
                 </div>
             </div>
