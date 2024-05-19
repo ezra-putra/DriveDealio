@@ -456,6 +456,22 @@ class TransactionController extends Controller
         $order->paymentdate = Carbon::now();
         $order->save();
 
+        $product = DB::select(
+            DB::raw("SELECT o.id as idorder, o.invoicenum, o.orderdate, u.id as iduser, o.status, o.paymentstatus, od.quantityordered, s.stock, s.id as idsparepart,
+            (SELECT sum(od.unitprice) from drivedealio.orderdetails as od where od.orders_id = o.id ) as total_price
+            from drivedealio.orders as o INNER JOIN drivedealio.users as u on o.users_id = u.id
+            INNER JOIN drivedealio.orderdetails as od on o.id = od.orders_id
+            INNER JOIN drivedealio.spareparts as s on od.spareparts_id = s.id
+            WHERE o.id = $id;")
+        );
+
+        foreach($product as $p)
+        {
+            $quantityordered = $p->stock - $p->quantityordered;
+            DB::update("UPDATE drivedealio.spareparts SET stock = :stock, updated_at = :updated_at WHERE id = :id",
+            ['stock' => $quantityordered, 'updated_at' => now(), 'id' => $p->idsparepart]);
+        }
+
         return redirect('/orderhistory')->with('success', 'Transaction Success');
     }
 
@@ -479,23 +495,6 @@ class TransactionController extends Controller
             $order = Order::findOrFail($id);
             $order->status = "On Process";
             $order->save();
-
-            $product = DB::select(
-                DB::raw("SELECT o.id as idorder, o.invoicenum, o.orderdate, u.id as iduser, o.status, o.paymentstatus, od.quantityordered, s.stock, s.id as idsparepart,
-                (SELECT sum(od.unitprice) from drivedealio.orderdetails as od where od.orders_id = o.id ) as total_price
-                from drivedealio.orders as o INNER JOIN drivedealio.users as u on o.users_id = u.id
-                INNER JOIN drivedealio.orderdetails as od on o.id = od.orders_id
-                INNER JOIN drivedealio.spareparts as s on od.spareparts_id = s.id
-                WHERE o.id = $id;")
-            );
-            // dd($product);
-
-            foreach($product as $p)
-            {
-                $quantityordered = $p->stock - $p->quantityordered;
-                DB::update("UPDATE drivedealio.spareparts SET stock = :stock, updated_at = :updated_at WHERE id = :id",
-                ['stock' => $quantityordered, 'updated_at' => now(), 'id' => $p->idsparepart]);
-            }
 
             return redirect()->back()->with('success', 'Status Changed');
         }

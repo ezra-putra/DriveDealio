@@ -38,13 +38,6 @@
                                         <span>Inspections</span>
                                     </a>
                                 @endif
-                                @if ($v->adstatus === 'Inspected')
-
-                                    <a class="btn btn-icon btn-flat-success" href="{{ route('finishGrading', $v->idvehicle) }}">
-                                        <i data-feather="check" class="me-50"></i>
-                                        <span>Finish</span>
-                                    </a>
-                                @endif
                             </td>
                         </tr>
                       @endforeach

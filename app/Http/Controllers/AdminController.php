@@ -53,8 +53,6 @@ class AdminController extends Controller
         return view('admin.listuser', compact('user', 'useradmin', 'userinspector', 'userbuyer', 'courier', 'role'));
     }
 
-
-
     public function editRoleUser(Request $request, $id)
     {
         $user = User::findOrFail($id);
@@ -92,10 +90,19 @@ class AdminController extends Controller
             INNER JOIN drivedealio.auctionwinners as aw on a.id = aw.auctions_id
             INNER JOIN drivedealio.auction_orders as ao on aw.id = ao.auctionwinners_id
             INNER JOIN drivedealio.users as u on aw.users_id = u.id
-            INNER JOIN drivedealio.brands as b on v.brands_id = b.id;")
+            INNER JOIN drivedealio.brands as b on v.brands_id = b.id
+            ORDER BY ao.orderdate desc;")
         );
 
-        return view('admin.listtransaction', compact('sparepartOrder', 'auctionOrder'));
+        $member = DB::select(
+            DB::raw("SELECT m.id as idmember, m.membershiptype as name, hm.id as idhasmember, hm.status, hm.start, hm.end, u.id as iduser, u.firstname, u.lastname, u.email, u.phonenumber,
+            hm.created_at, hm.updated_at , u.roles_id, mo.paymentstatus, mo.paymentdate, mo.id as idorder, mo.price, mo.snap_token, mo.invoicenum
+            from drivedealio.user_memberships as hm INNER JOIN drivedealio.users as u on hm.users_id = u.id
+            INNER JOIN drivedealio.member_orders as mo on hm.id = mo.user_memberships_id
+            INNER JOIN drivedealio.memberships as m on m.id = mo.memberships_id order by hm.created_at desc;")
+        );
+
+        return view('admin.listtransaction', compact('sparepartOrder', 'auctionOrder', 'member'));
     }
 
     public function approveSeller($id)
@@ -211,7 +218,7 @@ class AdminController extends Controller
         $iduser = $loanInfo[0]->users_id;
         $user = User::find($iduser);
         $title = 'Loan Request';
-        $message = 'Loan Rejected, Please Select Another PaymentMethod!';
+        $message = 'Loan Rejected, Use Virtual Account to complete your Auction payment!';
         $user->notify(new NotificationsLoan($title, $message));
 
         return redirect()->back()->with('success', 'Loan Status Changed!');

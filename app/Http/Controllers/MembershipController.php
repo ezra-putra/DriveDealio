@@ -26,7 +26,7 @@ class MembershipController extends Controller
             DB::raw("SELECT id, membershiptype, price, description FROM drivedealio.memberships;")
         );
         $document = DB::select(
-            DB::raw("SELECT ktp, npwp from drivedealio.users where id = $iduser;")
+            DB::raw("SELECT ktp, npwp, npwpktpcheck from drivedealio.users where id = $iduser;")
         );
         return view('membership.register', compact('membership', 'user', 'document'));
     }
@@ -75,20 +75,13 @@ class MembershipController extends Controller
     public function cancel_post($id)
     {
         $member = UserMemberships::findOrFail($id);
-        if(auth()->user()->roles_id == 2){
-            $member->status = 'Not Active';
-            $message = 'Your membership Cancelled.';
-        }
-        if(auth()->user()->roles_id == 1){
-            $member->status = 'Not Active';
-
-            $message = 'Your membership rejected by system.';
-        }
+        $member->status = 'Not Active';
         $member->save();
 
         $iduser = auth()->id();
         $user = User::find($iduser);
-        $title = 'Membership rejected';
+        $title = 'Membership Cancelled';
+        $message = 'Your membership Cancelled.';
         $user->notify(new NotificationsMembership($title, $message));
 
         return back()->with('status', 'Your request has been process!');
@@ -97,11 +90,7 @@ class MembershipController extends Controller
     public function store(Request $request)
     {
         $iduser = auth()->id();
-
-        $user = DB::select(
-            DB::raw("SELECT id, firstname, lastname, phonenumber, email
-            from drivedealio.users where id=$iduser;")
-        );
+        $user = User::find($iduser);
 
         $member = DB::select(
             DB::raw("SELECT m.id as idmember, m.membershiptype as name, hm.id as idhasmember, hm.status, hm.start, hm.end, u.id as iduser, u.firstname, u.lastname, u.email, u.phonenumber,
@@ -133,8 +122,10 @@ class MembershipController extends Controller
 
                 $user = User::findOrFail($iduser);
                 $user->npwp = encrypt($fileName);
+                $user->npwpktpcheck = true;
                 $user->save();
             }
+
             $usermember = new UserMemberships;
             $usermember->users_id = auth()->id();
             $usermember->status = 'Pending';
@@ -147,7 +138,6 @@ class MembershipController extends Controller
             $memberorder->memberships_id = $request->input('member');
             $memberorder->paymentstatus = 'Unpaid';
             $memberorder->price = $request->input('totalprice');
-            // dd($memberorder);
             $memberorder->save();
 
             \Midtrans\Config::$serverKey = 'SB-Mid-server-AOdoK40xyUyq11-i9Cc9ysHM';
@@ -161,10 +151,10 @@ class MembershipController extends Controller
                     'gross_amount' => $memberorder->price,
                 ),
                 'customer_details' => array(
-                    'first_name' => $user[0]->firstname,
-                    'last_name' => $user[0]->lastname,
-                    'email' => $user[0]->email,
-                    'phone' => $user[0]->phonenumber,
+                    'first_name' => $user->firstname,
+                    'last_name' => $user->lastname,
+                    'email' => $user->email,
+                    'phone' => $user->phonenumber,
                 ),
             );
 

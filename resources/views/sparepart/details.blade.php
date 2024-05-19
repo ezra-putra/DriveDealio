@@ -122,10 +122,12 @@
             <div class="card">
                 <div class="card-body col-md-12">
                     <h3>{{ $sparepart[0]->partnumber }} - {{ $sparepart[0]->partname }} {{ $sparepart[0]->model }}</h3>
-                    <div class="d-flex flex-column flex-sm-row pt-1 mt-auto mb-1 py-auto">
-                        <p style="font-size: 14px; font-weight: 900;">Item Sold 0</p>
-                    </div>
                     <h1 class="mb-2">@currency($sparepart[0]->unitprice)</h1>
+                    @if($sparepart[0]->preorder === true)
+                    <div class="d-flex flex-column flex-sm-row pt-1 py-auto">
+                        <span class="badge bg-light-success text-success">Pre-order</span>
+                    </div>
+                    @endif
                     <hr style="height:1px;border-width:0;color:gray;background-color:lightgray">
                     <h5 class="mb-1">Description</h5>
                     <hr style="height:1px;border-width:0;color:gray;background-color:lightgray">
@@ -209,16 +211,6 @@
                     <div>
                         <h5 class="mb-0">Review</h5>
                         <p class="mb-0">Displaying {{ $total_review[0]->total }} reviews</p>
-                    </div>
-                    <div class="dropdown mt-2 mt-sm-0">
-                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-                            Order By
-                        </button>
-                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                            <li><a class="dropdown-item" href="#">Newest</a></li>
-                            <li><a class="dropdown-item" href="#">Highest Rating</a></li>
-                            <li><a class="dropdown-item" href="#">Lowest Rating</a></li>
-                        </ul>
                     </div>
                 </div>
 

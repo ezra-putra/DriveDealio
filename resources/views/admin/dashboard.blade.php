@@ -164,7 +164,7 @@
                             <div class="card-header d-flex justify-content-between pb-0">
                                 <h4 class="card-title">Transaction List</h4>
                                 <div class="justify-items-end">
-                                    <a class="btn btn-flat-primary p-50" href="/user">See All</a>
+                                    <a class="btn btn-flat-primary p-50" href="/listtransaction">See All</a>
                                 </div>
                             </div>
                             <div class="table-responsive">

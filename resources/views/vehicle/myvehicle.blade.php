@@ -18,6 +18,7 @@
                                 <th scope="col">Status</th>
                                 <th scope="col">Auction Time Remaining</th>
                                 <th scope="col">Action</th>
+                                <th scope="col">Inspection</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -55,6 +56,16 @@
                                                 <span>Inspection Date</span>
                                             </a>
                                         @endif
+                                        @if ($v->adstatus === 'Draft')
+                                            <a class="btn btn-icon btn-flat-info"
+                                                href="{{ route('vehicle.editform', $v->idvehicle) }}">
+                                                <i data-feather="edit" class="me-50"></i>
+                                                <span>Edit Data</span>
+                                            </a>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        
                                     </td>
                                 </tr>
                             @endforeach
@@ -86,6 +97,7 @@
                                 <th scope="col">Vehicle Name</th>
                                 <th scope="col">Order Date</th>
                                 <th scope="col">Order Status</th>
+                                <th scope="col">Details</th>
                                 <th scope="col">Action</th>
                             </tr>
                         </thead>
@@ -101,18 +113,23 @@
                                     <td>{{ $o->orderdate }}</td>
                                     <td>{{ $o->status }}</td>
                                     <td>
+                                        <a data-bs-toggle="modal" href="#modalAuctionDetails" onclick="getAuctionDetails({{ $o->idorder }})" class="btn btn-flat-success">
+                                            Details
+                                        </a>
+                                    </td>
+                                    <td>
                                         @if ($o->status === 'Waiting for Confirmation')
                                             <a class="btn btn-icon btn-flat-success"
                                                 href="{{ route('approveauction.post', $o->idorder) }}">
                                                 <i data-feather="check" class="me-50"></i>
-                                                <span>Confirm Order</span>
+                                                <span>Confirm</span>
                                             </a>
                                         @endif
                                         @if ($o->status === 'On Process')
                                             <a class="btn btn-icon btn-flat-success"
                                                 href="{{ route('deliveryauction.post', $o->idorder) }}">
                                                 <i data-feather="truck" class="me-50"></i>
-                                                <span>Arrange Delivery</span>
+                                                <span>Delivery</span>
                                             </a>
                                         @endif
                                     </td>
@@ -123,13 +140,36 @@
                 </div>
                 @if (empty($vehicle))
                     <p class="text-center mt-1">No Vehicle Data</p>
-                    <div class="text-center">
-                        <a class="btn btn-outline-info mb-1 w-25" href="/vehicle/adddata">Sell My Vehicle</a>
-                    </div>
                 @endif
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="modalAuctionDetails" tabindex="-1" role="basic" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-wide" style="max-width: 750px">
+            <div class="modal-content">
+                <div class="modal-header bg-transparent">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body px-sm-5 mx-50 pb-5" id="auctionDetails">
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function getAuctionDetails(id) {
+            $.ajax({
+                type:'POST',
+                url:'{{route("auction.details")}}',
+                data:'_token= <?php echo csrf_token() ?> &id='+id,
+                success:function(data) {
+                    $("#auctionDetails").html(data.msg);
+                }
+            });
+        }
+    </script>
 
 
 

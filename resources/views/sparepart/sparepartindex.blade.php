@@ -39,6 +39,11 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="row">
+                                        @if($s->preorder === true)
+                                        <div class="d-flex flex-column flex-sm-row pt-1 py-auto">
+                                            <span class="badge bg-light-success text-success">Pre-order</span>
+                                        </div>
+                                        @endif
                                         <h5 class="item-name">
                                             <a class="text-body" href="{{ route('sparepart.show', $s->idsparepart) }}">{{ $s->partnumber }} - {{ $s->partname }}
                                                 {{ $s->vehiclemodel }}</a>
@@ -74,7 +79,6 @@
                         @endforeach
                     </section>
                     <!-- E-commerce Products Ends -->
-
                 </div>
             </div>
             <div class="sidebar-detached sidebar-left">

@@ -179,7 +179,7 @@
 
 <!-- list and filter end -->
 
-<div class="modal fade" id="modalRole" tabindex="-1" role="basic" aria-hidden="true">
+<div class="modal fade" id="modalRole-" tabindex="-1" role="basic" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header bg-transparent">
@@ -210,7 +210,7 @@
                         </div>
                     </div>
                     <div class="col-12 text-center">
-                        <input type="submit" id="submitBid" class="btn btn-primary me-1 mt-1" value="Add Address">
+                        <input type="submit" class="btn btn-primary me-1 mt-1" value="Edit Role">
                         <button type="reset" class="btn btn-outline-secondary mt-1" data-bs-dismiss="modal"
                             aria-label="Close">
                             Cancel

@@ -21,7 +21,10 @@
                 </div>
                 <div class="col-md-6 d-flex justify-content-end align-items-center">
                     <div class="col-md-4">
-                        <h5>Rating & Review</h5>
+                        @foreach ($rating as $r)
+                        <h2 class="text-center">{{ $r->avg_rating }}/5.0</h2>
+                        @endforeach
+                        <p class="text-center">Seller Rating</p>
                     </div>
                 </div>
             </div>

@@ -97,8 +97,8 @@
                                         @foreach ($brand as $b)
                                         <li>
                                             <div class="form-check">
-                                                <input type="checkbox" class="form-check-input" id="brand-{{ $b->id }}" name="brand" onchange="filterByBrand(this)"
-                                                @if (in_array($t->id, explode(',', $selectedBrand)))
+                                                <input type="checkbox" class="form-check-input" id="brand-{{ $b->id }}" name="brand" onchange="filterByBrand(this)" value="{{ $b->id }}"
+                                                @if (in_array($b->id, explode(',', $selectedBrand)))
                                                     checked="checked"
                                                 @endif/>
                                                 <label class="form-check-label" for="brand-{{ $b->id }}">{{ $b->name }}</label>
@@ -111,7 +111,7 @@
 
                                 <!-- Clear Filters Starts -->
                                 <div id="clear-filters">
-                                    <input type="reset" value="Clear All Filters" class="btn btn-primary w-100">
+                                    <input type="button" onclick="uncheckAll()" value="Clear All Filters" class="btn btn-primary w-100">
                                 </div>
                                 <!-- Clear Filters Ends -->
                             </div>
@@ -154,6 +154,18 @@
                 $("#b").val(brand);
                 $("#filter").submit();
             });
+        }
+    </script>
+
+    <script>
+        function uncheckAll() {
+            let inputs = document.querySelectorAll('.form-check-input');
+            for(let i = 0; i < inputs.length; i++){
+                inputs[i].checked = false;
+            }
+            document.getElementById('t').value = '';
+            document.getElementById('b').value = '';
+            document.getElementById('filter').submit();
         }
     </script>
 

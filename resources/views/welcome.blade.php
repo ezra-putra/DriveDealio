@@ -11,15 +11,15 @@
             <div class="carousel-inner" role="listbox">
                 <div class="carousel-item active">
                     <img class="img-fluid" src="{{ asset('images/vehicle/welcome/1.png') }}" alt="First slide"
-                        style="object-fit: cover; width:100%; height:55vh" />
+                        style="object-fit: contain; width:100%; height:55vh" />
                 </div>
                 <div class="carousel-item">
                     <img class="img-fluid" src="{{ asset('images/vehicle/welcome/2.png') }}" alt="Second slide"
-                        style="object-fit: cover; width:100%; height:55vh" />
+                        style="object-fit: contain; width:100%; height:55vh" />
                 </div>
                 <div class="carousel-item">
                     <img class="img-fluid" src="{{ asset('images/vehicle/welcome/3.png') }}" alt="Third slide"
-                        style="object-fit: cover; width:100%; height:55vh" />
+                        style="object-fit: contain; width:100%; height:55vh" />
                 </div>
             </div>
             <a class="carousel-control-prev" data-bs-target="#carousel-interval" role="button"
@@ -55,7 +55,7 @@
                             </p>
                         </div>
                         <div class="img-container w-50 mx-auto my-2 py-75">
-                            <img src="{{ asset('/images/vehicle/'.$v->idvehicle.'/'.$v->url) }}" style="height: 750px; width: 400px;" class="img-fluid" alt="image">
+                            <img src="{{ asset('/images/vehicle/'.$v->idvehicle.'/'.$v->url) }}" style="height: auto; width: auto;" class="img-fluid" alt="image">
                         </div>
                         <div class="item-meta">
                             <p class="mb-1" style="font-weight: 700">Start price: @currency($v->price)</p>
@@ -136,12 +136,7 @@
                                         </div>
                                         <small class="annual-pricing d-none text-muted"></small>
                                     </div>
-                                    <ul class="list-group list-group-circle text-start mb-1">
-                                        {{-- <li class="list-group-item">{{ $m->benefit1 }}</li>
-                                        <li class="list-group-item">{{ $m->benefit2 }}</li>
-                                        <li class="list-group-item">{{ $m->benefit3 }}</li> --}}
-                                    </ul>
-                                    <a class="btn w-100 btn-outline-success mt-2" href="/membership/register">More Details</a>
+                                    <a class="btn w-100 btn-outline-success mt-2" href="/membership/register">Register Now</a>
                                 </div>
                             </div>
                         </div>

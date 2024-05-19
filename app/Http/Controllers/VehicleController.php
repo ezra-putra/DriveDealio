@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Appointment;
 use App\Models\Vehicle;
 use App\Models\Auction;
+use App\Models\AuctionOrder;
 use App\Models\AuctionWinner;
 use App\Models\Bid;
 use App\Models\Brand;
@@ -37,7 +38,6 @@ class VehicleController extends Controller
                 ->where('c.name', 'Car')
                 ->where('v.adstatus', 'Open to Bid');
 
-        $vehicle = $query->get();
         $selectedType = $request->query('type');
         $selectedBrand = $request->query('brand');
 
@@ -48,6 +48,8 @@ class VehicleController extends Controller
         if(!empty($selectedBrand)){
             $query->whereIn('v.brands_id', explode(',',$selectedBrand));
         }
+
+        $vehicle = $query->get();
 
         $type = DB::table('vehicletypes')->where('vehiclecategories_id', 1)->get();
         $brand = Brand::all();
@@ -74,7 +76,7 @@ class VehicleController extends Controller
                 ->where('c.name', 'Motorcycle')
                 ->where('v.adstatus', 'Open to Bid');
 
-        $vehicle = $query->get();
+
         $selectedType = $request->query('type');
         $selectedBrand = $request->query('brand');
 
@@ -85,6 +87,8 @@ class VehicleController extends Controller
         if(!empty($selectedBrand)){
             $query->whereIn('v.brands_id', explode(',',$selectedBrand));
         }
+
+        $vehicle = $query->get();
 
         $type = DB::table('vehicletypes')->where('vehiclecategories_id', 2)->get();
         $brand = Brand::all();
@@ -174,9 +178,10 @@ class VehicleController extends Controller
             WHERE a.vehicles_id = $id ORDER BY b.bidamount asc limit 3;")
         );
 
+        $vehiclename = $vehicle[0]->brand. '-'. $vehicle[0]->model. ' '. $vehicle[0]->variant;
+
         $startDateTime = Carbon::parse($vehicle[0]->start_date);
         $endDateTime = Carbon::parse($vehicle[0]->end_date);
-
         $interval = $startDateTime->diff($endDateTime);
         $vehicle[0]->duration = $this->formatDuration($interval);
 
@@ -201,7 +206,7 @@ class VehicleController extends Controller
 
                         $user = User::find($w->iduser);
                         $title = 'Auction Information';
-                        $message = 'You win the auction, please continue the process. Go to Auction Page!';
+                        $message = 'You win the auction '. $vehiclename .', please continue the process. Go to Auction Page!';
                         $user->notify(new NotificationsAuctionWinner($title, $message));
 
                         if ($key === 0) {
@@ -225,7 +230,7 @@ class VehicleController extends Controller
         $bid = Bid::select('bids.*')
         ->join('auctions', 'bids.auctions_id', '=', 'auctions.id')
         ->where('auctions.vehicles_id', $id)
-        ->orderBy('bids.bidamount', 'asc')
+        ->orderBy('bids.biddatetime', 'desc')
         ->take(5)
         ->get();
         if(!empty($iduser))
@@ -307,6 +312,90 @@ class VehicleController extends Controller
         $vehicle->vehicletypes_id = $request->input('type');
         $vehicle->year = $request->input('year');
         $vehicle->colour = $request->input('color');
+        $vehicle->adstatus = $request->input('action') === 'submit' ? 'Pending' : 'Draft';
+        $vehicle->inputdate = now();
+        $vehicle->save();
+
+        if ($request->hasFile('stnk')) {
+            $file = $request->file('stnk');
+            $fileName = "STNK"."-$vehicle->id". "." .$file->getClientOriginalExtension();
+            $file->move(public_path("uploads/vehicle/$vehicle->id"), $fileName);
+
+            DB::update("UPDATE drivedealio.vehicles SET stnk = :stnk where id = :id",
+            ['stnk'=> $fileName, 'id'=>$vehicle->id]);
+        }
+        if ($request->hasFile('bpkb')){
+            $file = $request->file('bpkb');
+            $fileName = "BPKB"."-$vehicle->id". "." .$file->getClientOriginalExtension();
+            $file->move(public_path("uploads/vehicle/$vehicle->id"), $fileName);
+
+            DB::update("UPDATE drivedealio.vehicles SET bpkb = :bpkb where id = :id",
+            ['bpkb'=> $fileName, 'id'=>$vehicle->id]);
+        }
+        if ($request->hasFile('invoice')){
+            $file = $request->file('invoice');
+            $fileName = "INV"."-$vehicle->id". "." .$file->getClientOriginalExtension();
+            $file->move(public_path("uploads/vehicle/$vehicle->id"), $fileName);
+
+            DB::update("UPDATE drivedealio.vehicles SET invoice = :invoice where id = :id",
+            ['invoice'=> $fileName, 'id'=>$vehicle->id]);
+        }
+
+        $date = DB::select(
+            DB::raw("SELECT count(inputdate) from drivedealio.vehicles where DATE(inputdate) = CURRENT_DATE;")
+        );
+
+        $data = [];
+        $counter = $date[0]->count + 1;
+        if ($request->hasFile('image')) {
+            $data = [];
+            $counter = $date[0]->count + 1;
+            foreach($request->file('image') as $image) {
+                $name = $vehicle->inputdate->format('ymd'). "-$counter". "." .$image->getClientOriginalExtension();
+                $image->move(public_path("images/vehicle/$vehicle->id"), $name);
+                $data[] = [
+                    'url' => $name,
+                    'vehicles_id' => $vehicle->id,
+                ];
+                $counter++;
+            }
+            DB::table('drivedealio.images')->insert($data);
+        }
+        if ($request->input('action') === 'submit') {
+            return redirect('/vehicle/inspectionappointment/' . $vehicle->id)
+                ->with('success', 'Vehicle Data Saved!');
+        } else {
+            return redirect('/vehicle/myvehicle')
+                ->with('success', 'Vehicle data saved as draft!');
+        }
+    }
+
+    public function editVehicle($id)
+    {
+        $iduser = auth()->id();
+        $vehicle = DB::select(
+            DB::raw("SELECT * FROM drivedealio.vehicles where id = $id AND users_id = $iduser;")
+        );
+
+        return view('vehicle.updatevehicledata', compact('vehicle'));
+    }
+
+    public function updateDataVehicle(Request $request, $id)
+    {
+        $vehicle = Vehicle::findOrFail($id);
+        $vehicle->model = $request->input('model');
+        $vehicle->platenumber = $request->input('plate');
+        $vehicle->fueltype = $request->input('fuel');
+        $vehicle->transmission = $request->input('trans');
+        $vehicle->enginecapacity = $request->input('capacity');
+        $vehicle->enginecylinders = $request->input('engcylinder');
+        $vehicle->variant = $request->input('variant');
+        $vehicle->seatsnumber = $request->input('seats');
+        $vehicle->users_id = auth()->id();
+        $vehicle->brands_id = $request->input('brand');
+        $vehicle->vehicletypes_id = $request->input('type');
+        $vehicle->year = $request->input('year');
+        $vehicle->colour = $request->input('color');
         $vehicle->adstatus = "Pending";
         $vehicle->inputdate = now();
         $vehicle->save();
@@ -335,6 +424,7 @@ class VehicleController extends Controller
             DB::update("UPDATE drivedealio.vehicles SET invoice = :invoice where id = :id",
             ['invoice'=> $fileName, 'id'=>$vehicle->id]);
         }
+
         $date = DB::select(
             DB::raw("SELECT count(inputdate) from drivedealio.vehicles where DATE(inputdate) = CURRENT_DATE;")
         );
@@ -354,7 +444,7 @@ class VehicleController extends Controller
         }
         DB::table('drivedealio.images')->insert($data);
 
-        return redirect('/vehicle/inspectionappointment/'. $vehicle->id)->with('status', 'Vehicle Data Saved!');
+        return redirect('/vehicle/inspectionappointment/'. $vehicle->id)->with('success', 'Vehicle Data Saved!');
     }
 
     public function approve($id)
@@ -364,7 +454,7 @@ class VehicleController extends Controller
         $vehicle->verificationdate = now();
         $vehicle->save();
 
-        return redirect('/admin/listvehicle')->with('status', 'Your request has been processed!')->with('approvedVehicleId', $vehicle->id);
+        return redirect('/admin/listvehicle')->with('success', 'Your request has been processed!')->with('approvedVehicleId', $vehicle->id);
     }
 
     public function appointment($id)
@@ -397,7 +487,6 @@ class VehicleController extends Controller
         $vehicle->district = District::find($request->input('district'))->name;
         $vehicle->village = Village::find($request->input('village'))->name;
         $vehicle->odometer = $request->input('odo');
-        // dd($vehicle);
         $vehicle->save();
 
         $appointment = Appointment::select('appointments.id as idappointment', 'vehicles.id as idvehicle', 'appointments.inspectors_id')
@@ -408,7 +497,6 @@ class VehicleController extends Controller
         $idappointment = $appointment[0]->idappointment;
         $appointment = Appointment::find($idappointment);
         $appointment->status = 'Booked';
-        // dd($appointment);
         $appointment->save();
 
         $idinspector = $appointment->inspectors_id;
@@ -417,7 +505,7 @@ class VehicleController extends Controller
         $message ='New Inpsection Request from User!';
         $inspector->notify(new Inspector($title, $message));
 
-        return redirect('/vehicle/myvehicle')->with('status', 'Your request has been processed!');
+        return redirect('/vehicle/myvehicle')->with('success', 'Your request has been processed!');
     }
 
     public function acceptAppointment($id)
@@ -426,7 +514,7 @@ class VehicleController extends Controller
         $appointment->status = 'Accepted';
         $appointment->save();
 
-        return redirect('/admin/listvehicle')->with('status', 'Your request has been processed!');
+        return redirect('/admin/listvehicle')->with('success', 'Your request has been processed!');
     }
 
     public function inspec($id)
@@ -449,9 +537,8 @@ class VehicleController extends Controller
 
     public function inspections(Request $request, $id)
     {
-
         $vehicle = Vehicle::findOrFail($id);
-        $vehicle->adstatus = 'Inspected';
+        $vehicle->adstatus = 'Setup Auction';
         $vehicle->chassis_number = $request->input('chassis');
         $vehicle->engine_number = $request->input('engine-num');
         $vehicle->save();
@@ -466,31 +553,24 @@ class VehicleController extends Controller
         $inspection->appointments_id = $request->input('dates');
         $recprice = preg_replace('/[^\d]/', '', $request->input('recprice'));
         $inspection->recprice = (int)$recprice;
-        // dd($inspection);
         $inspection->save();
 
-        return redirect('/admin/listvehicle')->with('status', 'Your request has been processed!');
-    }
-
-    public function finishGrading($id)
-    {
-        $vehicle = Vehicle::findOrFail($id);
-        $vehicle->adstatus = 'Setup Auction';
-        $vehicle->save();
-
-        $ownerVehicle = Vehicle::select('users_id as iduser')
+        $ownerVehicle = Vehicle::select('users_id as iduser', 'model')
         ->where('id', $id)
         ->first();
 
         $iduser = $ownerVehicle->iduser;
+        $vehicleName = $ownerVehicle->model;
 
         $user = User::find($iduser);
         $title = 'Inspection Finish';
-        $message = 'Inspection finish, check the result in MyVehicle Page!';
+        $message = 'Inspection finish for '. $vehicleName .', check the result in MyVehicle Page !';
         $user->notify(new NotificationsVehicle($title, $message));
+
 
         return redirect('/admin/listvehicle')->with('status', 'Your request has been processed!');
     }
+
 
     public function auctionSetupBtn($id)
     {
@@ -522,7 +602,6 @@ class VehicleController extends Controller
         $auction->lot_number = $lotNumber;
         $auction->start_date = $request->input('startdate');
         $auction->end_date = $request->input('enddate');
-        // dd($auction);
         $auction->save();
 
         $vehicle = Vehicle::findOrFail($id);
@@ -531,6 +610,42 @@ class VehicleController extends Controller
         $vehicle->save();
 
         return redirect('/vehicle/myvehicle')->with('status', 'Your request has been processed!');
+    }
+
+    public function orderDetails(Request $request)
+    {
+        $id = ($request->get('id'));
+        $data = AuctionOrder::find($id);
+        $order = DB::select(
+            DB::raw("SELECT CONCAT(v.model, ' ', v.variant, ' ', v.colour, ', ', v.year) as vehiclename, a.lot_number, aw.id as idwinner, ao.orderdate, b.name,
+            ao.invoicenum, ao.total_price, u.firstname, u.lastname, u.email, u.phonenumber, ao.id as idorder, a.current_price, ao.status, v.id as idvehicle,
+            (SELECT COALESCE(i.url, 'placeholder_url') FROM drivedealio.images as i WHERE i.vehicles_id = v.id LIMIT 1) as url,
+            ad.name as addressname, ad.address, ad.province, ad.city, ad.district, ad.village, ad.zipcode
+            FROM drivedealio.vehicles as v INNER JOIN drivedealio.auctions as a on v.id = a.vehicles_id
+            INNER JOIN drivedealio.auctionwinners as aw on a.id = aw.auctions_id
+            INNER JOIN drivedealio.auction_orders as ao on aw.id = ao.auctionwinners_id
+            INNER JOIN drivedealio.users as u on aw.users_id = u.id
+            INNER JOIN drivedealio.brands as b on v.brands_id = b.id
+            INNER JOIN drivedealio.addresses as ad on ao.addresses_id = ad.id
+            WHERE ao.id = $id;")
+        );
+
+        $towing = DB::select(
+            DB::raw("SELECT tp.name, tw.price, tw.trans_number
+            FROM drivedealio.transporters as tp INNER JOIN drivedealio.towings as tw on tp.id = tw.transporters_id
+            INNER JOIN drivedealio.auction_orders as ao on tw.id = ao.towings_id
+            WHERE ao.id = $id;")
+        );
+        $status = DB::select(
+            DB::raw("SELECT ts.status, ts.created_at
+            FROM drivedealio.auction_orders as ao INNER JOIN drivedealio.towings as t on ao.towings_id = t.id
+            INNER JOIN drivedealio.towing_statuses as ts on t.id = ts.towings_id
+            WHERE ao.id = $id ORDER BY ts.created_at asc;")
+        );
+
+        return response()->json(array(
+            'msg'=> view('auction.orderdetails',compact('data', 'order', 'towing', 'status'))->render()
+        ),200);
     }
 
     protected function formatDuration($interval)
@@ -553,10 +668,5 @@ class VehicleController extends Controller
             $formattedDuration .= $interval->s . 'S';
         }
         return trim($formattedDuration);
-    }
-
-    public function destroy(Vehicle $vehicle)
-    {
-        //
     }
 }

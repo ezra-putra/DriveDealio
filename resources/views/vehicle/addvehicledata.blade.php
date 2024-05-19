@@ -43,14 +43,14 @@
                                         <label class="form-label" for="vehiclename">Vehicle Name</label>
                                         <div class="col-md-12 mb-2">
                                             <input type="text" class="form-control" id="vehiclename"
-                                                placeholder="Vehicle Name" name="model" required/>
+                                                placeholder="Vehicle Name" name="model" />
                                         </div>
                                     </div>
                                     <div class="col-md-4">
                                         <label class="form-label" for="select-year">Vehicle Build Year</label>
                                         <div class="col-md-12 mb-2">
                                             <input type="text" class="form-control" id="select-year"
-                                                placeholder="Production Year" name="year" required/>
+                                                placeholder="Production Year" name="year" />
                                         </div>
                                     </div>
                                 </div>
@@ -60,14 +60,14 @@
                                         <label class="form-label" for="vehiclevariant">Vehicle Variants</label>
                                         <div class="col-md-12 mb-2">
                                             <input type="text" class="form-control" id="vehiclevariant"
-                                                placeholder="Vehicle Variants" name="variant" required/>
+                                                placeholder="Vehicle Variants" name="variant" />
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <label class="form-label" for="enginecapacity">Vehicle Engine Capacity</label>
                                         <div class="col-md-12 mb-2">
                                             <input type="text" class="form-control" id="enginecapacity"
-                                                placeholder="Vehicle Engine Capacity" name="capacity" required/>
+                                                placeholder="Vehicle Engine Capacity" name="capacity" />
                                         </div>
                                     </div>
                                 </div>
@@ -77,7 +77,7 @@
                                         <label class="form-label" for="cylinder">Engine Cylinder</label>
                                         <div class="col-md-12 mb-2">
                                             <input type="number" class="form-control" id="cylinder"
-                                                placeholder="Engine Cylinder" name="engcylinder" required/>
+                                                placeholder="Engine Cylinder" name="engcylinder" />
                                         </div>
                                     </div>
                                     <div class="col-md-3">
@@ -105,21 +105,21 @@
                                         <label class="form-label" for="platenum">Plate Number</label>
                                         <div class="col-md-12 mb-2">
                                             <input type="text" class="form-control" id="platenum"
-                                                placeholder="Plate Number" name="plate" required/>
+                                                placeholder="Plate Number" name="plate" />
                                         </div>
                                     </div>
                                     <div class="col-md-3">
                                         <label class="form-label" for="select-color">Vehicle Colour</label>
                                         <div class="col-md-12 mb-2">
                                             <input type="text" class="form-control" id="select-color"
-                                                placeholder="Colour" name="color" required/>
+                                                placeholder="Colour" name="color" />
                                         </div>
                                     </div>
                                     <div class="col-md-3">
                                         <label class="form-label" for="vehicleseats">Vehicle Seats Number</label>
                                         <div class="col-md-12 mb-2">
                                             <input type="text" class="form-control" id="vehicleseats"
-                                                placeholder="Vehicle Seats" name="seats" required/>
+                                                placeholder="Vehicle Seats" name="seats" />
                                         </div>
                                     </div>
                                 </div>
@@ -139,7 +139,7 @@
 
                             <div class="col-md-12">
                                 <label for="fileStnk" class="form-label">Upload Scan STNK</label>
-                                <input class="form-control" type="file" id="fileStnk" name="stnk" accept=".pdf" required/>
+                                <input class="form-control" type="file" id="fileStnk" name="stnk" accept=".pdf" />
                                 <p style="color: red; margin-left: 5px; size: 10px;">*Maximum file size is 2MB, and only
                                     PDF file format is accepted.</p>
                             </div>
@@ -153,18 +153,14 @@
 
                             <div class="col-md-12">
                                 <label for="fileBpkb" class="form-label">Upload Scan BPKB</label>
-                                <input class="form-control" type="file" id="fileBpkb" name="bpkb" accept=".pdf" required/>
+                                <input class="form-control" type="file" id="fileBpkb" name="bpkb" accept=".pdf" />
                                 <p style="color: red; margin-left: 5px; size: 10px;">*Maximum file size is 2MB, and only
                                     PDF file format is accepted.</p>
                             </div>
                         </div>
                         <div class="d-flex justify-content-between">
-                            <button class="btn btn-outline-info btn-draft">
-                                <i data-feather="file-text" class="align-middle me-sm-25 me-0"></i>
-                                <span class="align-middle d-sm-inline-block d-none">Save as Draft</span>
-                            </button>
-                            <input type="submit" class="btn btn-primary btn-submit"
-                                value="Submit">
+                            <button type="submit" name="action" value="draft" class="btn btn-outline-info">Save as Draft</button>
+                            <button type="submit" name="action" value="submit" class="btn btn-success">Submit</button>
                         </div>
                     </div>
                 </form>

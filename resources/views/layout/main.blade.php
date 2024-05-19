@@ -6,7 +6,6 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=0,minimal-ui">
-    <meta name="author" content="PIXINVENT">
     <title>DriveDealio - Your Trusted Vehicle Auctions and Autoparts</title>
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('/app-assets/images/ico/favicon.ico') }}">
     <link href="{{ asset('/app-assets/fonts/monserat.css') }}"
@@ -29,14 +28,6 @@
 
     <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/css/core/colors/palette-gradient.css') }}">
 
-    <link rel="stylesheet" type="text/css"
-        href="{{ asset('app-assets/vendors/css/tables/datatable/dataTables.bootstrap5.min.css') }}">
-    <link rel="stylesheet" type="text/css"
-        href="{{ asset('app-assets/vendors/css/tables/datatable/responsive.bootstrap5.min.css') }}">
-    <link rel="stylesheet" type="text/css"
-        href="{{ asset('app-assets/vendors/css/tables/datatable/buttons.bootstrap5.min.css') }}">
-    <link rel="stylesheet" type="text/css"
-        href="{{ asset('app-assets/vendors/css/tables/datatable/rowGroup.bootstrap5.min.css') }}">
 
     <link rel="stylesheet" type="text/css" href="{{ asset('/app-assets/css/core/menu/menu-types/horizontal-menu.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('/app-assets/css/plugins/extensions/ext-component-sliders.css') }}">
@@ -277,18 +268,11 @@
                         <li class="nav-item mx-2">
                             <a href="/login" class="btn btn-outline-primary">Login</a>
                         </li>
-                        <li class="nav-item mx-0.5">
-                            <a href="{{ route('register') }}" class="btn btn-outline-primary">Register</a>
-                        </li>
                     @endif
                 </ul>
             </div>
         </div>
     </nav>
-
-
-
-
     <!-- END: Header-->
 
 
@@ -338,83 +322,85 @@
 
 
     <!-- BEGIN: Vendor JS-->
-    <script src="../../../app-assets/vendors/js/vendors.min.js"></script>
+    <script src="{{ asset('/app-assets/vendors/js/vendors.min.js') }}"></script>
     <!-- BEGIN Vendor JS-->
 
     <!-- BEGIN: Page Vendor JS-->
-    <script src="../../../app-assets/vendors/js/ui/jquery.sticky.js"></script>
-    <script src="../../../app-assets/vendors/js/extensions/wNumb.min.js"></script>
-    <script src="../../../app-assets/vendors/js/extensions/nouislider.min.js"></script>
-    <script src="../../../app-assets/vendors/js/extensions/toastr.min.js"></script>
+    <script src="{{ asset('/app-assets/vendors/js/ui/jquery.sticky.js') }}"></script>
+    <script src="{{ asset('/app-assets/vendors/js/extensions/wNumb.min.js') }}"></script>
+    <script src="{{ asset('/app-assets/vendors/js/extensions/nouislider.min.js') }}"></script>
+    <script src="{{ asset('/app-assets/vendors/js/extensions/toastr.min.js') }}"></script>
     <!-- END: Page Vendor JS-->
 
-    <!-- BEGIN: Theme JS-->
-    <script src="../../../app-assets/js/core/app-menu.js"></script>
-    <script src="../../../app-assets/js/core/app.js"></script>
+    <!-- BEGIN: Theme JS-->'
+    <script src="{{ asset('/app-assets/js/core/app-menu.js') }}"></script>
+    <script src="{{ asset('/app-assets/js/core/app.js') }}"></script>
     <!-- END: Theme JS-->
 
     <!-- BEGIN: Page JS-->
-    <script src="../../../app-assets/js/scripts/pages/app-ecommerce.js"></script>
+    <script src="{{ asset('/app-assets/js/scripts/pages/app-ecommerce.js') }}"></script>
     <!-- END: Page JS-->
 
     {{-- Swipper --}}
     <!-- BEGIN: Vendor JS -->
-    <script src="../../../app-assets/vendors/js/vendors.min.js"></script>
+    <script src="{{ asset('/app-assets/vendors/js/vendors.min.js') }}"></script>
     <!-- BEGIN Vendor JS-->
 
     <!-- BEGIN: Page Vendor JS-->
-    <script src="../../../app-assets/vendors/js/ui/jquery.sticky.js"></script>
-    <script src="../../../app-assets/vendors/js/forms/spinner/jquery.bootstrap-touchspin.js"></script>
-    <script src="../../../app-assets/vendors/js/extensions/swiper.min.js"></script>
+    <script src="{{ asset('/app-assets/vendors/js/ui/jquery.sticky.js') }}"></script>
+    <script src="{{ asset('/app-assets/vendors/js/forms/spinner/jquery.bootstrap-touchspin.js') }}"></script>
+    <script src="{{ asset('/app-assets/vendors/js/extensions/swiper.min.js') }}"></script>
     <!-- END: Page Vendor JS-->
 
     <!-- BEGIN: Theme JS-->
-    <script src="../../../app-assets/js/core/app-menu.js"></script>
-    <script src="../../../app-assets/js/core/app.js"></script>
+    <script src="{{ asset('/app-assets/js/core/app-menu.js') }}"></script>
+    <script src="{{ asset('/app-assets/js/core/app.js') }}"></script>
     <!-- END: Theme JS-->
 
     <!-- BEGIN: Page JS-->
-    <script src="../../../app-assets/js/scripts/pages/app-ecommerce-details.js"></script>
+    <script src="{{ asset('/app-assets/js/scripts/pages/app-ecommerce-details.js') }}"></script>
 
-    <script src="../../../app-assets/vendors/js/forms/select/select2.full.min.js"></script>
+    <script src="{{ asset('/app-assets/vendors/js/forms/select/select2.full.min.js') }}"></script>
     <!-- END: Page JS-->
     {{-- End Swipper --}}
 
     {{-- Start Recommendation --}}
     <!-- BEGIN: Vendor JS-->
-    <script src="../../../app-assets/vendors/js/vendors.min.js"></script>
+    <script src="{{ asset('/app-assets/vendors/js/vendors.min.js') }}"></script>
     <!-- BEGIN Vendor JS-->
 
     <!-- BEGIN: Page Vendor JS-->
-    <script src="../../../app-assets/vendors/js/ui/jquery.sticky.js"></script>
+    <script src="{{ asset('/app-assets/vendors/js/ui/jquery.sticky.js') }}"></script>
 
-    <script src="../../../app-assets/vendors/js/extensions/moment.min.js"></script>
-    <script src="../../../app-assets/vendors/js/forms/validation/jquery.validate.min.js"></script>
-    <script src="../../../app-assets/vendors/js/pickers/flatpickr/flatpickr.min.js"></script>
+    <script src="{{ asset('/app-assets/vendors/js/extensions/moment.min.js') }}"></script>
+    <script src="{{ asset('/app-assets/vendors/js/forms/validation/jquery.validate.min.js') }}"></script>
+    <script src="{{ asset('/app-assets/vendors/js/pickers/flatpickr/flatpickr.min.js') }}"></script>
 
 
     <!-- END: Page Vendor JS-->
 
     <!-- BEGIN: Theme JS-->
-    <script src="../../../app-assets/js/core/app-menu.js"></script>
-    <script src="../../../app-assets/js/core/app.js"></script>
+    <script src="{{ asset('/app-assets/js/core/app-menu.js') }}"></script>
+    <script src="{{ asset('/app-assets/js/core/app.js') }}"></script>
     <!-- END: Theme JS-->
 
     <!-- BEGIN: Page JS-->
-    <script src="../../../app-assets/vendors/js/file-uploaders/dropzone.min.js"></script>
+    <script src="{{ asset('/app-assets/vendors/js/file-uploaders/dropzone.min.js') }}"></script>
 
-    <script src="../../../app-assets/vendors/js/ui/jquery.sticky.js"></script>
-    <script src="../../../app-assets/vendors/js/forms/wizard/bs-stepper.min.js"></script>
-    <script src="../../../app-assets/vendors/js/forms/select/select2.full.min.js"></script>
-    <script src="../../../app-assets/vendors/js/forms/validation/jquery.validate.min.js"></script>
+    <script src="{{ asset('/app-assets/vendors/js/ui/jquery.sticky.js') }}"></script>
+    <script src="{{ asset('/app-assets/vendors/js/forms/wizard/bs-stepper.min.js') }}"></script>
+    <script src="{{ asset('/app-assets/vendors/js/forms/select/select2.full.min.js') }}"></script>
+    <script src="{{ asset('/app-assets/vendors/js/forms/validation/jquery.validate.min.js') }}"></script>
 
-    <script src="../../../app-assets/js/scripts/extensions/ext-component-swiper.js"></script>
+    <script src="{{ asset('/app-assets/js/scripts/extensions/ext-component-swiper.js') }}"></script>
 
-    <script src="../../../app-assets/js/scripts/pages/page-pricing.js"></script>
+    <script src="{{ asset('/app-assets/js/scripts/pages/page-pricing.js') }}"></script>
 
-    <script src="../../../app-assets/js/scripts/pages/app-calendar-events.js"></script>
+    <script src="{{ asset('/app-assets/js/scripts/pages/app-calendar-events.js') }}"></script>
 
-    <script src="../../../app-assets/js/scripts/forms/form-wizard.js"></script>
+    <script src="{{ asset('/app-assets/js/scripts/forms/form-wizard.js') }}"></script>
+
+
     <!-- END: Page JS-->
     {{-- End Recommendation --}}
 

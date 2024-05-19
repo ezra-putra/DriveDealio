@@ -74,11 +74,12 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/vehicle/inspectionappointment/{id}', [VehicleController::class, 'appointment'])->name('vehicle.appointment');
     Route::put('/appointmentDate/{id}', [VehicleController::class, 'appointmentDate'])->name('appointmentDate');
     Route::get('/approveauctions/{id}', [VehicleController::class, 'approveAuction'])->name('vehicle.approveautions');
+    Route::get('/edit-vehicle/{id}', [VehicleController::class, 'editVehicle'])->name('vehicle.editform');
+    Route::put('vehicle-update/{id}', [VehicleController::class, 'sparepartUpdate'])->name('vehicle.update');
 
     Route::get('/appointmentconfirmation/{id}', [VehicleController::class, 'acceptAppointment'])->name('acceptAppointment');
     Route::get('/inspector/inspec/{id}', [VehicleController::class, 'inspec'])->name('inspector.inspec');
     Route::put('/inspections/{id}', [VehicleController::class, 'inspections'])->name('inspector.inspections');
-    Route::get('/inspector/finishgrade/{id}', [VehicleController::class, 'finishGrading'])->name('finishGrading');
 
     Route::get('/admin/dashboard', [AdminController::class, 'dashboard'],function () {
         return view('admin.dashboard');
@@ -91,6 +92,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/approve-loan/{id}', [AdminController::class, 'approveLoan'])->name('loan.approve');
     Route::get('/reject-loan/{id}', [AdminController::class, 'rejectLoan'])->name('loan.reject');
     Route::get('/admin/reviewvehicle/{id}', [AdminController::class, 'adminEdit'])->name('vehicle.adminEdit');
+    Route::get('/listtransaction', [AdminController::class, 'listTransaction']);
 
     Route::get('/inspector/dashboard', [InspectorController::class, 'dashboardIndex'], function () {
         return view('inspector.dashboard');

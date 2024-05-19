@@ -42,7 +42,7 @@ class AuctionSaleStatusCron extends Command
 
         foreach ($winners as $winner) {
             $createdAt = Carbon::parse($winner->created_at);
-            if (!$winner->is_checkout && $createdAt->diffInDays(Carbon::now()) > 3) {
+            if (!$winner->is_checkout && $createdAt->diffInDays(Carbon::now()) > 5) {
                 $idauction = $winner->auctions_id;
                 $firstWinner = AuctionWinner::where('is_winner', true)->where('is_checkout', false)
                     ->where('auctions_id', $idauction)
@@ -78,6 +78,14 @@ class AuctionSaleStatusCron extends Command
                 if($thirdWinner){
                     $thirdWinner->is_winner = false;
                     $thirdWinner->save();
+                }
+
+                if(!$firstWinner && !$secondWinner && !$thirdWinner){
+                    $vehicle = Vehicle::join('auctions', 'auctions.vehicles_id', '=', 'vehicles.id')
+                    ->where('auctions.id', $idauction)
+                    ->first();
+                    $vehicle->adstatus = "Setup Auction";
+                    $vehicle->save();
                 }
             }
         }

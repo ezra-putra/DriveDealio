@@ -146,10 +146,15 @@
                                             My Loan
                                         </a>
                                         @endif
+                                    @else
+                                        <a href="{{ url('/myloan', $ao->idloan) }}" class="btn btn-info">
+                                            My Loan
+                                        </a>
+                                        <a href="{{ url('/paymentauction', $ao->idorder) }}" class="btn btn-info w-100 mb-1">Pay with Virtual Account</a>
                                     @endif
                                 @endif
                                 @if ($ao->status === 'Arrived')
-                                <a href="{{ route('finish.order', $ao->idorder) }}" class="btn btn-info">
+                                <a href="{{ route('finish.order', $ao->idorder) }}" class="btn btn-info ms-1">
                                     Finish
                                 </a>
                                 @endif

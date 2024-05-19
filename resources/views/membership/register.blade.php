@@ -29,7 +29,7 @@
                                     </div>
                                 </div>
                             </div>
-                                @if (empty($document))
+                                @if ($document[0]->npwpktpcheck === false)
                                 <div class="col-md-12">
                                     <label for="fileKtp" class="form-label">Upload Scan KTP</label>
                                     <input class="form-control" type="file" id="fileKtp" name="ktp" accept=".pdf" required/>
@@ -70,15 +70,6 @@
                                             <div class="col-sm-4">
                                                 <p style="font-size: 14px; font-weight:500;" class="mt-1" id="subtotal">@currency(0)</p>
                                             </div>
-                                            <label for="colFormLabelLg" class="col-sm-8 col-form-label-lg">
-                                                <p style="font-size: 14px;font-weight:500; ">Admin Fee</p>
-                                            </label>
-                                            @php
-                                                $adminfee = 5000;
-                                            @endphp
-                                            <div class="col-sm-4">
-                                                <p style="font-size: 14px; font-weight:500;" class="mt-1" id="adminfee">@currency($adminfee)</p>
-                                            </div>
                                         </div>
                                         <hr style="height:5px;border-width:0;color:gray;background-color:lightgray">
                                         <div class="row">
@@ -103,7 +94,6 @@
             </div>
         </div>
     </div>
-    </div>
 </form>
 <script>
     function formatCurrency(amount) {
@@ -117,9 +107,7 @@
     function updateMemberPrice(price) {
         var formatedSubTotal = formatCurrency(price);
         document.getElementById('subtotal').innerText = formatedSubTotal;
-
-        var adminfee = {{ $adminfee }};
-        var finalPrice = price + adminfee;
+        var finalPrice = price;
         var formatedFinalPrice = formatCurrency(finalPrice);
         document.getElementById('finalprice').innerText = formatedFinalPrice;
 

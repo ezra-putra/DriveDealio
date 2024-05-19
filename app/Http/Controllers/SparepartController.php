@@ -13,7 +13,7 @@ class SparepartController extends Controller
     {
         $query = DB::table('spareparts as s')
         ->select('sh.id as idshop', 'sh.name', 'sh.city', 's.id as idsparepart', 's.partnumber', 's.partname', 's.unitprice', 's.stock', 's.description',
-                's.vehiclemodel', 's.buildyear', 's.colour', 's.condition', 's.shops_id', 's.weight',
+                's.vehiclemodel', 's.buildyear', 's.colour', 's.condition', 's.shops_id', 's.weight', 's.preorder',
                 DB::raw('(SELECT p.url FROM drivedealio.pics as p WHERE p.spareparts_id = s.id LIMIT 1) as url'))
         ->join('shops as sh', 's.shops_id', '=', 'sh.id')
         ->where('s.stock', '>', 0);
@@ -24,20 +24,18 @@ class SparepartController extends Controller
             $query->whereIn('s.sparepartcategories_id', explode(',',$selectedCategories));
         }
 
-        $sparepart = $query->paginate(10);
+        $sparepart = $query->get();
 
         $categories = DB::table('sparepartcategories')->select('id', 'categoriname')->get();
 
         return view('sparepart.sparepartindex', compact('sparepart', 'categories', 'selectedCategories'));
     }
 
-
-
     public function show($id)
     {
         $sparepart = DB::select(
             DB::raw("SELECT p.url, sh.id as idshop, sh.name, sh.city, sh.province, s.id as idsparepart, s.partnumber, s.partname, s.unitprice, s.stock, s.description,
-            s.vehiclemodel as model, s.buildyear, s.colour, s.condition, s.shops_id, s.brand, s.weight, sc.categoriname as category, sh.pics, sh.users_id
+            s.vehiclemodel as model, s.buildyear, s.colour, s.condition, s.shops_id, s.brand, s.weight, sc.categoriname as category, sh.pics, sh.users_id, s.preorder
             FROM drivedealio.spareparts as s LEFT JOIN drivedealio.pics as p on s.id = p.spareparts_id
             INNER JOIN drivedealio.shops as sh on s.shops_id = sh.id
             INNER JOIN drivedealio.sparepartcategories as sc on sc.id = s.sparepartcategories_id

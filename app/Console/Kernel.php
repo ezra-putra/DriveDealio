@@ -23,7 +23,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->command('loan:cron')->monthlyOn(1);
-        // $schedule->command('auctionsale:cron')->everyMinute();
+        $schedule->command('auctionsale:cron')->everyMinute();
     }
 
     /**

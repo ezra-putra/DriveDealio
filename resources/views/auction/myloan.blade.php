@@ -35,6 +35,14 @@
                             <p style="font-size: 12px; font-weight: bold" class="mt-1">{{ $month }} Month ({{ $l->loantenor }} Year)</p>
                         </div>
                     </div>
+                    <div class="row">
+                        <label for="colFormLabelLg" class="col-sm-6 col-form-label-lg">
+                            <p style="font-size: 12px; font-weight: bold">Loan Status</p>
+                        </label>
+                        <div class="col-sm-6">
+                            <p style="font-size: 12px; font-weight: bold" class="mt-1">{{ $l->status }}</p>
+                        </div>
+                    </div>
                     @endforeach
                 </div>
             </div>

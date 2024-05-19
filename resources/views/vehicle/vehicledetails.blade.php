@@ -240,7 +240,6 @@
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
     <hr style="height:1px;border-width:0;color:gray;background-color:lightgray">
@@ -297,7 +296,6 @@
             </form>
             <h6 style="color: red">*Current Price: @currency($vehicle[0]->current_price)</h6>
             @endif
-
         </div>
         <div class="col-md-5">
             <div class="col-md-12">
@@ -525,8 +523,6 @@
         </div>
     </div>
 </div>
-
-
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>

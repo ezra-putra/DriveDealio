@@ -34,12 +34,11 @@ class LoanMonthlyPaymentCron extends Command
      */
     public function handle()
     {
-        // Fetch all active loans
         $loans = Loan::where('status', 'Approved')->get();
 
         if ($loans->isEmpty()) {
             $this->error('No active loans found.');
-            return 1; // Return error code
+            return 1;
         }
 
         foreach ($loans as $loan) {
@@ -48,23 +47,24 @@ class LoanMonthlyPaymentCron extends Command
             $monthlypayment = $loan->monthlypayment;
             $loantenor = $loan->loantenor * 12;
 
-            // Check if the vehicle associated with the loan has been delivered to the buyer
-            $auctionOrder = AuctionOrder::where('loans_id', $idloan)->first();
+            $auctionOrder = DB::table('auction_orders')
+            ->join('loans', 'auction_orders.id', '=', 'loans.auction_orders_id')
+            ->where('loans.id', $idloan)
+            ->select('auction_orders.status')
+            ->first();
 
             if ($auctionOrder && $auctionOrder->status === 'Finished') {
-                // Fetch existing payments for the loan
+
                 $existingPayments = LoanPayment::where('loans_id', $idloan)
                     ->max('paymentcount');
 
-                // If there are no existing payments, set the counter to 1, otherwise increment it
                 $counter = ($existingPayments !== null) ? $existingPayments + 1 : 1;
 
                 if ($counter > $loantenor) {
                     $this->info("Loan payment for loan ID $idloan completed.");
                     $loan->update(['status' => 'Finished']);
-                    continue; // Move to next loan
+                    continue;
                 }
-                // Create loan payment record
                 $loanPayment = new LoanPayment;
                 $loanPayment->invoicenum = "INV/MP/" . now()->format('Y/m/d') . "/$idloan/$counter";
                 $loanPayment->loans_id = $idloan;
@@ -84,6 +84,6 @@ class LoanMonthlyPaymentCron extends Command
                 $this->info("Loan payment for loan ID $idloan not recorded as the vehicle has not been delivered to the buyer yet.");
             }
         }
-        return 0; // Return success code
+        return 0;
     }
 }

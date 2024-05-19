@@ -130,7 +130,7 @@
 
         var today = new Date();
         var minDate = new Date(today);
-        minDate.setDate(today.getDate() + 1)
+        minDate.setDate(today.getDate())
         // Initialize Flatpickr with minDate option
         flatpickr("#dateInput", {
             minDate: minDate,
