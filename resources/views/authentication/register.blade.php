@@ -68,8 +68,6 @@
                                                 <h2 class="fw-bolder mb-75">Account Information</h2>
                                                 <span>Enter your username password details</span>
                                             </div>
-
-
                                             <div class="col-md-12 mb-1">
                                                 <label class="form-label" for="email">Email</label>
                                                 <input type="email" name="email" id="email"
@@ -101,7 +99,6 @@
                                                     </div>
                                                 </div>
                                             </div>
-
                                             <div class="row">
                                                 <div class="col-md-6 mb-1">
                                                     <label class="form-label" for="fname">Firstname</label>
@@ -126,7 +123,6 @@
                                                         placeholder="October 14, 2020" />
                                                 </div>
                                             </div>
-
                                             <div class="d-flex justify-content-center mt-2">
                                                 <button class="btn btn-info btn-submit w-100">
                                                     <span

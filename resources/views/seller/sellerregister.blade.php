@@ -45,27 +45,11 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="row mb-1">
-                                <div class="col-md-6 mb-1">
-                                    <label class="form-label" for="select-regencies">Regencies</label>
-                                    <select class="form-select" id="select-regencies" name="regency">
-                                        <option value="">--Choose Regencies--</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-6 mb-1">
-                                    <label class="form-label" for="select-district">District</label>
-                                        <select class="form-select" id="select-district" name="district">
-                                            <option value="">--Choose District--</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label" for="shop-zip">Shop Zipcode</label>
-                                    <div class="col-md-12 mb-2">
-                                        <input type="text" class="form-control" id="shop-zip" placeholder="Zip Code"
-                                            name="shopzip" />
-                                    </div>
-                                </div>
+                            <div class="col-12 mb-1">
+                                <label class="form-label" for="select-cities">City</label>
+                                <select class="form-select" id="select-cities" name="city">
+                                    <option value="">--Choose City--</option>
+                                </select>
                             </div>
                         </div>
                         <div class="d-flex justify-content-end">
@@ -91,12 +75,12 @@
                     let province_id = $('#select-province').val();
                     $.ajax({
                         type: 'POST',
-                        url: "{{ route('regency') }}",
+                        url: "{{ route('cities') }}",
                         data: { province_id:province_id },
                         cache: false,
 
                         success: function(params){
-                            $('#select-regencies').html(params);
+                            $('#select-cities').html(params);
                         },
                         error: function(data){
                             console.log(data);
@@ -104,25 +88,6 @@
                     })
                 })
             })
-
-            $(function(){
-                $('#select-regencies').on('change', function() {
-                    let regency_id = $('#select-regencies').val();
-                    $.ajax({
-                        type: 'POST',
-                        url: "{{ route('district') }}",
-                        data: { regency_id:regency_id },
-                        cache: false,
-
-                        success: function(params){
-                            $('#select-district').html(params);
-                        },
-                        error: function(data){
-                            console.log(data);
-                        }
-                    })
-                })
-            })
-        })
+        });
     </script>
 @endsection

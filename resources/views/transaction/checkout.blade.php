@@ -13,9 +13,7 @@
                     <p></p>
                     @foreach ($address as $a)
                     <p style="font-weight: 500;">{{ $a->name }}</p>
-                    <p>{{ $a->address }}</p>
-                    <p>{{ $a->district }}, {{ $a->city }}, {{ $a->zipcode }}</p>
-                    <p>{{ $a->province }}</p>
+                    <p>{{ $a->address }} {{ $a->city }}, {{ $a->province }}</p>
                     @endforeach
                     @if (auth()->user() && auth()->user()->roles_id === 2)
                         @if (empty($address))
@@ -68,46 +66,20 @@
                         @endforeach
 
                         <div class="col-md-12 mt-1">
-                            <p class="mb-0">Select Shipping</p>
-                            <div class="card-body">
-                                <div class="row custom-options-checkable g-1">
-                                    @foreach ($shipping as $s)
-                                    <div class="col-md-6">
-                                        <input class="custom-option-item-check" type="radio" name="ship" value="{{ $s->id }}" id="rdoship-{{ $s->id }}" checked/>
-                                        <label class="custom-option-item p-1" for="rdoship-{{ $s->id }}">
-                                            <span class="d-flex justify-content-between flex-wrap mb-50">
-                                                <span class="fw-bolder">{{ $s->name }}</span>
-                                                @php
-                                                    if ($distanceValue > 100.0)
-                                                    {
-                                                        if ($s->id === 1)
-                                                        {
-                                                            $price = ($distanceValue * 50) + ($weight * 4000);
-                                                        }
-                                                        elseif ($s->id === 2)
-                                                        {
-                                                            $price = ($distanceValue * 20) + ($weight * 4000);
-                                                        }
-                                                    }
-                                                    else
-                                                    {
-                                                        if ($s->id === 1)
-                                                        {
-                                                            $price = ($distanceValue * 800) + ($weight * 4000);
-                                                        }
-                                                        elseif ($s->id === 2)
-                                                        {
-                                                            $price = ($distanceValue * 500) + ($weight * 4000);
-                                                        }
-
-                                                    }
-                                                @endphp
-                                                <span class="fw-bolder">@currency($price)</span>
-                                            </span>
-                                            <small class="d-block">{{ $s->details }}</small>
-                                        </label>
-                                    </div>
-                                    @endforeach
+                            <p class="mb-1">Select Shipping</p>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <select class="form-select" id="select-courier" name="courier" onchange="calculateOngkirFee()">
+                                        <option value="">--Select Courier--</option>
+                                        <option value="jne">JNE</option>
+                                        <option value="tiki">Tiki</option>
+                                        <option value="pos">Pos Indonesia</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <select class="form-select" id="select-service" name="service" onchange="updateShippingCost()">
+                                        <option value="">--Select Service--</option>
+                                    </select>
                                 </div>
                             </div>
                         </div>
@@ -140,7 +112,7 @@
                             <p style="font-size: 14px;font-weight:700; ">Shipping Cost</p>
                         </label>
                         <div class="col-sm-4">
-                            <p style="font-size: 14px; font-weight:700;" class="mt-1" id="shipping">@currency($price)</p>
+                            <p style="font-size: 14px; font-weight:700;" class="mt-1" id="shipping">@currency($shippingCost)</p>
                         </div>
                     </div>
                     <hr style="height:5px;border-width:0;color:gray;background-color:lightgray">
@@ -154,7 +126,7 @@
                     </div>
                     <form action="{{ route('order.post') }}" method="POST" enctype="multipart/form-data" class="row gy-1 gx-2 mt-75" id="bidForm">
                     @csrf
-                        <input type="hidden" name="shipId" id="selectedShipId" value="">
+                        <input type="hidden" name="courierName" id="courierId" value="">
                         <input type="hidden" name="ongkirfee" value=>
                         <input type="hidden" name="weight" value={{ $weight }}>
                         <input type="hidden" name="totalPrice" value=>
@@ -167,8 +139,6 @@
     </div>
 </div>
 
-
-{{-- Modal Add Address --}}
 <div class="modal fade" id="modalAddress" tabindex="-1" role="basic" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
@@ -199,36 +169,16 @@
                                 <select class="form-select" id="select-province" name="province">
                                     <option value="">--Choose Province--</option>
                                     @foreach ($provinces as $p)
-                                        <option value="{{ $p->id }}">{{ $p->name }}</option>
+                                        <option value="{{ $p->province_id }}">{{ $p->province_name }}</option>
                                     @endforeach
                                 </select>
                             </div>
 
                             <div class="col-6 mb-1">
-                                <label class="form-label" for="select-regencies">Regencies</label>
-                                <select class="form-select" id="select-regencies" name="regency">
-                                    <option value="">--Choose Regencies--</option>
+                                <label class="form-label" for="select-cities">City</label>
+                                <select class="form-select" id="select-cities" name="city">
+                                    <option value="">--Choose City--</option>
                                 </select>
-                            </div>
-
-                            <div class="col-6 mb-1">
-                                <label class="form-label" for="select-district">District</label>
-                                    <select class="form-select" id="select-district" name="district">
-                                        <option value="">--Choose District--</option>
-                                    </select>
-                            </div>
-
-                            <div class="col-6 mb-1">
-                                <label class="form-label" for="select-village">Village</label>
-                                    <select class="form-select" id="select-village" name="village">
-                                        <option value="">--Choose Village--</option>
-                                    </select>
-                            </div>
-
-                            <div class="mb-1 col-md-6">
-                                <label class="form-label" for="zip">Zip Code</label>
-                                <input type="text" name="zip" id="zip"
-                                    class="form-control" placeholder="Zip Code" />
                             </div>
                         </div>
                     </div>
@@ -245,7 +195,7 @@
     </div>
 </div>
 
-{{-- Modal Select Address --}}
+
 <div class="modal fade" id="modalSelAddress" tabindex="-1" role="basic" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-wide" style="max-width: 750px">
         <div class="modal-content">
@@ -263,8 +213,7 @@
                                     <div class="col-md-8">
                                         <p style="font-weight: 600;">{{ $p->firstname }} {{ $p->lastname }}</p>
                                         <p>{{ $p->address }}</p>
-                                        <p>{{ $p->district }}, {{ $p->city }}, {{ $p->zipcode }}</p>
-                                        <p>{{ $p->province }}</p>
+                                        <p>{{ $p->city }}, {{ $p->province }}</p>
                                     </div>
                                     <div class="col-md-4">
                                         <div class="d-flex justify-content-end">
@@ -299,55 +248,89 @@
             currencyDisplay: 'symbol'
         }).format(amount);
     }
+
+    function selectShippingService(courierCode, courierName, service, estimate){
+
+    }
+
+    function calculateOngkirFee(){
+        var selectCourier = document.getElementById('select-courier');
+        if(selectCourier)
+        {
+            var courierName = selectCourier.value;
+            var selectService = document.getElementById('select-service');
+            selectService.innerHTML = '<option value="">--Select Service--</option>';
+
+            $.ajax({
+                type: 'POST',
+                url: '{{ route('calculate.ongkir') }}',
+                data: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'origin': '{{ $idorigin }}',
+                    'destination': '{{ $iddestination }}',
+                    'weight': '{{ $weight }}',
+                    'courier': courierName
+                },
+                success: function (response){
+                    if(response) {
+                        var shippingList = response.results;
+                        console.log(shippingList);
+
+                        shippingList.forEach(function(list){
+                            list.costs.forEach(function(costs){
+                                costs.cost.forEach(function(cost){
+                                    var option = document.createElement('option');
+                                    option.value = JSON.stringify({
+                                        costs : cost.value,
+                                        service: costs.service
+                                    });
+
+                                    option.textContent = `${costs.service} - ${formatCurrency(cost.value)} - Estimated ${cost.etd} days`;
+                                    option.classList.add('custom-option');
+                                    selectService.appendChild(option);
+                                });
+                            });
+                        });
+                    }
+                    else {
+                        alert('Failed to calculate shipping fee:', response.message);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('AJAX error:', status, error);
+                }
+            });
+        }
+    }
+
     function updateShippingCost() {
-        var selectedRadioButton = document.querySelector('input[name="ship"]:checked');
-        if (selectedRadioButton) {
-            var shippingOptionId = selectedRadioButton.value;
-            var price;
-            var distanceValue = {{ $distanceValue }};
-            var selectedShipIdInput = document.getElementById('selectedShipId');
-            var ongkirFeeInput = document.querySelector('input[name="ongkirfee"]');
-            var finalPriceInput = document.querySelector('input[name="totalPrice"]');
-            var totalPrice = {{ $totalPrice }};
-            var formattedPrice = 0;
+        var selectService = document.getElementById('select-service');
+        var selectedCourier = document.getElementById('courierId');
+        var ongkirFeeInput = document.querySelector('input[name="ongkirfee"]');
+        var finalPriceInput = document.querySelector('input[name="totalPrice"]');
+        var totalPrice = {{ $totalPrice }};
+        var selectCourier = document.getElementById('select-courier');
 
-            if (distanceValue > 100.0) {
-                if (shippingOptionId === "1") {
-                    price = {{ ($distanceValue * 50) + ($weight * 4000) }};
-                } else if (shippingOptionId === "2") {
-                    price = {{ ($distanceValue * 20) + ($weight * 4000) }};
-                }
-            } else {
-                if (shippingOptionId === "1") {
-                    price = {{ ($distanceValue * 800) + ($weight * 4000) }};
-                } else if (shippingOptionId === "2") {
-                    price = {{ ($distanceValue * 500) + ($weight * 4000) }};
-                }
-            }
-
-            price = parseFloat(price);
-            var previousOngkir = parseFloat(ongkirFeeInput.value);
-            var finalPrice = parseFloat(totalPrice) + price;
-
-            ongkirFeeInput.value = price;
-            selectedShipIdInput.value = shippingOptionId;
-            finalPriceInput.value = finalPrice;
-
-            formattedPrice = formatCurrency(price);
+        var selectedOption = selectService.options[selectService.selectedIndex];
+        if (selectedOption.value && selectCourier) {
+            var serviceDetails = JSON.parse(selectedOption.value);
+            var cost = parseFloat(serviceDetails.costs);
+            var formattedPrice = formatCurrency(cost);
             document.getElementById("shipping").innerText = formattedPrice;
+
+            ongkirFeeInput.value = cost;
+            var courierName = selectCourier.value;
+            selectedCourier.value = courierName + "-" + serviceDetails.service;
+
+            price = parseFloat(cost);
+            var finalPrice = parseFloat(totalPrice) + price;
+            finalPriceInput.value = finalPrice;
 
             finalPrice = parseFloat(finalPrice);
             var formattedFinalPrice = formatCurrency(finalPrice);
             document.getElementById("finalPrice").innerText = formattedFinalPrice;
         }
     }
-
-    var radioButtons = document.querySelectorAll('input[name="ship"]');
-    radioButtons.forEach(function(radioButton) {
-        radioButton.addEventListener('change', updateShippingCost);
-    });
-
-    updateShippingCost();
 </script>
 
 <script>
@@ -361,12 +344,12 @@
                 let province_id = $('#select-province').val();
                 $.ajax({
                     type: 'POST',
-                    url: "{{ route('regency') }}",
+                    url: "{{ route('cities') }}",
                     data: { province_id:province_id },
                     cache: false,
 
                     success: function(params){
-                        $('#select-regencies').html(params);
+                        $('#select-cities').html(params);
                     },
                     error: function(data){
                         console.log(data);
@@ -374,43 +357,6 @@
                 })
             })
         })
-
-        $(function(){
-            $('#select-regencies').on('change', function() {
-                let regency_id = $('#select-regencies').val();
-                $.ajax({
-                    type: 'POST',
-                    url: "{{ route('district') }}",
-                    data: { regency_id:regency_id },
-                    cache: false,
-
-                    success: function(params){
-                        $('#select-district').html(params);
-                    },
-                    error: function(data){
-                        console.log(data);
-                    }
-                })
-            })
-        })
-        $(function(){
-            $('#select-district').on('change', function() {
-                let district_id = $('#select-district').val();
-                $.ajax({
-                    type: 'POST',
-                    url: "{{ route('village') }}",
-                    data: { district_id:district_id },
-                    cache: false,
-
-                    success: function(params){
-                        $('#select-village').html(params);
-                    },
-                    error: function(data){
-                        console.log(data);
-                    }
-                })
-            })
-        })
-    })
+    });
 </script>
 @endsection

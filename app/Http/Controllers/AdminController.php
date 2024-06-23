@@ -20,7 +20,7 @@ class AdminController extends Controller
     public function listUser()
     {
         $user = DB::select(
-            DB::raw("SELECT u.id, u.email, u.firstname, u.lastname, u.phonenumber, r.name
+            DB::raw("SELECT u.id as iduser, u.email, u.firstname, u.lastname, u.phonenumber, r.name
             from drivedealio.users as u INNER JOIN drivedealio.roles as r on u.roles_id = r.id
             order by u.id asc;")
         );
@@ -51,6 +51,25 @@ class AdminController extends Controller
 
         // dd($user);
         return view('admin.listuser', compact('user', 'useradmin', 'userinspector', 'userbuyer', 'courier', 'role'));
+    }
+
+    public function roleModal(Request $request)
+    {
+        $id = ($request->get('id'));
+        $data = User::find($id);
+        $user = DB::select(
+            DB::raw("SELECT u.id as iduser, u.email, u.firstname, u.lastname, u.phonenumber, r.name
+            from drivedealio.users as u INNER JOIN drivedealio.roles as r on u.roles_id = r.id
+            where u.id = $id;")
+        );
+
+        $role = DB::select(
+            DB::raw("SELECT * from drivedealio.roles;")
+        );
+
+        return response()->json(array(
+            'msg'=> view('admin.editrole',compact('data', 'user', 'role'))->render()
+        ),200);
     }
 
     public function editRoleUser(Request $request, $id)
@@ -247,5 +266,22 @@ class AdminController extends Controller
         );
 
         return view('admin.detailsvehicle', compact('vehicle', 'vhc', 'brand', 'type', 'date', 'image'));
+    }
+    public function approve($id)
+    {
+        $vehicle = Vehicle::findOrFail($id);
+        $vehicle->adstatus = 'Inspection';
+        $vehicle->verificationdate = now();
+        $vehicle->save();
+
+        return redirect('/admin/listvehicle')->with('success', 'Data Changed Successfully!')->with('approvedVehicleId', $vehicle->id);
+    }
+    public function reject($id)
+    {
+        $vehicle = Vehicle::findOrFail($id);
+        $vehicle->adstatus = 'Rejected';
+        $vehicle->save();
+
+        return redirect('/admin/listvehicle')->with('error', 'Data Changed Successfully!');
     }
 }

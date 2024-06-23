@@ -9,6 +9,7 @@ use App\Models\AuctionOrder;
 use App\Models\AuctionWinner;
 use App\Models\Bid;
 use App\Models\Brand;
+use App\Models\City;
 use App\Models\District;
 use App\Models\Inspection;
 use App\Models\Province;
@@ -119,7 +120,7 @@ class VehicleController extends Controller
         if(auth()->user()->roles_id === 3){
             $vehicle = DB::select(
                 DB::raw("SELECT v.id as idvehicle, CONCAT(v.model,' ', v.variant) as name, v.transmission, v.platenumber,
-                v.adstatus, v.inputdate, b.name as brand, u.id, u.firstname, v.appointments_id, a.id as idappointment, a.status, v.address, v.village, v.district, v.regency, v.province, u.phonenumber
+                v.adstatus, v.inputdate, b.name as brand, u.id, u.firstname, v.appointments_id, a.id as idappointment, a.status, v.address, v.city, v.province, u.phonenumber
                 FROM drivedealio.vehicles as v INNER JOIN drivedealio.brands as b on v.brands_id = b.id
                 INNER JOIN drivedealio.users as u on v.users_id = u.id
                 LEFT JOIN drivedealio.appointments as a on v.appointments_id = a.id
@@ -175,8 +176,28 @@ class VehicleController extends Controller
             DB::raw("SELECT b.*, a.id as idauction, a.current_price, u.id as iduser from drivedealio.bids as b INNER JOIN drivedealio.auctions as a on b.auctions_id = a.id
             INNER JOIN drivedealio.user_memberships as um on b.user_memberships_id = um.id
             INNER JOIN drivedealio.users as u on um.users_id = u.id
-            WHERE a.vehicles_id = $id ORDER BY b.bidamount asc limit 3;")
+            WHERE a.vehicles_id = $id ORDER BY b.biddatetime desc limit 3;")
         );
+
+        // dd($winner);
+
+        $query = DB::table('auctions as a')
+                ->select('a.start_price as price', 'v.id as idvehicle', 'v.model', 'v.variant', 'vt.name as type', 'c.name', 'b.name as brand', 'a.lot_number', 'v.adstatus', 'v.transmission',
+                        DB::raw('(SELECT COALESCE(i.url, \'placeholder_url\') FROM drivedealio.images as i WHERE i.vehicles_id = v.id LIMIT 1) as url'), 'a.start_date', 'a.end_date', 'a.id as idauction')
+                ->join('vehicles as v', 'a.vehicles_id', '=', 'v.id')
+                ->join('vehicletypes as vt', 'vt.id', '=', 'v.vehicletypes_id')
+                ->join('vehiclecategories as c', 'c.id', '=', 'vt.vehiclecategories_id')
+                ->join('brands as b', 'v.brands_id', '=', 'b.id')
+                ->where('v.adstatus', 'Open to Bid')->whereNot( 'v.id', $id);
+
+        $vehiclerec = $query->get();
+        foreach($vehiclerec as $v)
+        {
+            $startDateTime = Carbon::parse($v->start_date);
+            $endDateTime = Carbon::parse($v->end_date);
+            $interval = $startDateTime->diff($endDateTime);
+            $v->duration = $this->formatDuration($interval);
+        }
 
         $vehiclename = $vehicle[0]->brand. '-'. $vehicle[0]->model. ' '. $vehicle[0]->variant;
 
@@ -253,8 +274,10 @@ class VehicleController extends Controller
             DB::raw("SELECT exterior, interior, engine, mechanism, inputdate
             from drivedealio.inspections where vehicles_id = $id;")
         );
+
+
         // dd($decryptBidAmount);
-        return view('vehicle.vehicledetails', compact('vehicle', 'bid', 'winner', 'inspection', 'mybid'));
+        return view('vehicle.vehicledetails', compact('vehicle', 'bid', 'winner', 'inspection', 'mybid', 'vehiclerec'));
     }
 
     public function toFormAddVehicle()
@@ -351,7 +374,7 @@ class VehicleController extends Controller
             $data = [];
             $counter = $date[0]->count + 1;
             foreach($request->file('image') as $image) {
-                $name = $vehicle->inputdate->format('ymd'). "-$counter". "." .$image->getClientOriginalExtension();
+                $name = $vehicle->inputdate->format('ymd'). "-$counter". "$vehicle->id" ."." .$image->getClientOriginalExtension();
                 $image->move(public_path("images/vehicle/$vehicle->id"), $name);
                 $data[] = [
                     'url' => $name,
@@ -433,7 +456,7 @@ class VehicleController extends Controller
         $counter = $date[0]->count + 1;
         foreach($request->file('image') as $image)
         {
-            $name = $vehicle->inputdate->format('ymd'). "-$counter". "." .$image->getClientOriginalExtension();
+            $name = $vehicle->inputdate->format('ymd'). "-$counter". "$vehicle->id" . "." .$image->getClientOriginalExtension();
             $image->move(public_path("images/vehicle/$vehicle->id"), $name);
             $data[] = [
                 'url' => $name,
@@ -445,16 +468,6 @@ class VehicleController extends Controller
         DB::table('drivedealio.images')->insert($data);
 
         return redirect('/vehicle/inspectionappointment/'. $vehicle->id)->with('success', 'Vehicle Data Saved!');
-    }
-
-    public function approve($id)
-    {
-        $vehicle = Vehicle::findOrFail($id);
-        $vehicle->adstatus = 'Inspection';
-        $vehicle->verificationdate = now();
-        $vehicle->save();
-
-        return redirect('/admin/listvehicle')->with('success', 'Your request has been processed!')->with('approvedVehicleId', $vehicle->id);
     }
 
     public function appointment($id)
@@ -469,11 +482,9 @@ class VehicleController extends Controller
         );
 
         $provinces = Province::all();
-        $regencies = Regency::all();
-        $districts = District::all();
-        $villages = Village::all();
+        $cities = City::all();
 
-        return view('vehicle.inspectappointment', compact('appointment', 'vehicle' , 'provinces', 'regencies', 'districts', 'villages'));
+        return view('vehicle.inspectappointment', compact('appointment', 'vehicle' , 'provinces', 'cities'));
     }
 
     public function appointmentDate(Request $request, $id)
@@ -482,10 +493,8 @@ class VehicleController extends Controller
         $vehicle->adstatus = "Waiting for Approval";
         $vehicle->appointments_id = $request->input('inspectiondate');
         $vehicle->address = $request->input('address');
-        $vehicle->province = Province::find($request->input('province'))->name;
-        $vehicle->regency = Regency::find($request->input('regency'))->name;
-        $vehicle->district = District::find($request->input('district'))->name;
-        $vehicle->village = Village::find($request->input('village'))->name;
+        $vehicle->province = Province::find($request->input('province'))->province_name;
+        $vehicle->city = City::find($request->input('city'))->city_name;
         $vehicle->odometer = $request->input('odo');
         $vehicle->save();
 
@@ -620,7 +629,7 @@ class VehicleController extends Controller
             DB::raw("SELECT CONCAT(v.model, ' ', v.variant, ' ', v.colour, ', ', v.year) as vehiclename, a.lot_number, aw.id as idwinner, ao.orderdate, b.name,
             ao.invoicenum, ao.total_price, u.firstname, u.lastname, u.email, u.phonenumber, ao.id as idorder, a.current_price, ao.status, v.id as idvehicle,
             (SELECT COALESCE(i.url, 'placeholder_url') FROM drivedealio.images as i WHERE i.vehicles_id = v.id LIMIT 1) as url,
-            ad.name as addressname, ad.address, ad.province, ad.city, ad.district, ad.village, ad.zipcode
+            ad.name as addressname, ad.address, ad.province, ad.city
             FROM drivedealio.vehicles as v INNER JOIN drivedealio.auctions as a on v.id = a.vehicles_id
             INNER JOIN drivedealio.auctionwinners as aw on a.id = aw.auctions_id
             INNER JOIN drivedealio.auction_orders as ao on aw.id = ao.auctionwinners_id

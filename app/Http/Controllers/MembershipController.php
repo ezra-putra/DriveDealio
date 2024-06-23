@@ -43,18 +43,16 @@ class MembershipController extends Controller
         if(auth()->user()->roles_id === 1){
             $member = DB::select(
                 DB::raw("SELECT m.id as idmember, m.membershiptype as name, hm.id as idhasmember, hm.status, hm.start, hm.end, u.id as iduser,
-                hm.created_at, hm.updated_at , u.roles_id, mo.paymentstatus, mo.paymentdate, u.firstname, mo.id as idorder, mo.invoicenum
+                hm.created_at, hm.updated_at , u.roles_id, hm.paymentstatus, hm.paymentdate, u.firstname, hm.id as idorder, hm.invoicenum
                 from drivedealio.user_memberships as hm INNER JOIN drivedealio.users as u on hm.users_id = u.id
-                INNER JOIN drivedealio.member_orders as mo on hm.id = mo.user_memberships_id
-                INNER JOIN drivedealio.memberships as m on m.id = mo.memberships_id order by hm.created_at desc;")
+                INNER JOIN drivedealio.memberships as m on m.id = hm.memberships_id order by hm.created_at desc;")
             );
         }else{
             $member = DB::select(
                 DB::raw("SELECT m.id as idmember, m.membershiptype as name, hm.id as idhasmember, hm.status, hm.start, hm.end, u.id as iduser, u.firstname, u.lastname, u.email, u.phonenumber,
-                hm.created_at, hm.updated_at , u.roles_id, mo.paymentstatus, mo.paymentdate, mo.id as idorder, mo.price, mo.snap_token, mo.invoicenum
+                hm.created_at, hm.updated_at , u.roles_id, hm.paymentstatus, hm.paymentdate, hm.id as idorder, hm.price, hm.snap_token, hm.invoicenum
                 from drivedealio.user_memberships as hm INNER JOIN drivedealio.users as u on hm.users_id = u.id
-                INNER JOIN drivedealio.member_orders as mo on hm.id = mo.user_memberships_id
-                INNER JOIN drivedealio.memberships as m on m.id = mo.memberships_id where u.id = $iduser order by hm.created_at desc;")
+                INNER JOIN drivedealio.memberships as m on m.id = hm.memberships_id where u.id = $iduser order by hm.created_at desc;")
             );
             if (!empty($member)) {
                 $endDateTime = Carbon::parse($member[0]->end);
@@ -94,14 +92,13 @@ class MembershipController extends Controller
 
         $member = DB::select(
             DB::raw("SELECT m.id as idmember, m.membershiptype as name, hm.id as idhasmember, hm.status, hm.start, hm.end, u.id as iduser, u.firstname, u.lastname, u.email, u.phonenumber,
-            hm.created_at, hm.updated_at , u.roles_id, mo.paymentstatus, mo.paymentdate, mo.id as idorder, mo.price, mo.snap_token
+            hm.created_at, hm.updated_at , u.roles_id, hm.paymentstatus, hm.paymentdate, hm.id as idorder, hm.price, hm.snap_token
             from drivedealio.user_memberships as hm INNER JOIN drivedealio.users as u on hm.users_id = u.id
-            INNER JOIN drivedealio.member_orders as mo on hm.id = mo.user_memberships_id
-            INNER JOIN drivedealio.memberships as m on m.id = mo.memberships_id where u.id = $iduser AND hm.status = 'Active';")
+            INNER JOIN drivedealio.memberships as m on m.id = hm.memberships_id where u.id = $iduser AND hm.status = 'Active';")
         );
 
         $date = DB::select(
-            DB::raw("SELECT count(created_at) from drivedealio.member_orders where DATE(created_at) = CURRENT_DATE;")
+            DB::raw("SELECT count(created_at) from drivedealio.user_memberships where DATE(created_at) = CURRENT_DATE;")
         );
         if(empty($member))
         {
@@ -126,19 +123,15 @@ class MembershipController extends Controller
                 $user->save();
             }
 
+            $counter = $date[0]->count + 1;
             $usermember = new UserMemberships;
             $usermember->users_id = auth()->id();
             $usermember->status = 'Pending';
+            $usermember->invoicenum = "INV/MB/" .date("Y/m/d"). "/$counter";
+            $usermember->memberships_id = $request->input('member');
+            $usermember->paymentstatus = 'Unpaid';
+            $usermember->price = $request->input('totalprice');
             $usermember->save();
-
-            $memberorder = new MemberOrder;
-            $counter = $date[0]->count + 1;
-            $memberorder->invoicenum = "INV/MB/" .date("Y/m/d"). "/$counter";
-            $memberorder->user_memberships_id = $usermember->id;
-            $memberorder->memberships_id = $request->input('member');
-            $memberorder->paymentstatus = 'Unpaid';
-            $memberorder->price = $request->input('totalprice');
-            $memberorder->save();
 
             \Midtrans\Config::$serverKey = 'SB-Mid-server-AOdoK40xyUyq11-i9Cc9ysHM';
             \Midtrans\Config::$isProduction = false;
@@ -147,8 +140,8 @@ class MembershipController extends Controller
 
             $params = array(
                 'transaction_details' => array(
-                    'order_id' => $memberorder->invoicenum,
-                    'gross_amount' => $memberorder->price,
+                    'order_id' => $usermember->invoicenum,
+                    'gross_amount' => $usermember->price,
                 ),
                 'customer_details' => array(
                     'first_name' => $user->firstname,
@@ -159,7 +152,7 @@ class MembershipController extends Controller
             );
 
             $snapToken = \Midtrans\Snap::getSnapToken($params);
-            $orderMember = MemberOrder::findOrFail($memberorder->id);
+            $orderMember = UserMemberships::findOrFail($usermember->id);
             $orderMember->snap_token = $snapToken;
             $orderMember->save();
 
@@ -178,17 +171,16 @@ class MembershipController extends Controller
 
     public function paymentPaid($id)
     {
-        $memberorder = MemberOrder::findOrFail($id);
-        $memberorder->paymentstatus = "Paid";
-        $memberorder->paymentdate = Carbon::now();
-        $memberorder->save();
+        $usermember = UserMemberships::findOrFail($id);
+        $usermember->paymentstatus = "Paid";
+        $usermember->paymentdate = Carbon::now();
+        $usermember->save();
 
         $membership = DB::select(
             DB::raw("SELECT m.id as idmember, m.membershiptype as name, hm.id as idhasmember, hm.status, hm.start, hm.end, u.id as iduser, u.firstname, u.lastname, u.email, u.phonenumber,
-            hm.created_at, hm.updated_at , u.roles_id, mo.paymentstatus, mo.paymentdate, mo.id as idorder, mo.price, mo.snap_token
+            hm.created_at, hm.updated_at , u.roles_id, hm.paymentstatus, hm.paymentdate, hm.id as idorder, hm.price, hm.snap_token
             from drivedealio.user_memberships as hm INNER JOIN drivedealio.users as u on hm.users_id = u.id
-            INNER JOIN drivedealio.member_orders as mo on hm.id = mo.user_memberships_id
-            INNER JOIN drivedealio.memberships as m on m.id = mo.memberships_id where mo.id = $id")
+            INNER JOIN drivedealio.memberships as m on m.id = hm.memberships_id where hm.id = $id")
         );
         $idhasmember = $membership[0]->idhasmember;
         $type = $membership[0]->name;
@@ -217,11 +209,10 @@ class MembershipController extends Controller
     public function invoice($id)
     {
         $orderMember = DB::select(
-            DB::raw("SELECT u.firstname, u.phonenumber, mo.invoicenum, mo.price as total_price, mo.created_at, m.membershiptype, m.price
+            DB::raw("SELECT u.firstname, u.phonenumber, um.invoicenum, um.price as total_price, um.created_at, m.membershiptype, m.price
             FROM drivedealio.users as u INNER JOIN drivedealio.user_memberships as um on u.id = um.users_id
-            INNER JOIN drivedealio.member_orders as mo on um.id = mo.user_memberships_id
-            INNER JOIN drivedealio.memberships as m on m.id = mo.memberships_id
-            WHERE mo.id = $id;")
+            INNER JOIN drivedealio.memberships as m on m.id = um.memberships_id
+            WHERE um.id = $id;")
         );
         return view('membership.invoice', compact('orderMember'));
     }

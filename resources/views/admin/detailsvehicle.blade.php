@@ -170,8 +170,9 @@
                                 </a>
                             </div>
                             <div class="col-auto">
-                                <input type="submit" class="btn btn-danger btn-submit"
-                                    value="Reject">
+                                <a href="{{ url('reject', $v->id) }}" class="btn btn-danger">
+                                    <span>Reject</span>
+                                </a>
                             </div>
                             @endforeach
 

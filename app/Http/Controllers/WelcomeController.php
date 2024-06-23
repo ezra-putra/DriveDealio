@@ -17,6 +17,7 @@ class WelcomeController extends Controller
      */
     public function index()
     {
+        $iduser = auth()->id();
         $membership = DB::select(
             DB::raw("SELECT * FROM drivedealio.memberships;")
         );
@@ -46,7 +47,17 @@ class WelcomeController extends Controller
             $interval = $startDateTime->diff($endDateTime);
             $v->duration = $this->formatDuration($interval);
         }
-        return view('welcome', compact('membership', 'sparepart', 'vehicle'));
+
+        if(auth()->user()){
+            $address = DB::select(
+                DB::raw("SELECT id as idaddress, name, address,
+                city, province, is_primaryadd FROM drivedealio.addresses where users_id = $iduser AND is_primaryadd = true order by is_primaryadd desc")
+            );
+        }
+        else{
+            $address = [];
+        }
+        return view('welcome', compact('membership', 'sparepart', 'vehicle', 'address'));
     }
 
     protected function formatDuration($interval)

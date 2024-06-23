@@ -36,10 +36,6 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @php
-                            $subtotal = 0;
-                            $adminfee = 5000;
-                        @endphp
                         <td>{{ $o->membershiptype }} Membership</td>
                         <td>@currency($o->price)</td>
                     </tbody>
@@ -49,7 +45,6 @@
             <div class="d-flex justify-content-end mt-1">
                 <div class="d-flex flex-column me-5 mt-1">
                     <p style="text-align: left">Subtotal : @currency($o->price)</p>
-                    <p style="text-align: left">Admin : @currency($adminfee)</p>
                     <h6>Total Price : @currency($o->total_price)</h6>
                 </div>
             </div>

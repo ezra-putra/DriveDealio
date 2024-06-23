@@ -83,8 +83,7 @@
                                             <div class="col-md-8">
                                                 <p style="font-weight: 600;">{{ $a->name }}</p>
                                                 <p>{{ $a->address }}</p>
-                                                <p>{{ $a->district }}, {{ $a->city }}, {{ $a->zipcode }}</p>
-                                                <p>{{ $a->province }}</p>
+                                                <p>{{ $a->city }}, {{ $a->province }}</p>
                                             </div>
                                             <div class="col-md-4">
                                                 <div class="d-flex justify-content-end">
@@ -103,6 +102,8 @@
                                 </div>
                             </div>
                             @endforeach
+                            @else
+                            <p class="text-center mt-1">Register your address first to continue your transaction.</p>
                             @endif
                         </div>
                     </div>
@@ -142,36 +143,16 @@
                                 <select class="form-select" id="select-province" name="province">
                                     <option value="">--Choose Province--</option>
                                     @foreach ($provinces as $p)
-                                        <option value="{{ $p->id }}">{{ $p->name }}</option>
+                                        <option value="{{ $p->province_id }}">{{ $p->province_name }}</option>
                                     @endforeach
                                 </select>
                             </div>
 
                             <div class="col-6 mb-1">
-                                <label class="form-label" for="select-regencies">Regencies</label>
-                                <select class="form-select" id="select-regencies" name="regency">
-                                    <option value="">--Choose Regencies--</option>
+                                <label class="form-label" for="select-cities">City</label>
+                                <select class="form-select" id="select-cities" name="city">
+                                    <option value="">--Choose City--</option>
                                 </select>
-                            </div>
-
-                            <div class="col-6 mb-1">
-                                <label class="form-label" for="select-district">District</label>
-                                    <select class="form-select" id="select-district" name="district">
-                                        <option value="">--Choose District--</option>
-                                    </select>
-                            </div>
-
-                            <div class="col-6 mb-1">
-                                <label class="form-label" for="select-village">Village</label>
-                                    <select class="form-select" id="select-village" name="village">
-                                        <option value="">--Choose Village--</option>
-                                    </select>
-                            </div>
-
-                            <div class="mb-1 col-md-6">
-                                <label class="form-label" for="zip">Zip Code</label>
-                                <input type="text" name="zip" id="zip"
-                                    class="form-control" placeholder="Zip Code" />
                             </div>
                         </div>
                     </div>
@@ -213,12 +194,12 @@
                 let province_id = $('#select-province').val();
                 $.ajax({
                     type: 'POST',
-                    url: "{{ route('regency') }}",
+                    url: "{{ route('cities') }}",
                     data: { province_id:province_id },
                     cache: false,
 
                     success: function(params){
-                        $('#select-regencies').html(params);
+                        $('#select-cities').html(params);
                     },
                     error: function(data){
                         console.log(data);
@@ -226,43 +207,6 @@
                 })
             })
         })
-
-        $(function(){
-            $('#select-regencies').on('change', function() {
-                let regency_id = $('#select-regencies').val();
-                $.ajax({
-                    type: 'POST',
-                    url: "{{ route('district') }}",
-                    data: { regency_id:regency_id },
-                    cache: false,
-
-                    success: function(params){
-                        $('#select-district').html(params);
-                    },
-                    error: function(data){
-                        console.log(data);
-                    }
-                })
-            })
-        })
-        $(function(){
-            $('#select-district').on('change', function() {
-                let district_id = $('#select-district').val();
-                $.ajax({
-                    type: 'POST',
-                    url: "{{ route('village') }}",
-                    data: { district_id:district_id },
-                    cache: false,
-
-                    success: function(params){
-                        $('#select-village').html(params);
-                    },
-                    error: function(data){
-                        console.log(data);
-                    }
-                })
-            })
-        })
-    })
+    });
 </script>
 @endsection

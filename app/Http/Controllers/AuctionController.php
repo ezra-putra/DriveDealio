@@ -7,16 +7,14 @@ use App\Models\Auction;
 use App\Models\AuctionOrder;
 use App\Models\AuctionWinner;
 use App\Models\Bid;
-use App\Models\District;
+use App\Models\City;
 use App\Models\Loan;
 use App\Models\LoanPayment;
 use App\Models\Province;
-use App\Models\Regency;
 use App\Models\Towing;
 use App\Models\TowingStatus;
 use App\Models\User;
 use App\Models\Vehicle;
-use App\Models\Village;
 use App\Notifications\Admin as NotificationsAdmin;
 use App\Notifications\Auction as NotificationsAuction;
 use App\Notifications\Loan as NotificationsLoan;
@@ -41,8 +39,7 @@ class AuctionController extends Controller
             DB::raw("(SELECT COALESCE(images.url, 'placeholder_url') FROM images WHERE images.vehicles_id = vehicles.id LIMIT 1) as url")
         )
         ->join('user_memberships', 'bids.user_memberships_id', '=', 'user_memberships.id')
-        ->join('member_orders', 'user_memberships.id', '=', 'member_orders.user_memberships_id')
-        ->join('memberships', 'memberships.id', '=', 'member_orders.memberships_id')
+        ->join('memberships', 'memberships.id', '=', 'user_memberships.memberships_id')
         ->join('auctions', 'auctions.id', '=', 'bids.auctions_id')
         ->join('vehicles', 'auctions.vehicles_id', '=', 'vehicles.id')
         ->join('brands', 'vehicles.brands_id', '=', 'brands.id')
@@ -73,16 +70,16 @@ class AuctionController extends Controller
 
                 $order = AuctionOrder::where('vehicles_id', $idvehicle)->get();
 
-                $winner = AuctionWinner::select('id as idwinner', 'auctions_id', 'is_checkout')
-                    ->where('users_id', $iduser)
-                    ->where('is_winner', true)
-                    ->get();
-                if(!empty($winner)){
-                    return view('auction.listauction', compact('list', 'winner', 'order'));
-                }
+                $winner = DB::table('drivedealio.auctionwinners as aw')
+                ->join('drivedealio.user_memberships as um', 'aw.user_memberships_id', '=', 'um.id')
+                ->where('um.users_id', $iduser)
+                ->where('aw.is_winner', true)
+                ->get();
             }
         }
-        return view('auction.listauction', compact('list'));
+        if(!empty($winner)){
+            return view('auction.listauction', compact('list', 'winner', 'order'));
+        }
     }
 
     public function placeBid(Request $request, $id)
@@ -91,8 +88,7 @@ class AuctionController extends Controller
         $userMember = DB::table('user_memberships as um')
             ->select('um.id as idusermember', 'um.status', 'm.membershiptype')
             ->join('users as u', 'um.users_id', '=', 'u.id')
-            ->join('member_orders as mo', 'um.id', '=', 'mo.user_memberships_id')
-            ->join('memberships as m', 'mo.memberships_id', '=', 'm.id')
+            ->join('memberships as m', 'um.memberships_id', '=', 'm.id')
             ->where('um.users_id', $iduser)
             ->where('um.status', 'Active')
             ->first();
@@ -103,7 +99,6 @@ class AuctionController extends Controller
             ->join('vehicles as v', 'vt.id', '=', 'v.vehicletypes_id')
             ->where('v.id', $id)
             ->first();
-        // dd($categories);
 
         $auction = DB::table('drivedealio.auctions as a')
             ->join('vehicles as v', 'a.vehicles_id', '=', 'v.id')
@@ -116,7 +111,6 @@ class AuctionController extends Controller
         $idauction = $auction->idauction;
         $vehiclename = $auction->model .' '. $auction->variant;
         $idcategory = $categories->idcategory;
-        // dd($idcategory);
 
         $bidamount = preg_replace('/[^\d]/', '', $request->input('amount'));
         $amount = (int)$bidamount;
@@ -125,13 +119,13 @@ class AuctionController extends Controller
             $allowedAuctions = 0;
             if ($userMember->status === 'Active') {
                 if ($userMember->membershiptype === 'Bronze') {
-                    if ($categories->id === 2) {
+                    if ($idcategory === 2) {
                         $allowedAuctions = 2;
                     }
                 } elseif ($userMember->membershiptype === 'Silver') {
                     if ($idcategory === 2) {
                         $allowedAuctions = 2;
-                    } elseif ($categories->id === 1) {
+                    } elseif ($idcategory === 1) {
                         $allowedAuctions = 1;
                     }
                 } elseif ($userMember->membershiptype === 'Gold') {
@@ -149,23 +143,120 @@ class AuctionController extends Controller
                 }
             }
             if ($allowedAuctions > 0) {
-                $existingAuctionsCount = Auction::join('bids as b', 'auctions.id', '=', 'b.auctions_id')
+                $existingAuctionsCount = DB::table('bids as b')
+                ->join('auctions as a', 'b.auctions_id', '=', 'a.id')
                 ->join('user_memberships as um', 'b.user_memberships_id', '=', 'um.id')
-                ->join('vehicles as v', 'auctions.vehicles_id', '=', 'v.id')
+                ->join('vehicles as v', 'a.vehicles_id', '=', 'v.id')
                 ->join('vehicletypes as vt', 'v.vehicletypes_id', '=', 'vt.id')
                 ->join('vehiclecategories as vc', 'vt.vehiclecategories_id', '=', 'vc.id')
                 ->where('um.id', $userMember->idusermember)
                 ->where('vc.id', $idcategory)
-                ->count('auctions.id');
+                ->whereRaw('b.bidamount = (
+                    SELECT MAX(b2.bidamount)
+                    FROM drivedealio.bids AS b2
+                    WHERE b2.auctions_id = b.auctions_id
+                )')
+                ->whereNotExists(function ($query) {
+                    $query->select(DB::raw(1))
+                          ->from('auctionwinners as aw')
+                          ->whereColumn('aw.auctions_id', 'b.auctions_id')
+                          ->where('aw.is_winner', true);
+                })
+                ->count('b.id');
 
-                // dd($existingAuctionsCount);
+                $bidWin = DB::table('user_memberships as um')
+                ->join('bids as b', 'um.id', '=', 'b.user_memberships_id')
+                ->join('auctionwinners as aw', function($join) {
+                    $join->on('b.auctions_id', '=', 'aw.auctions_id')
+                         ->on('um.id', '=', 'aw.user_memberships_id');
+                })
+                ->join('auctions as a', 'aw.auctions_id', '=', 'a.id')
+                ->join('vehicles as v', 'a.vehicles_id', '=', 'v.id')
+                ->join('vehicletypes as vt', 'v.vehicletypes_id', '=', 'vt.id')
+                ->join('vehiclecategories as vc', 'vt.vehiclecategories_id', '=', 'vc.id')
+                ->where('um.id', $userMember->idusermember)
+                ->where('vc.id', $idcategory)
+                ->where('aw.is_winner', true)
+                ->count('aw.id');
+
+                $totalbid = $existingAuctionsCount + $bidWin;
                 $increments = [
                     2 => 1000000,
                     1 => 5000000
                 ];
 
                 $increment = isset($increments[$idcategory]) ? $increments[$idcategory] : 1000000;
-                if ($amount > $currentprice && $currentprice != 0)
+                $isBidExist = DB::select("SELECT 1 FROM drivedealio.bids WHERE user_memberships_id = :user_memberships_id AND auctions_id = :id",
+                ['user_memberships_id' => $userMember->idusermember, 'id' => $idauction]);
+                if(!$isBidExist)
+                {
+                    if ($totalbid < $allowedAuctions)
+                    {
+                        if ($amount > $startprice && $currentprice == 0) {
+                            if ($amount % $increment !== 0) {
+                                return redirect()->back()->with(['error' => 'Bid amount must be in increments of ' . number_format($increment)]);
+                            }
+
+                            $bidnew = new Bid;
+                            $bidnew->bidamount = $amount;
+                            $bidnew->user_memberships_id = $userMember->idusermember;
+                            $bidnew->auctions_id = $idauction;
+                            $bidnew->biddatetime = Carbon::now();
+                            $bidnew->save();
+
+                            $auction = Auction::findOrFail($idauction);
+                            $auction->current_price = $amount;
+                            $auction->save();
+
+                            $user = User::find($iduser);
+                            $title = 'Bid Successfully';
+                            $message = 'Your Bid is Leading the Auction ' . $vehiclename . '!';
+                            $user->notify(new NotificationsAuction($title, $message));
+
+                            return redirect()->back()->with(['success' => 'Bid placed successfully']);
+                        } elseif ($amount > $currentprice && $currentprice != 0) {
+                            if (($amount - $currentprice) % $increment !== 0) {
+                                return redirect()->back()->with(['error' => 'Bid amount must be in increments of ' . number_format($increment)]);
+                            }
+
+                            $isDuplicateBid = Bid::where('bidamount', $amount)
+                                ->where('biddatetime', '>=', Carbon::now()->subMilliseconds(1))
+                                ->exists();
+
+                            if ($isDuplicateBid) {
+                                return redirect()->back()->with(['error' => 'Another bid with the same amount has been placed within a millisecond.']);
+                            }
+
+                            $bidnew = new Bid;
+                            $bidnew->bidamount = $amount;
+                            $bidnew->user_memberships_id = $userMember->idusermember;
+                            $bidnew->auctions_id = $idauction;
+                            $bidnew->biddatetime = Carbon::now();
+                            $bidnew->save();
+
+                            $auction = Auction::findOrFail($idauction);
+                            $auction->current_price = $amount;
+                            $auction->save();
+
+                            $user = User::find($iduser);
+                            $title = 'Bid Successfully';
+                            $message = 'Your Bid is Leading the Auction ' . $vehiclename . '!';
+                            $user->notify(new NotificationsAuction($title, $message));
+
+                            return redirect()->back()->with(['success' => 'Bid placed successfully']);
+                        } elseif ($amount < $currentprice) {
+                            return redirect()->back()->with(['error' => 'Bid amount must be greater than the current price']);
+                        } else {
+                            return redirect()->back()->with(['error' => 'Bid amount must be greater than the starting price']);
+                        }
+                    }
+                    else {
+                        return redirect()->back()->with(['error' => 'You have reached the maximum number of Auctions allowed for your membership type in this category']);
+                    }
+                }
+                else
+                {
+                    if ($amount > $currentprice && $currentprice != 0)
                     {
                         if (($amount - $currentprice) % $increment !== 0) {
                             return redirect()->back()->with(['error' => 'Bid amount must be in increments of ' . number_format($increment)]);
@@ -230,38 +321,6 @@ class AuctionController extends Controller
                     elseif ($amount < $currentprice) {
                         return redirect()->back()->with(['error' => 'Bid amount must be greater than the current price']);
                     }
-                if ($existingAuctionsCount < $allowedAuctions)
-                {
-                    if ($amount >= $startprice && $currentprice == 0)
-                    {
-                        if ($amount % $increment !== 0)
-                        {
-                            return redirect()->back()->with(['error' => 'Bid amount must be in increments of ' . number_format($increment)]);
-                        }
-
-                        $bidnew = new Bid;
-                        $bidnew->bidamount = $amount;
-                        $bidnew->user_memberships_id = $userMember->idusermember;
-                        $bidnew->auctions_id = $idauction;
-                        $bidnew->biddatetime = Carbon::now();
-                        $bidnew->save();
-
-                        $auction = Auction::findOrFail($idauction);
-                        $auction->current_price = $amount;
-                        $auction->save();
-
-                        $user = User::find($iduser);
-                        $title = 'Bid Successfully';
-                        $message = 'Your Bid is Leading the Auction '. $vehiclename.'!';
-                        $user->notify(new NotificationsAuction($title, $message));
-                        return redirect()->back()->with(['success' => 'Bid placed successfully']);
-                    }
-                    else {
-                        return redirect()->back()->with(['error' => 'Bid amount must be greater than the starting price']);
-                    }
-                }
-                else {
-                    return redirect()->back()->with(['error' => 'You have reached the maximum number of Auctions allowed for your membership type in this category']);
                 }
             }
             else {
@@ -276,47 +335,36 @@ class AuctionController extends Controller
     public function auctionCheckout($id)
     {
         $iduser = auth()->id();
-        $vehicle = DB::table('users as u')
-        ->select(
-            'u.id as iduser', 'u.firstname', 'um.id as idusermember', 'm.id as idmembership', 'm.membershiptype', 'b.id as idbid',
-            'b.bidamount', 'a.id as idauction', 'a.current_price', 'a.lot_number', 'v.id as idvehicle', 'v.model', 'v.variant',
-            'v.transmission', 'v.colour', 'v.year', 'v.adstatus', 'br.name as brand', 'a.start_price', 'v.province', 'v.village',
-            'v.district', 'v.regency',
-            DB::raw("(SELECT COALESCE(i.url, 'placeholder_url') FROM images as i WHERE i.vehicles_id = v.id LIMIT 1) as url")
-        )
-        ->join('user_memberships as um', 'u.id', '=', 'um.users_id')
-        ->join('member_orders as mo', 'um.id', '=', 'mo.user_memberships_id')
-        ->join('memberships as m', 'm.id', '=', 'mo.memberships_id')
-        ->join('bids as b', 'um.id', '=', 'b.user_memberships_id')
-        ->join('auctions as a', 'a.id', '=', 'b.auctions_id')
-        ->join('vehicles as v', 'a.vehicles_id', '=', 'v.id')
-        ->join('brands as br', 'v.brands_id', '=', 'br.id')
-        ->where('v.id', $id)
-        ->where('u.id', $iduser)
-        ->get();
+        $vehicle = DB::select(
+            DB::raw("SELECT u.id as iduser, u.firstname, um.id as idusermember, m.id as idmembership, m.membershiptype, b.id as idbid, b.bidamount,
+            a.id as idauction, a.current_price, a.lot_number, v.id as idvehicle, v.model, v.variant, v.transmission, v.colour, v.year, v.adstatus, br.name as brand, a.start_price, v.province, v.city,
+            (SELECT COALESCE(i.url, 'placeholder_url') FROM drivedealio.images as i WHERE i.vehicles_id = v.id LIMIT 1) as url
+            FROM drivedealio.users as u INNER JOIN drivedealio.user_memberships as um on u.id = um.users_id
+            INNER JOIN drivedealio.memberships as m on m.id = um.memberships_id
+            INNER JOIN drivedealio.bids as b on um.id = b.user_memberships_id
+            INNER JOIN drivedealio.auctions as a on a.id = b.auctions_id
+            INNER JOIN drivedealio.vehicles as v on a.vehicles_id = v.id
+            INNER JOIN drivedealio.brands as br on v.brands_id = br.id
+            where v.id = $id AND u.id = $iduser;")
+        );
 
-        $categories = DB::table('vehiclecategories as c')
-        ->select('c.id', 'c.name')
-        ->join('vehicletypes as vt', 'c.id', '=', 'vt.vehiclecategories_id')
-        ->join('vehicles as v', 'vt.id', '=', 'v.vehicletypes_id')
-        ->where('v.id', $id)
-        ->get();
+        $categories = DB::select(
+            DB::raw("SELECT c.id, c.name from drivedealio.vehiclecategories as c
+            INNER JOIN drivedealio.vehicletypes as vt on c.id = vt.vehiclecategories_id
+            INNER JOIN drivedealio.vehicles as v on vt.id = v.vehicletypes_id where v.id = $id")
+        );
 
-        $address = DB::table('addresses')
-        ->select('id as idaddress', 'name', 'address', 'district', 'city', 'province', 'village', 'zipcode', 'is_primaryadd')
-        ->where('users_id', $iduser)
-        ->where('is_primaryadd', true)
-        ->orderBy('is_primaryadd', 'desc')
-        ->get();
+        $address = DB::select(
+            DB::raw("SELECT id as idaddress, name, address, city, province, is_primaryadd
+            FROM drivedealio.addresses where users_id = $iduser AND is_primaryadd = true order by is_primaryadd desc")
+        );
 
         $provinces = Province::all();
-        $regencies = Regency::all();
-        $districts = District::all();
-        $villages = Village::all();
+        $cities = City::all();
 
         $profile = DB::select(
             DB::raw("SELECT u.id as iduser, u.email, u.profilepicture, u.firstname, u.lastname, u.birthdate, u.phonenumber, a.id as idaddress, a.name, a.address, a.district,
-            a.city, a.province, a.zipcode, a.is_primaryadd
+            a.city, a.province, a.is_primaryadd
             from drivedealio.users as u INNER JOIN drivedealio.addresses as a on u.id = a.users_id where u.id = $iduser order by a.is_primaryadd desc;")
         );
 
@@ -336,8 +384,8 @@ class AuctionController extends Controller
             DB::raw("SELECT * FROM drivedealio.auction_orders where vehicles_id = $id")
         );
 
-        $origin = $vehicle[0]->district. ", " .$vehicle[0]->regency. ", " .$vehicle[0]->province;
-        $destination = $address[0]->district. ", " .$address[0]->city. ", " .$address[0]->province;
+        $origin = $vehicle[0]->city. ", " .$vehicle[0]->province;
+        $destination = $address[0]->city. ", " .$address[0]->province;
 
         $api_key = "U3iyOQmVBs4QcsdEdUvELHllqlXt7pbrL36Wo8aSfWA5AIVWswwPGNbSl4SVerHC";
         $url = "https://api.distancematrix.ai/maps/api/distancematrix/json?origins=". urlencode($origin) . "&destinations=" . urlencode($destination) . "&key=" . $api_key;
@@ -355,7 +403,7 @@ class AuctionController extends Controller
 
             $distanceValue = (float)preg_replace('/[^0-9.]/', '', $distance);
         }
-        return view('auction.checkoutauction', compact('vehicle', 'address', 'userinfo', 'provinces', 'regencies', 'districts', 'villages', 'profile', 'distanceValue', 'transporters', 'categories', 'order'));
+        return view('auction.checkoutauction', compact('vehicle', 'address', 'userinfo', 'provinces', 'city', 'distanceValue', 'transporters', 'categories', 'order'));
     }
 
     public function auctionOrders(Request $request, $id)
@@ -363,10 +411,9 @@ class AuctionController extends Controller
         $iduser = auth()->id();
         $vehicle = DB::select(
             DB::raw("SELECT u.id as iduser, u.firstname, um.id as idusermember, m.id as idmembership, m.membershiptype, b.id as idbid, b.bidamount, v.users_id,
-            a.id as idauction, a.current_price, a.lot_number, v.id as idvehicle, v.model, v.adstatus, a.start_price, v.province, v.village, v.district, v.regency
+            a.id as idauction, a.current_price, a.lot_number, v.id as idvehicle, v.model, v.adstatus, a.start_price, v.province, v.city
             FROM drivedealio.users as u INNER JOIN drivedealio.user_memberships as um on u.id = um.users_id
-            INNER JOIN drivedealio.member_orders as mo on um.id = mo.user_memberships_id
-            INNER JOIN drivedealio.memberships as m on m.id = mo.memberships_id
+            INNER JOIN drivedealio.memberships as m on m.id = um.memberships_id
             INNER JOIN drivedealio.bids as b on um.id = b.user_memberships_id
             INNER JOIN drivedealio.auctions as a on a.id = b.auctions_id
             INNER JOIN drivedealio.vehicles as v on a.vehicles_id = v.id where u.id = $iduser AND v.id = $id;")
@@ -376,7 +423,7 @@ class AuctionController extends Controller
             DB::raw("SELECT count(orderdate) from drivedealio.auction_orders where DATE(orderdate) = CURRENT_DATE;")
         );
         $address = DB::select(
-            DB::raw("SELECT u.id as iduser, a.id as idaddress, a.name, a.address, a.district, a.city, a.zipcode, a.province
+            DB::raw("SELECT u.id as iduser, a.id as idaddress, a.name, a.address, a.city, a.province
             from drivedealio.users as u INNER JOIN drivedealio.addresses as a on u.id = a.users_id where u.id = $iduser AND is_primaryadd = true;")
         );
         $winner = DB::select(
@@ -389,8 +436,8 @@ class AuctionController extends Controller
 
         if(!empty($address))
         {
-            $origin = $vehicle[0]->district. ", " .$vehicle[0]->regency. ", " .$vehicle[0]->province;
-            $destination = $address[0]->district. ", " .$address[0]->city. ", " .$address[0]->province;
+            $origin = $vehicle[0]->city. ", " .$vehicle[0]->province;
+            $destination = $address[0]->city. ", " .$address[0]->province;
 
             $order = new AuctionOrder;
             $counter = $date[0]->count + 1;
@@ -833,7 +880,7 @@ class AuctionController extends Controller
             DB::raw("SELECT CONCAT(v.model, ' ', v.variant, ' ', v.colour, ', ', v.year) as vehiclename, a.lot_number, aw.id as idwinner, ao.orderdate, b.name,
             ao.invoicenum, ao.total_price, u.firstname, u.lastname, u.email, u.phonenumber, ao.id as idorder, a.current_price, ao.status, v.id as idvehicle,
             (SELECT COALESCE(i.url, 'placeholder_url') FROM drivedealio.images as i WHERE i.vehicles_id = v.id LIMIT 1) as url,
-            ad.name as addressname, ad.address, ad.province, ad.city, ad.district, ad.village, ad.zipcode
+            ad.name as addressname, ad.address, ad.province, ad.city,
             FROM drivedealio.vehicles as v INNER JOIN drivedealio.auctions as a on v.id = a.vehicles_id
             INNER JOIN drivedealio.auctionwinners as aw on a.id = aw.auctions_id
             INNER JOIN drivedealio.auction_orders as ao on aw.id = ao.auctionwinners_id

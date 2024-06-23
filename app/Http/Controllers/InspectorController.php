@@ -42,7 +42,7 @@ class InspectorController extends Controller
         $appointment = DB::select(
             DB::raw("SELECT a.id as idappointment, a.appointmentdate, a.appointmenttime, a.inspectors_id, a.status, u.id as iduser, u.firstname
             from drivedealio.appointments as a INNER JOIN drivedealio.users as u on a.inspectors_id = u.id
-            where a.inspectors_id = $iduser order by a.appointmentdate, a.appointmenttime desc")
+            where a.inspectors_id = $iduser order by a.appointmentdate desc;")
         );
         if ($appointment[0]->status == 'Available')
         {

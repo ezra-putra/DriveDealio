@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AuctionOrder;
-use App\Models\District;
+use App\Models\City;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\Province;
@@ -19,6 +19,7 @@ use App\Notifications\Transaction;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 
 class TransactionController extends Controller
 {
@@ -126,7 +127,7 @@ class TransactionController extends Controller
         $iduser = auth()->id();
         $checkout = DB::select(
             DB::raw("SELECT sp.id as idsparepart, sp.partnumber, sp.partname, sp.vehiclemodel, sp.stock, sp.unitprice, c.quantity, (sp.stock - c.quantity) as temp_stock, (sp.unitprice * c.quantity) as total_price, c.spareparts_id, c.users_id, sp.weight,
-            u.id as iduser, u.firstname, s.id as idseller, s.name as sellername, s.city as sellercity, s.district, s.province,
+            u.id as iduser, u.firstname, s.id as idseller, s.name as sellername, s.city as sellercity, s.province,
             (SELECT p.url FROM drivedealio.pics as p WHERE p.spareparts_id = sp.id LIMIT 1) as url
             FROM drivedealio.spareparts as sp INNER JOIN drivedealio.carts as c on sp.id = c.spareparts_id
             INNER JOIN drivedealio.users as u on c.users_id = u.id
@@ -134,18 +135,16 @@ class TransactionController extends Controller
         );
 
         $address = DB::select(
-            DB::raw("SELECT id as idaddress, name, address, district,
-            city, province, village, zipcode, is_primaryadd FROM drivedealio.addresses where users_id = $iduser AND is_primaryadd = true order by is_primaryadd desc")
+            DB::raw("SELECT id as idaddress, name, address,
+            city, province, is_primaryadd FROM drivedealio.addresses where users_id = $iduser AND is_primaryadd = true order by is_primaryadd desc")
         );
 
         $provinces = Province::all();
-        $regencies = Regency::all();
-        $districts = District::all();
-        $villages = Village::all();
+        $cities = City::all();
 
         $profile = DB::select(
-            DB::raw("SELECT u.id as iduser, u.email, u.profilepicture, u.firstname, u.lastname, u.birthdate, u.phonenumber, a.id as idaddress, a.name, a.address, a.district,
-            a.city, a.province, a.zipcode, a.is_primaryadd
+            DB::raw("SELECT u.id as iduser, u.email, u.profilepicture, u.firstname, u.lastname, u.birthdate, u.phonenumber, a.id as idaddress, a.name, a.address,
+            a.city, a.province, a.is_primaryadd
             from drivedealio.users as u INNER JOIN drivedealio.addresses as a on u.id = a.users_id where u.id = $iduser order by a.is_primaryadd desc;")
         );
 
@@ -153,27 +152,10 @@ class TransactionController extends Controller
             DB::raw("SELECT id, firstname, lastname, phonenumber from drivedealio.users where id = $iduser")
         )[0];
 
-        $shipping = DB::select(
-            DB::raw("SELECT id, details, packagename as name from drivedealio.shipments;")
-        );
 
         if (empty($address)) {
             return redirect('/profile')->with('error', 'Add Your Address First!');
         }
-
-
-        $origin = $checkout[0]->district. ", " .$checkout[0]->sellercity. ", ". $checkout[0]->province;
-        $destination = $address[0]->district. ", " .$address[0]->city. ", " .$address[0]->province;
-
-        $api_key = "U3iyOQmVBs4QcsdEdUvELHllqlXt7pbrL36Wo8aSfWA5AIVWswwPGNbSl4SVerHC";
-        $url = "https://api.distancematrix.ai/maps/api/distancematrix/json?origins=". urlencode($origin) . "&destinations=" . urlencode($destination) . "&key=" . $api_key;
-
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        $response = curl_exec($ch);
-        curl_close($ch);
-        $data = json_decode($response, true);
 
         $weight = 0;
         foreach($checkout as $c)
@@ -181,23 +163,53 @@ class TransactionController extends Controller
             $weight += $c->weight * $c->quantity;
         }
 
-        if ($data['status'] == 'OK')
-        {
-            $distance = $data['rows'][0]['elements'][0]['distance']['text'];
+        $origin = City::where('city_name', $checkout[0]->sellercity)->first();
+        $destination = City::where('city_name', $address[0]->city)->first();
+        $idorigin = $origin->city_id;
+        $iddestination = $destination->city_id;
 
-            $distanceValue = (float)preg_replace('/[^0-9.]/', '', $distance);
-
-        }
-        return view('transaction.checkout', compact('checkout', 'userinfo', 'address', 'profile', 'provinces', 'regencies', 'districts', 'villages', 'shipping', 'weight', 'distanceValue'));
+        return view('transaction.checkout', compact('checkout', 'userinfo', 'address', 'profile', 'provinces', 'cities', 'weight', 'idorigin', 'iddestination', 'weight'));
     }
 
+    public function calculateOngkir(Request $request)
+    {
+        $data = [
+            'origin' => $request->origin,
+            'destination' => $request->destination,
+            'weight' => $request->weight,
+            'courier' => $request->courier,
+        ];
+
+        $url = 'https://api.rajaongkir.com/starter/cost';
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'key: 35ca86b8c26dde9c10d728f6532c0828',
+        ]);
+
+        $response = curl_exec($ch);
+        $decodedResponse = json_decode($response, true);
+        $shippingfee = $decodedResponse['rajaongkir'];
+        $err = curl_error($ch);
+        curl_close($ch);
+        if($err){
+            echo "cURL Error #:". $err;
+        }
+        else{
+            return $shippingfee;
+        }
+    }
 
     public function createOrderSparepart(Request $request)
     {
         $iduser = auth()->id();
         $checkout = DB::select(
             DB::raw("SELECT sp.id as idsparepart, sp.partnumber, sp.partname, sp.vehiclemodel, sp.stock, sp.unitprice, c.id as idcart, c.quantity, (sp.stock - c.quantity) as temp_stock, (sp.unitprice * c.quantity) as total_price, c.spareparts_id, c.users_id,
-            u.id as iduser, u.firstname, s.id as idseller, s.name as sellername, s.city as sellercity, s.district, s.province, s.users_id as owner
+            u.id as iduser, u.firstname, s.id as idseller, s.name as sellername, s.city as sellercity, s.province, s.users_id as owner
             FROM drivedealio.spareparts as sp INNER JOIN drivedealio.carts as c on sp.id = c.spareparts_id
             INNER JOIN drivedealio.users as u on c.users_id = u.id
             INNER JOIN drivedealio.shops as s on sp.shops_id = s.id WHERE u.id = $iduser; ")
@@ -205,27 +217,23 @@ class TransactionController extends Controller
         $date = DB::select(
             DB::raw("SELECT count(orderdate) from drivedealio.orders where DATE(orderdate) = CURRENT_DATE;")
         );
-        $address = DB::select(
-            DB::raw("SELECT u.id as iduser, a.id as idaddress, a.name, a.address, a.district, a.city, a.zipcode, a.province, a.village
-            from drivedealio.users as u INNER JOIN drivedealio.addresses as a on u.id = a.users_id where u.id = $iduser;")
-        );
 
         $addresses = DB::select(
-            DB::raw("SELECT u.id as iduser, a.id as idaddress, a.name, a.address, a.district, a.city, a.zipcode, a.province, a.village
+            DB::raw("SELECT u.id as iduser, a.id as idaddress, a.name, a.address, a.city, a.province
             from drivedealio.users as u INNER JOIN drivedealio.addresses as a on u.id = a.users_id where u.id = $iduser AND a.is_primaryadd = true;")
         );
         $sellerId = $checkout[0]->owner;
         //dd($sellerId);
         $shopaddress = DB::select(
-            DB::raw("SELECT s.city as sellercity, s.district, s.province, s.id as idseller, s.users_id
+            DB::raw("SELECT s.city, s.province, s.id as idseller, s.users_id
             FROM drivedealio.shops as s INNER JOIN drivedealio.spareparts as sp on s.id = sp.shops_id
             WHERE s.users_id = $sellerId;")
         );
 
         if(!empty($address))
         {
-            $origin = $shopaddress[0]->district. ", " .$shopaddress[0]->sellercity. ", ". $shopaddress[0]->province;
-            $destination = $addresses[0]->district. ", " .$addresses[0]->city. ", " .$addresses[0]->province;
+            $destination = $addresses[0]->address. ', ' .$addresses[0]->city. ' '. $addresses[0]->province;
+            $origin = $shopaddress[0]->city. ', '. $shopaddress[0]->province;
 
             $idseller = $shopaddress[0]->idseller;
             $idshopOwner = $shopaddress[0]->users_id;
@@ -246,8 +254,7 @@ class TransactionController extends Controller
             $shipping->total_weight = $request->input('weight');
             $shipping->origin = $origin;
             $shipping->destination = $destination;
-            $shipping->shipments_id = $request->input('shipId');
-            // dd($shipping);
+            $shipping->shipments_type = $request->input('courierName');
             $shipping->save();
 
 
@@ -337,7 +344,7 @@ class TransactionController extends Controller
 
         $order = DB::select(
             DB::raw("SELECT o.id as idorder, u.id as iduser, o.invoicenum, o.orderdate, o.shops_id, o.users_id, o.status, o.paymentstatus, s.name, o.total_price, s.id as idshop,
-            a.name as addressname, a.address, a.province, a.city, a.district, a.village, a.zipcode
+            a.name as addressname, a.address, a.province, a.city
             from drivedealio.orders as o INNER JOIN drivedealio.users as u on o.users_id = u.id
             INNER JOIN drivedealio.shops as s on o.shops_id = s.id
             LEFT JOIN drivedealio.addresses as a on a.id = o.addresses_id
@@ -352,9 +359,8 @@ class TransactionController extends Controller
         );
 
         $shippings = DB::select(
-            DB::raw("SELECT shp.packagename, sh.shipping_number, sh.shipping_fee
-            FROM drivedealio.shipments as shp INNER JOIN drivedealio.shippings as sh on shp.id = sh.shipments_id
-            INNER JOIN drivedealio.orders as o on sh.id = o.shippings_id where o.id = $id;")
+            DB::raw("SELECT sh.shipments_type, sh.shipping_number, sh.shipping_fee
+            FROM drivedealio.shippings as sh INNER JOIN drivedealio.orders as o on sh.id = o.shippings_id where o.id = $id;")
         );
 
         $status = DB::select(
@@ -380,7 +386,7 @@ class TransactionController extends Controller
     {
         $order = DB::select(
             DB::raw("SELECT o.id as idorder, u.id as iduser, o.invoicenum, o.orderdate, o.shops_id, o.users_id, o.status, o.paymentstatus, s.name, o.total_price, s.id as idshop,
-            a.name as addressname, a.address, a.province, a.city, a.district, a.village, a.zipcode, s.name as sellername, u.firstname, u.lastname, u.phonenumber
+            a.name as addressname, a.address, a.province, a.city, s.name as sellername, u.firstname, u.lastname, u.phonenumber
             from drivedealio.orders as o INNER JOIN drivedealio.users as u on o.users_id = u.id
             INNER JOIN drivedealio.shops as s on o.shops_id = s.id
             LEFT JOIN drivedealio.addresses as a on a.id = o.addresses_id
@@ -395,9 +401,8 @@ class TransactionController extends Controller
         );
 
         $shippings = DB::select(
-            DB::raw("SELECT shp.packagename, sh.shipping_number, sh.shipping_fee
-            FROM drivedealio.shipments as shp INNER JOIN drivedealio.shippings as sh on shp.id = sh.shipments_id
-            INNER JOIN drivedealio.orders as o on sh.id = o.shippings_id where o.id = $id;")
+            DB::raw("SELECT sh.shipments_type, sh.shipping_number, sh.shipping_fee
+            FROM drivedealio.shippings as sh INNER JOIN drivedealio.orders as o on sh.id = o.shippings_id where o.id = $id;")
         );
 
         return view('transaction.invoice', compact('order', 'orderdetails', 'shippings'));

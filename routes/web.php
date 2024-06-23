@@ -70,12 +70,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/membership/bilings', [MembershipController::class, 'myBilings'])->name('membership.myBilings');
     Route::get('/update-membership-statuses', [MembershipController::class, 'expired_post'])->name('expired_post');
     Route::get('/pay-member/{id}', [MembershipController::class, 'paymentPaid'])->name('payment-post');
-    Route::get('/approve/{id}', [VehicleController::class, 'approve'])->name('approve_post');
     Route::get('/vehicle/inspectionappointment/{id}', [VehicleController::class, 'appointment'])->name('vehicle.appointment');
     Route::put('/appointmentDate/{id}', [VehicleController::class, 'appointmentDate'])->name('appointmentDate');
     Route::get('/approveauctions/{id}', [VehicleController::class, 'approveAuction'])->name('vehicle.approveautions');
     Route::get('/edit-vehicle/{id}', [VehicleController::class, 'editVehicle'])->name('vehicle.editform');
-    Route::put('vehicle-update/{id}', [VehicleController::class, 'sparepartUpdate'])->name('vehicle.update');
+    Route::put('vehicle-update/{id}', [VehicleController::class, 'updateDataVehicle'])->name('vehicle.update');
 
     Route::get('/appointmentconfirmation/{id}', [VehicleController::class, 'acceptAppointment'])->name('acceptAppointment');
     Route::get('/inspector/inspec/{id}', [VehicleController::class, 'inspec'])->name('inspector.inspec');
@@ -93,6 +92,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/reject-loan/{id}', [AdminController::class, 'rejectLoan'])->name('loan.reject');
     Route::get('/admin/reviewvehicle/{id}', [AdminController::class, 'adminEdit'])->name('vehicle.adminEdit');
     Route::get('/listtransaction', [AdminController::class, 'listTransaction']);
+    Route::post('/user/edit-role', [AdminController::class, 'roleModal'])->name('edit.role-form');
+    Route::post('/user/edit-role/{id}', [AdminController::class, 'editRoleUser'])->name('edit.role');
+    Route::get('/approve/{id}', [AdminController::class, 'approve'])->name('approve_post');
+    Route::get('/reject/{id}', [AdminController::class, 'reject'])->name('reject_post');
 
     Route::get('/inspector/dashboard', [InspectorController::class, 'dashboardIndex'], function () {
         return view('inspector.dashboard');
@@ -135,6 +138,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/review/{id}', [TransactionController::class, 'review']);
     Route::post('/add-review/{id}', [TransactionController::class, 'addReview'])->name('review.post');
     Route::get('/finish-order/{id}', [TransactionController::class, 'finishAuctionOrder'])->name('finish.order');
+    Route::post('/calculate-ongkir', [TransactionController::class, 'calculateOngkir'])->name('calculate.ongkir');
 
     Route::get('/seller/register', [UserController::class, 'toSellerRegister']);
     Route::post('become-seller', [UserController::class, 'becomeSeller'])->name('seller.register');
@@ -142,9 +146,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('profile-edit/{id}', [UserController::class, 'editProfile'])->name('edit.profile');
     Route::post('/set-primary-address/{id?}', [UserController::class, 'setPrimaryAddress'])
     ->name('primary.address');
-    Route::post('/regency', [UserController::class, 'regency'])->name('regency');
-    Route::post('/district', [UserController::class, 'district'])->name('district');
-    Route::post('/village', [UserController::class, 'village'])->name('village');
+    Route::post('/cities', [UserController::class, 'cities'])->name('cities');
 
     Route::post('/auction/add-bid/{id}', [AuctionController::class, 'placeBid'])->name('place_bid');
     Route::get('/auction', [AuctionController::class, 'auctionlist'])->name('auction.list');

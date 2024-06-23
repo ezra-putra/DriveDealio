@@ -18,7 +18,6 @@
                                 <th scope="col">Status</th>
                                 <th scope="col">Auction Time Remaining</th>
                                 <th scope="col">Action</th>
-                                <th scope="col">Inspection</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -63,9 +62,6 @@
                                                 <span>Edit Data</span>
                                             </a>
                                         @endif
-                                    </td>
-                                    <td>
-                                        
                                     </td>
                                 </tr>
                             @endforeach

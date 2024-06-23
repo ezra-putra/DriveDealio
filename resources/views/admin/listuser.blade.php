@@ -32,7 +32,7 @@
                                 <td>{{ $us->phonenumber }}</td>
                                 <td>{{ $us->name }}</td>
                                 <td>
-                                    <a class="btn btn-flat-info" data-bs-toggle="modal" href="#modalRole">
+                                    <a class="btn btn-flat-info" data-bs-toggle="modal" href="#modalRole" onclick="getModalEditRole({{ $us->iduser }})">
                                         <i data-feather="edit"></i>
                                         <span>Role</span>
                                     </a>
@@ -177,9 +177,8 @@
     </div>
 </div>
 
-<!-- list and filter end -->
 
-<div class="modal fade" id="modalRole-" tabindex="-1" role="basic" aria-hidden="true">
+<div class="modal fade" id="modalRole" tabindex="-1" role="basic" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header bg-transparent">
@@ -187,39 +186,25 @@
             </div>
             <div class="modal-body px-sm-5 mx-50 pb-5">
                 <h1 class="text-center mb-1" id="addNewCardTitle">User Role Information</h1>
-                <!-- form -->
-                <form action="#" method="POST"
-                    enctype="multipart/form-data" class="row gy-1 gx-2 mt-75" id="roleForm">
-                    @csrf
-                    <div class="col-12">
-                        <div class="row">
-                            <div class="col-12 mb-1">
-                                <label class="form-label" for="name">Name</label>
-                                <input type="text" name="name" id="name"
-                                    class="form-control" placeholder="User Name" value="" disabled/>
-                            </div>
-                            <div class="col-12 mb-1">
-                                <label class="form-label" for="select-role">Role</label>
-                                    <select class="form-select" id="select-role" name="role">
-                                        <option value="">--Choose Role--</option>
-                                        @foreach ($role as $r)
-                                        <option value="{{ $r->id }}">{{ $r->name }}</option>
-                                        @endforeach
-                                    </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-12 text-center">
-                        <input type="submit" class="btn btn-primary me-1 mt-1" value="Edit Role">
-                        <button type="reset" class="btn btn-outline-secondary mt-1" data-bs-dismiss="modal"
-                            aria-label="Close">
-                            Cancel
-                        </button>
-                    </div>
-                </form>
+                <div id="inputForm">
+
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+    function getModalEditRole(id) {
+        $.ajax({
+            type:'POST',
+            url:'{{route("edit.role-form")}}',
+            data:'_token= <?php echo csrf_token() ?> &id='+id,
+            success:function(data) {
+                $("#inputForm").html(data.msg);
+            }
+        });
+    }
+</script>
 
 @endsection

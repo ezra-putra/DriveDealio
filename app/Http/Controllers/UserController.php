@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Address;
+use App\Models\City;
 use App\Models\District;
 use App\Models\Province;
 use App\Models\Regency;
@@ -39,10 +40,8 @@ class UserController extends Controller
         // dd($document);
 
         $provinces = Province::all();
-        $regencies = Regency::all();
-        $districts = District::all();
-        $villages = Village::all();
-        return view('authentication.profile', compact('profile', 'provinces', 'regencies', 'districts', 'villages', 'address', 'document'));
+        $cities = City::all();
+        return view('authentication.profile', compact('profile', 'provinces', 'cities', 'address', 'document'));
     }
 
     public function editProfile(Request $request, $id)
@@ -57,39 +56,16 @@ class UserController extends Controller
         return redirect()->back()->with('status', 'Profile Edited!');
     }
 
-    public function regency(Request $request)
+    public function cities(Request $request)
     {
         $province_id = $request->province_id;
-        $regencies = Regency::where('province_id', $province_id)->get();
+        $city = City::where('province_id', $province_id)->get();
 
-        foreach($regencies as $r)
+        foreach($city as $c)
         {
-            echo "<option value='$r->id'>$r->name</option>";
+            echo "<option value='$c->city_id'>$c->city_name</option>";
         }
     }
-
-    public function district(Request $request)
-    {
-        $regency_id = $request->regency_id;
-        $district = District::where('regency_id', $regency_id)->get();
-
-        foreach($district as $d)
-        {
-            echo "<option value='$d->id'>$d->name</option>";
-        }
-    }
-
-    public function village(Request $request)
-    {
-        $district_id = $request->district_id;
-        $village = Village::where('district_id', $district_id)->get();
-
-        foreach($village as $v)
-        {
-            echo "<option value='$v->id'>$v->name</option>";
-        }
-    }
-
 
     public function addAddress(Request $request)
     {
@@ -98,10 +74,8 @@ class UserController extends Controller
         $address->users_id = $iduser;
         $address->name = $request->input('name');
         $address->address = $request->input('address');
-        $address->province = Province::find($request->input('province'))->name;
-        $address->city = Regency::find($request->input('regency'))->name;
-        $address->district = District::find($request->input('district'))->name;
-        $address->village = Village::find($request->input('village'))->name;
+        $address->province = Province::find($request->input('province'))->province_name;
+        $address->city = City::find($request->input('city'))->city_name;
         $address->zipcode = $request->input('zip');
         // dd($address);
 
@@ -122,11 +96,9 @@ class UserController extends Controller
     public function toSellerRegister()
     {
         $provinces = Province::all();
-        $regencies = Regency::all();
-        $districts = District::all();
-        $villages = Village::all();
+        $cities = City::all();
 
-        return view('seller.sellerregister', compact('provinces', 'regencies', 'districts', 'villages'));
+        return view('seller.sellerregister', compact('provinces', 'cities'));
     }
 
     public function becomeSeller(Request $request)
@@ -136,9 +108,8 @@ class UserController extends Controller
         $seller->name = $request->input('shopname');
         $seller->address = $request->input('shopaddress');
         $seller->phonenumber = $request->input('shopphone');
-        $seller->city = Regency::find($request->input('regency'))->name;
-        $seller->district = District::find($request->input('district'))->name;
-        $seller->province = Province::find($request->input('province'))->name;
+        $seller->province = Province::find($request->input('province'))->province_name;
+        $seller->city = City::find($request->input('city'))->city_name;
         $seller->zipcode = $request->input('shopzip');
         $seller->status = 'Pending';
         $seller->users_id = $id;

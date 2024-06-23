@@ -48,13 +48,12 @@ class LoanMonthlyPaymentCron extends Command
             $loantenor = $loan->loantenor * 12;
 
             $auctionOrder = DB::table('auction_orders')
-            ->join('loans', 'auction_orders.id', '=', 'loans.auction_orders_id')
-            ->where('loans.id', $idloan)
-            ->select('auction_orders.status')
-            ->first();
+                ->join('loans', 'auction_orders.id', '=', 'loans.auction_orders_id')
+                ->where('loans.id', $idloan)
+                ->select('auction_orders.status')
+                ->first();
 
             if ($auctionOrder && $auctionOrder->status === 'Finished') {
-
                 $existingPayments = LoanPayment::where('loans_id', $idloan)
                     ->max('paymentcount');
 
@@ -65,10 +64,21 @@ class LoanMonthlyPaymentCron extends Command
                     $loan->update(['status' => 'Finished']);
                     continue;
                 }
+
+                $dueDate = now()->subMonths($counter);
+                $lateFee = 0;
+                $lateDays = now()->diffInDays($dueDate, false);
+
+                if ($lateDays > 3) {
+                    $lateFee = $this->calculateLateFee($monthlypayment);
+                }
+
+                $totalBill = $monthlypayment + $lateFee;
+
                 $loanPayment = new LoanPayment;
                 $loanPayment->invoicenum = "INV/MP/" . now()->format('Y/m/d') . "/$idloan/$counter";
                 $loanPayment->loans_id = $idloan;
-                $loanPayment->total_bill = $monthlypayment;
+                $loanPayment->total_bill = $totalBill;
                 $loanPayment->type = "Monthly Payment";
                 $loanPayment->status = "Unpaid";
                 $loanPayment->paymentcount = $counter;
@@ -77,6 +87,9 @@ class LoanMonthlyPaymentCron extends Command
                 $user = User::find($iduser);
                 $title = 'Bill Payment';
                 $message = 'Installment Bill is Payable now, Pay Now!';
+                if ($lateFee > 0) {
+                    $message .= " A late fee of $$lateFee has been added to your bill.";
+                }
                 $user->notify(new MonthlyPayment($title, $message));
 
                 $this->info("Loan payment recorded successfully for loan ID $idloan.");
@@ -85,5 +98,11 @@ class LoanMonthlyPaymentCron extends Command
             }
         }
         return 0;
+    }
+
+    private function calculateLateFee($monthlypayment)
+    {
+        $lateFeeRate = 0.004;
+        return $monthlypayment * $lateFeeRate;
     }
 }

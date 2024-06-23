@@ -1,5 +1,19 @@
 @extends('layout.main')
 @section('content')
+@if (auth()->user())
+    @if (!empty($address))
+        <p>
+            <i class="fa fa-map-marker"></i>
+            Send to
+            <strong>
+                <a data-bs-toggle="modal" href="#modalSelAddress" style="font-weight: bold;">{{ $address[0]->name }}, {{ $address[0]->address }} {{ $address[0]->city }}
+                </a>
+            </strong>
+        </p>
+    @else
+        <p><strong><a href="/profile" style="font-weight: bold;">Register your address before make any transaction</a></strong></p>
+    @endif
+@endif
 <section id="carousel-options">
     <div class="row match-height mb-1" style="padding: 2.5vh;">
         <div id="carousel-interval" class="carousel slide" data-bs-ride="carousel" data-bs-interval="2000">
@@ -145,6 +159,47 @@
                 </div>
             </div>
         </section>
+    </div>
+</div>
+
+<div class="modal fade" id="modalSelAddress" tabindex="-1" role="basic" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-wide" style="max-width: 750px">
+        <div class="modal-content">
+            <div class="modal-header bg-transparent">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body px-sm-5 mx-50 pb-5">
+                <h2 id="addNewCardTitle">Where do you want to send your item?</h2>
+                <p class="mb-2">Before continue your transaction, select your address first.</p>
+                @foreach ($address as $a)
+                    <div class="col-md-12 mt-1">
+                        <div class="card border border-3">
+                            <div class="card-body col-md-12">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <p>{{ $a->name }}</p>
+                                        <p>{{ $a->address }}</p>
+                                        <p>{{ $a->city }}, {{ $a->province }}</p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="d-flex justify-content-end">
+                                            @if ($a->is_primaryadd === true)
+                                                <span class="badge bg-light-success text-success">Main Address</span>
+                                            @else
+                                                <form action="{{ route('primary.address', $a->idaddress) }}" method="POST">
+                                                    @csrf
+                                                    <button class="btn btn-info" type="submit">Set as Primary</button>
+                                                </form>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
     </div>
 </div>
 
