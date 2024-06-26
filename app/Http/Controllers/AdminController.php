@@ -178,7 +178,8 @@ class AdminController extends Controller
             FROM drivedealio.vehicles as v INNER JOIN drivedealio.auctions as a on v.id = a.vehicles_id
             INNER JOIN drivedealio.auctionwinners as aw on a.id = aw.auctions_id
             INNER JOIN drivedealio.auction_orders as ao on aw.id = ao.auctionwinners_id
-            INNER JOIN drivedealio.users as u on aw.users_id = u.id
+            INNER JOIN drivedealio.user_memberships as um on aw.user_memberships_id = um.id
+            INNER JOIN drivedealio.users as u on um.users_id = u.id
             INNER JOIN drivedealio.brands as b on v.brands_id = b.id
             ORDER BY ao.orderdate asc LIMIT 2;")
         );

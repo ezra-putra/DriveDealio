@@ -17,9 +17,8 @@ class CourierController extends Controller
     public function dashboard()
     {
         $shipping = DB::select(
-            DB::raw("SELECT o.id as idorder, o.invoicenum, o.status, s.destination, s.origin, s.shipping_number, sp.packagename, s.id as idshipping
+            DB::raw("SELECT o.id as idorder, o.invoicenum, o.status, s.destination, s.origin, s.shipping_number, s.shipments_type, s.id as idshipping
             FROM drivedealio.orders as o INNER JOIN drivedealio.shippings as s on o.shippings_id = s.id
-            INNER JOIN drivedealio.shipments as sp on s.shipments_id = sp.id
             WHERE s.shipping_number IS NOT NULL AND o.status != 'Arrived' ORDER BY s.created_at desc LIMIT 5;")
         );
 
@@ -35,10 +34,9 @@ class CourierController extends Controller
     public function shippingList()
     {
         $shipping = DB::select(
-            DB::raw("SELECT o.id as idorder, o.invoicenum, s.destination, s.origin, s.shipping_number, sp.packagename, s.id as idshipping, s.total_weight, s.shipping_number,
+            DB::raw("SELECT o.id as idorder, o.invoicenum, s.destination, s.origin, s.shipping_number, s.shipments_type, s.id as idshipping, s.total_weight, s.shipping_number,
             sh.name, sh.phonenumber, u.firstname, u.lastname, u.phonenumber as usernumber, u.email, o.status
             FROM drivedealio.orders as o INNER JOIN drivedealio.shippings as s on o.shippings_id = s.id
-            INNER JOIN drivedealio.shipments as sp on s.shipments_id = sp.id
             INNER JOIN drivedealio.shops as sh on o.shops_id = sh.id
             INNER JOIN drivedealio.users as u on o.users_id = u.id WHERE o.status IN ('Arrived', 'On Delivery') ORDER BY s.created_at asc;")
         );
@@ -63,10 +61,9 @@ class CourierController extends Controller
     public function shippingDetails($id)
     {
         $shipping = DB::select(
-            DB::raw("SELECT o.id as idorder, o.invoicenum, s.destination, s.origin, s.shipping_number, sp.packagename, s.id as idshipping, s.total_weight, s.shipping_number,
+            DB::raw("SELECT o.id as idorder, o.invoicenum, s.destination, s.origin, s.shipping_number, s.shipments_type, s.id as idshipping, s.total_weight, s.shipping_number,
             sh.name, sh.phonenumber, u.firstname, u.lastname, u.phonenumber as usernumber, u.email
             FROM drivedealio.orders as o INNER JOIN drivedealio.shippings as s on o.shippings_id = s.id
-            INNER JOIN drivedealio.shipments as sp on s.shipments_id = sp.id
             INNER JOIN drivedealio.shops as sh on o.shops_id = sh.id
             INNER JOIN drivedealio.users as u on o.users_id = u.id
             WHERE s.id = $id;")

@@ -60,7 +60,7 @@
                 <div class="d-flex flex-column me-5 mt-1">
                     @foreach ($shippings as $s)
                     <h6>Courier</h6>
-                    <p class="mb-1">{{ $s->packagename }} Delivery Service</p>
+                    <p class="mb-1">{{ $s->shipments_type }} Delivery Service</p>
                     @endforeach
                 </div>
                 <div class="d-flex flex-column me-5 mt-1">

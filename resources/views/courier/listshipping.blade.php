@@ -26,7 +26,7 @@
                             @foreach ( $shipping as $s )
                             <tr>
                                 <td>{{ $counter++ }}</td>
-                                <td>{{ $s->packagename }}</td>
+                                <td>{{ $s->shipments_type }}</td>
                                 <td>{{ $s->name }}</td>
                                 <td>{{ $s->origin }}</td>
                                 <td>{{ $s->firstname }} {{ $s->lastname }}</td>

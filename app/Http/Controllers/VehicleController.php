@@ -149,7 +149,8 @@ class VehicleController extends Controller
                 FROM drivedealio.vehicles as v INNER JOIN drivedealio.auctions as a on v.id = a.vehicles_id
                 INNER JOIN drivedealio.auctionwinners as aw on a.id = aw.auctions_id
                 INNER JOIN drivedealio.auction_orders as ao on aw.id = ao.auctionwinners_id
-                INNER JOIN drivedealio.users as u on aw.users_id = u.id
+                INNER JOIN drivedealio.user_memberships as um on aw.user_memberships_id = um.id
+                INNER JOIN drivedealio.users as u on um.users_id = u.id
                 INNER JOIN drivedealio.brands as b on v.brands_id = b.id
                 WHERE v.users_id = $iduser;")
             );
@@ -173,7 +174,8 @@ class VehicleController extends Controller
         );
 
         $winner = DB::select(
-            DB::raw("SELECT b.*, a.id as idauction, a.current_price, u.id as iduser from drivedealio.bids as b INNER JOIN drivedealio.auctions as a on b.auctions_id = a.id
+            DB::raw("SELECT b.*, a.id as idauction, a.current_price, u.id as iduser, um.id as idusermember
+             from drivedealio.bids as b INNER JOIN drivedealio.auctions as a on b.auctions_id = a.id
             INNER JOIN drivedealio.user_memberships as um on b.user_memberships_id = um.id
             INNER JOIN drivedealio.users as u on um.users_id = u.id
             WHERE a.vehicles_id = $id ORDER BY b.biddatetime desc limit 3;")
@@ -215,14 +217,14 @@ class VehicleController extends Controller
                 $auctionStatus = 'Auction Ended';
                 foreach ($winner as $key => $w) {
                     $existingWinner = AuctionWinner::where('auctions_id', $w->idauction)
-                        ->where('users_id', $w->iduser)
+                        ->where('user_memberships_id', $w->idusermember)
                         ->exists();
 
                     if (!$existingWinner) {
                         $auctionWinner = new AuctionWinner();
                         $auctionWinner->windate = $endDateTime;
                         $auctionWinner->auctions_id = $w->idauction;
-                        $auctionWinner->users_id = $w->iduser;
+                        $auctionWinner->user_memberships_id = $w->idusermember;
                         $auctionWinner->is_checkout = false;
 
                         $user = User::find($w->iduser);
@@ -633,7 +635,8 @@ class VehicleController extends Controller
             FROM drivedealio.vehicles as v INNER JOIN drivedealio.auctions as a on v.id = a.vehicles_id
             INNER JOIN drivedealio.auctionwinners as aw on a.id = aw.auctions_id
             INNER JOIN drivedealio.auction_orders as ao on aw.id = ao.auctionwinners_id
-            INNER JOIN drivedealio.users as u on aw.users_id = u.id
+            INNER JOIN drivedealio.user_memberships as um on aw.user_memberships_id = um.id
+            INNER JOIN drivedealio.users as u on um.users_id = u.id
             INNER JOIN drivedealio.brands as b on v.brands_id = b.id
             INNER JOIN drivedealio.addresses as ad on ao.addresses_id = ad.id
             WHERE ao.id = $id;")
